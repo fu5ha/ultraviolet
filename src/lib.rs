@@ -38,6 +38,13 @@ macro_rules! vec2s {
                 r.normalize();
                 r
             }
+
+            pub fn mul_add(&self, mul: $n, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.x, add.x),
+                )
+            }
         }
 
         impl Add for $n {
@@ -139,6 +146,40 @@ macro_rules! vec3s {
                 r.normalize();
                 r
             }
+
+            pub fn mul_add(&self, mul: $n, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.x, add.x),
+                    self.z.mul_add(mul.x, add.x),
+                )
+            }
+
+            pub fn map<F>(&self, f: F) -> Self
+                where F: Fn($t) -> $t
+            {
+                $n::new(
+                    f(self.x),
+                    f(self.y),
+                    f(self.z)
+                )
+            }
+
+            pub fn apply<F>(&mut self, f: F)
+                where F: Fn($t) -> $t
+            {
+                self.x = f(self.x);
+                self.y = f(self.y);
+                self.z = f(self.z);
+            }
+
+            pub fn component_max(&self) -> $t {
+                self.x.max(self.y).max(self.z)
+            }
+
+            pub fn component_min(&self) -> $t {
+                self.x.min(self.y).min(self.z)
+            }
         }
 
         impl Add for $n {
@@ -193,6 +234,46 @@ macro_rules! vec3s {
 }
 
 vec3s!(Vec3 => f32, Wec3 => f32x4);
+
+impl Vec3 {
+    pub fn zero() -> Self {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn one() -> Self {
+        Self::new(1.0, 1.0, 1.0)
+    }
+}
+
+impl Wec3 {
+    pub fn zero() -> Self {
+        Self::new(f32x4::from(0.0), f32x4::from(0.0), f32x4::from(0.0))
+    }
+
+    pub fn one() -> Self {
+        Self::new(f32x4::from(1.0), f32x4::from(1.0), f32x4::from(1.0))
+    }
+
+    pub fn from_vecs(v1: Vec3, v2: Vec3, v3: Vec3, v4: Vec3) -> Self {
+        Self {
+            x: f32x4::new(v1.x, v2.x, v3.x, v4.x),
+            y: f32x4::new(v1.y, v2.y, v3.y, v4.y),
+            z: f32x4::new(v1.z, v2.z, v3.z, v4.z),
+        }
+    }
+
+    pub fn to_vecs(self) -> [Vec3; 4] {
+        let xs = self.x.as_ref();
+        let ys = self.y.as_ref();
+        let zs = self.z.as_ref();
+        [
+            Vec3::new(xs[0], ys[0], zs[0]),
+            Vec3::new(xs[1], ys[1], zs[1]),
+            Vec3::new(xs[2], ys[2], zs[2]),
+            Vec3::new(xs[3], ys[3], zs[3]),
+        ]
+    }
+}
 
 macro_rules! mat3s {
     ($($n:ident => $t:ident),+) => {
