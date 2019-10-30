@@ -20,3 +20,6 @@ mod vec;
 pub use lerp::*;
 pub use mat::*;
 pub use vec::*;
+
+pub use wide;
+pub use wide::f32x4;
