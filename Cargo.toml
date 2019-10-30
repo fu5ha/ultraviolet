@@ -1,10 +1,13 @@
 [package]
-name = "widehard"
+name = "ultraviolet"
 version = "0.1.0"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "A crate to do linear algebra, fast."
+repository = "https://github.com/termhn/ultraviolet"
+readme = "README.md"
+keywords = ["simd", "wide", "termhn", "grpahics", "math", "linear algebra"]
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 wide = "0.2"
