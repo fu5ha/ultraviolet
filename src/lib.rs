@@ -4,7 +4,7 @@ use wide::f32x4;
 
 macro_rules! vec2s {
     ($($n:ident => $t:ident),+) => {
-        $(#[derive(Clone, Copy)]
+        $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -94,15 +94,44 @@ macro_rules! vec2s {
             fn div(self, rhs: $t) -> $n {
                 $n::new(self.x / rhs, self.y / rhs)
             }
+        }
+
+        impl Neg for $n {
+            type Output = $n;
+            fn neg(self) -> $n {
+                self * $t::from(-1.0)
+            }
         })+
     };
 }
 
 vec2s!(Vec2 => f32, Wec2 => f32x4);
 
+impl From<[Vec2; 4]> for Wec2 {
+    fn from(vecs: [Vec2; 4]) -> Self {
+        Self {
+            x: f32x4::new(vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x),
+            y: f32x4::new(vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y),
+        }
+    }
+}
+
+impl Wec2 {
+    pub fn splat(vec: Vec2) -> Self {
+        Self::from([vec, vec, vec, vec])
+    }
+
+    pub fn merge(mask: f32x4, a: Self, b: Self) -> Self {
+        Self {
+            x: f32x4::merge(mask, a.x, b.x),
+            y: f32x4::merge(mask, a.y, b.y),
+        }
+    }
+}
+
 macro_rules! vec3s {
     ($($n:ident => $t:ident),+) => {
-        $(#[derive(Clone, Copy)]
+        $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -112,6 +141,18 @@ macro_rules! vec3s {
         impl $n {
             pub fn new(x: $t, y: $t, z: $t) -> Self {
                 $n { x, y, z }
+            }
+
+            pub fn unit_x() -> Self {
+                $n{ x: $t::from(1.0), y: $t::from(0.0), z: $t::from(0.0) }
+            }
+
+            pub fn unit_y() -> Self {
+                $n{ x: $t::from(0.0), y: $t::from(1.0), z: $t::from(0.0) }
+            }
+
+            pub fn unit_z() -> Self {
+                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0) }
             }
 
             pub fn dot(&self, other: $n) -> $t {
@@ -124,6 +165,10 @@ macro_rules! vec3s {
                     self.z * other.x - self.x * other.z,
                     self.x * other.y - self.y * other.x,
                 )
+            }
+
+            pub fn reflected(&self, normal: $n) -> Self {
+                *self - ($t::from(2.0) * self.dot(normal) * normal)
             }
 
             pub fn mag_sq(&self) -> $t {
@@ -150,8 +195,8 @@ macro_rules! vec3s {
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
                     self.x.mul_add(mul.x, add.x),
-                    self.y.mul_add(mul.x, add.x),
-                    self.z.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
+                    self.z.mul_add(mul.z, add.z),
                 )
             }
 
@@ -182,6 +227,12 @@ macro_rules! vec3s {
             }
         }
 
+        impl From<[$t; 3]> for $n {
+            fn from(comps: [$t; 3]) -> Self {
+                Self::new(comps[0], comps[1], comps[2])
+            }
+        }
+
         impl Add for $n {
             type Output = Self;
             fn add(self, rhs: $n) -> Self {
@@ -189,10 +240,26 @@ macro_rules! vec3s {
             }
         }
 
+        impl AddAssign for $n {
+            fn add_assign(&mut self, rhs: $n) {
+                self.x += rhs.x;
+                self.y += rhs.y;
+                self.z += rhs.z;
+            }
+        }
+
         impl Sub for $n {
             type Output = Self;
             fn sub(self, rhs: $n) -> Self {
                 $n::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+            }
+        }
+
+        impl SubAssign for $n {
+            fn sub_assign(&mut self, rhs: $n) {
+                self.x -= rhs.x;
+                self.y -= rhs.y;
+                self.z -= rhs.z;
             }
         }
 
@@ -217,6 +284,22 @@ macro_rules! vec3s {
             }
         }
 
+        impl MulAssign for $n {
+            fn mul_assign(&mut self, rhs: $n) {
+                self.x *= rhs.x;
+                self.y *= rhs.y;
+                self.z *= rhs.z;
+            }
+        }
+
+        impl MulAssign<$t> for $n {
+            fn mul_assign(&mut self, rhs: $t) {
+                self.x *= rhs;
+                self.y *= rhs;
+                self.z *= rhs;
+            }
+        }
+
         impl Div for $n {
             type Output = Self;
             fn div(self, rhs: $n) -> Self {
@@ -228,6 +311,29 @@ macro_rules! vec3s {
             type Output = $n;
             fn div(self, rhs: $t) -> $n {
                 $n::new(self.x / rhs, self.y / rhs, self.z / rhs)
+            }
+        }
+
+        impl DivAssign for $n {
+            fn div_assign(&mut self, rhs: $n) {
+                self.x /= rhs.x;
+                self.y /= rhs.y;
+                self.z /= rhs.z;
+            }
+        }
+
+        impl DivAssign<$t> for $n {
+            fn div_assign(&mut self, rhs: $t) {
+                self.x /= rhs;
+                self.y /= rhs;
+                self.z /= rhs;
+            }
+        }
+
+        impl Neg for $n {
+            type Output = $n;
+            fn neg(self) -> $n {
+                self * $t::from(-1.0)
             }
         })+
     }
@@ -245,6 +351,26 @@ impl Vec3 {
     }
 }
 
+impl From<Vec2> for Vec3 {
+    fn from(vec: Vec2) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: f32::from(0.0),
+        }
+    }
+}
+
+impl From<Wec2> for Wec3 {
+    fn from(vec: Wec2) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: f32x4::from(0.0),
+        }
+    }
+}
+
 impl Wec3 {
     pub fn zero() -> Self {
         Self::new(f32x4::from(0.0), f32x4::from(0.0), f32x4::from(0.0))
@@ -254,15 +380,21 @@ impl Wec3 {
         Self::new(f32x4::from(1.0), f32x4::from(1.0), f32x4::from(1.0))
     }
 
-    pub fn from_vecs(v1: Vec3, v2: Vec3, v3: Vec3, v4: Vec3) -> Self {
-        Self {
-            x: f32x4::new(v1.x, v2.x, v3.x, v4.x),
-            y: f32x4::new(v1.y, v2.y, v3.y, v4.y),
-            z: f32x4::new(v1.z, v2.z, v3.z, v4.z),
-        }
+    pub fn splat(vec: Vec3) -> Self {
+        Self::from([vec, vec, vec, vec])
     }
 
-    pub fn to_vecs(self) -> [Vec3; 4] {
+    pub fn merge(mask: f32x4, a: Self, b: Self) -> Self {
+        Self {
+            x: f32x4::merge(mask, a.x, b.x),
+            y: f32x4::merge(mask, a.y, b.y),
+            z: f32x4::merge(mask, a.z, b.z),
+        }
+    }
+}
+
+impl Into<[Vec3; 4]> for Wec3 {
+    fn into(self) -> [Vec3; 4] {
         let xs = self.x.as_ref();
         let ys = self.y.as_ref();
         let zs = self.z.as_ref();
@@ -272,6 +404,16 @@ impl Wec3 {
             Vec3::new(xs[2], ys[2], zs[2]),
             Vec3::new(xs[3], ys[3], zs[3]),
         ]
+    }
+}
+
+impl From<[Vec3; 4]> for Wec3 {
+    fn from(vecs: [Vec3; 4]) -> Self {
+        Self {
+            x: f32x4::new(vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x),
+            y: f32x4::new(vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y),
+            z: f32x4::new(vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z),
+        }
     }
 }
 
