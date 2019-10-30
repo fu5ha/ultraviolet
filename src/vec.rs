@@ -83,6 +83,14 @@ macro_rules! vec2s {
             pub fn component_min(&self) -> $t {
                 self.x.min(self.y)
             }
+
+            pub fn zero() -> Self {
+                Self::broadcast($t::from(0.0))
+            }
+
+            pub fn one() -> Self {
+                Self::broadcast($t::from(1.0))
+            }
         }
 
         impl Add for $n {
