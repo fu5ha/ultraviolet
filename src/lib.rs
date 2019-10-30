@@ -439,9 +439,9 @@ macro_rules! mat3s {
                 let b = self.cols[1];
                 let c = self.cols[2];
                 $t::new(
-                    a.x * rhs.x + a.y * rhs.y + a.z * rhs.z,
-                    b.x * rhs.x + b.y * rhs.y + b.z * rhs.z,
-                    c.x * rhs.x + c.y * rhs.y + c.z * rhs.z,
+                    a.x * rhs.x + b.x * rhs.y + c.x * rhs.z,
+                    a.y * rhs.x + b.y * rhs.y + c.y * rhs.z,
+                    a.z * rhs.x + b.z * rhs.y + c.z * rhs.z,
                 )
             }
         })+
