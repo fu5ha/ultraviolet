@@ -419,7 +419,7 @@ impl From<[Vec3; 4]> for Wec3 {
 
 macro_rules! mat3s {
     ($($n:ident => $t:ident),+) => {
-        $(#[derive(Clone, Copy)]
+        $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub cols: [$t; 3],
         }
@@ -439,9 +439,9 @@ macro_rules! mat3s {
                 let b = self.cols[1];
                 let c = self.cols[2];
                 $t::new(
-                    a.x * rhs.x + a.y * rhs.x + a.z * rhs.x,
-                    b.x * rhs.y + b.y * rhs.y + b.z * rhs.y,
-                    c.x * rhs.z + c.y * rhs.z + c.z * rhs.z,
+                    a.x * rhs.x + a.y * rhs.y + a.z * rhs.z,
+                    b.x * rhs.x + b.y * rhs.y + b.z * rhs.z,
+                    c.x * rhs.x + c.y * rhs.y + c.z * rhs.z,
                 )
             }
         })+
