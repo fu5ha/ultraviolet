@@ -6,7 +6,7 @@ edition = "2018"
 description = "A crate to do linear algebra, fast."
 repository = "https://github.com/termhn/ultraviolet"
 readme = "README.md"
-keywords = ["simd", "wide", "termhn", "graphics", "math", "linear-algebra"]
+keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
