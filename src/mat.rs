@@ -10,6 +10,7 @@ macro_rules! mat3s {
         }
 
         impl $n {
+            #[inline]
             pub fn new(col1: $t, col2: $t, col3: $t) -> Self {
                 $n {
                     cols: [col1, col2, col3],
@@ -19,6 +20,7 @@ macro_rules! mat3s {
 
         impl Mul<$t> for $n {
             type Output = $t;
+            #[inline]
             fn mul(self, rhs: $t) -> $t {
                 let a = self.cols[0];
                 let b = self.cols[1];

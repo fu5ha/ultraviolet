@@ -9,6 +9,7 @@ pub trait Lerp<T> {
 macro_rules! impl_lerp {
     ($($tt:ident => ($($vt:ident),+)),+) => {
         $($(impl Lerp<$tt> for $vt {
+            #[inline]
             fn lerp(&self, end: Self, t: $tt) -> Self {
                 *self * ($tt::from(1.0) - t) + end * t
             }
