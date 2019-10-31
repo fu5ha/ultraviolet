@@ -229,6 +229,20 @@ impl From<[Vec2; 4]> for Wec2 {
     }
 }
 
+impl From<Vec3> for Vec2 {
+    #[inline]
+    fn from(vec: Vec3) -> Self {
+        Self { x: vec.x, y: vec.y }
+    }
+}
+
+impl From<Wec3> for Wec2 {
+    #[inline]
+    fn from(vec: Wec3) -> Self {
+        Self { x: vec.x, y: vec.y }
+    }
+}
+
 impl Vec2 {
     #[inline]
     pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
@@ -567,6 +581,28 @@ impl From<Wec2> for Wec3 {
             x: vec.x,
             y: vec.y,
             z: f32x4::from(0.0),
+        }
+    }
+}
+
+impl From<Vec4> for Vec3 {
+    #[inline]
+    fn from(vec: Vec4) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+        }
+    }
+}
+
+impl From<Wec4> for Wec3 {
+    #[inline]
+    fn from(vec: Wec4) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
         }
     }
 }
