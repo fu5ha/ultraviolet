@@ -1,10 +1,13 @@
+use crate::bivec::*;
 use std::ops::*;
 
 use wide::f32x4;
 
 macro_rules! vec2s {
-    ($($n:ident => $t:ident),+) => {
-        $(#[derive(Clone, Copy, Debug)]
+    ($(($n:ident, $bn:ident) => $t:ident),+) => {
+        $(
+        /// A vector in 2d space.
+        #[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -24,6 +27,11 @@ macro_rules! vec2s {
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
                 self.x * other.x + self.y * other.y
+            }
+
+            #[inline]
+            pub fn wedge(&self, other: $n) -> $bn {
+                $bn::new(self.x * other.y - other.x * self.y)
             }
 
             #[inline]
@@ -217,7 +225,7 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!(Vec2 => f32, Wec2 => f32x4);
+vec2s!((Vec2, Bivec2) => f32, (Wec2, WBivec2) => f32x4);
 
 impl From<[Vec2; 4]> for Wec2 {
     #[inline]
@@ -299,7 +307,7 @@ impl Wec2 {
 }
 
 macro_rules! vec3s {
-    ($($n:ident => $t:ident),+) => {
+    ($(($n:ident, $bn:ident) => $t:ident),+) => {
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -336,6 +344,15 @@ macro_rules! vec3s {
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
                 self.x * other.x + self.y * other.y + self.z * other.z
+            }
+
+            #[inline]
+            pub fn wedge(&self, other: $n) -> $bn {
+                $bn::new(
+                    self.x * other.y - other.x * self.y,
+                    self.x * other.z - other.x * self.z,
+                    self.y * other.x - other.y * self.z
+                )
             }
 
             #[inline]
@@ -561,7 +578,7 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!(Vec3 => f32, Wec3 => f32x4);
+vec3s!((Vec3, Bivec3) => f32, (Wec3, WBivec3) => f32x4);
 
 impl From<Vec2> for Vec3 {
     #[inline]

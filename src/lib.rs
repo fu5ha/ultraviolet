@@ -13,12 +13,16 @@
 //! If it's missing something you need it to do, bug me on the GitHub issue tracker and/or Rust
 //! community discord server (I'm Fusha there) and I'll try to add it for you :)
 
-mod lerp;
-mod mat;
-mod vec;
+pub mod bivec;
+pub mod lerp;
+pub mod mat;
+pub mod rotor;
+pub mod vec;
 
+pub use bivec::*;
 pub use lerp::*;
 pub use mat::*;
+pub use rotor::*;
 pub use vec::*;
 
 pub use wide;

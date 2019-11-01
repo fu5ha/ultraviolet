@@ -18,6 +18,36 @@ macro_rules! mat3s {
             }
         }
 
+        impl Mul for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self {
+                let sa = self.cols[0];
+                let sb = self.cols[1];
+                let sc = self.cols[2];
+                let oa = rhs.cols[0];
+                let ob = rhs.cols[1];
+                let oc = rhs.cols[2];
+                Self::new(
+                    $t::new(
+                        sa.x * oa.x + sb.x * oa.y + sc.x * oa.z,
+                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z,
+                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z
+                    ),
+                    $t::new(
+                        sa.y * oa.x + sb.y * oa.y + sc.y * oa.z,
+                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z,
+                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z
+                    ),
+                    $t::new(
+                        sa.z * oa.x + sb.z * oa.y + sc.z * oa.z,
+                        sa.z * ob.x + sb.z * ob.y + sc.z * ob.z,
+                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z
+                    ),
+                )
+            }
+        }
+
         impl Mul<$t> for $n {
             type Output = $t;
             #[inline]
@@ -50,6 +80,47 @@ macro_rules! mat4s {
                 $n {
                     cols: [col1, col2, col3, col4],
                 }
+            }
+        }
+
+        impl Mul for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self {
+                let sa = self.cols[0];
+                let sb = self.cols[1];
+                let sc = self.cols[2];
+                let sd = self.cols[3];
+                let oa = rhs.cols[0];
+                let ob = rhs.cols[1];
+                let oc = rhs.cols[2];
+                let od = rhs.cols[3];
+                Self::new(
+                    $t::new(
+                        sa.x * oa.x + sb.x * oa.y + sc.x * oa.z + sd.x * oa.w,
+                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z + sd.x * ob.w,
+                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z + sd.x * oc.w,
+                        sa.x * od.x + sb.x * od.y + sc.x * od.z + sd.x * od.w,
+                    ),
+                    $t::new(
+                        sa.y * oa.x + sb.y * oa.y + sc.y * oa.z + sd.y * oa.w,
+                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z + sd.y * ob.w,
+                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z + sd.y * oc.w,
+                        sa.y * od.x + sb.y * od.y + sc.y * od.z + sd.y * od.w,
+                    ),
+                    $t::new(
+                        sa.z * oa.x + sb.z * oa.y + sc.z * oa.z + sd.z * oa.w,
+                        sa.z * ob.x + sb.z * ob.y + sc.z * ob.z + sd.z * ob.w,
+                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z + sd.z * oc.w,
+                        sa.z * od.x + sb.z * od.y + sc.z * od.z + sd.z * od.w,
+                    ),
+                    $t::new(
+                        sa.w * oa.x + sb.w * oa.y + sc.w * oa.z + sd.w * oa.w,
+                        sa.w * ob.x + sb.w * ob.y + sc.w * ob.z + sd.w * oa.w,
+                        sa.w * oc.x + sb.w * oc.y + sc.w * oc.z + sd.w * oc.w,
+                        sa.w * od.x + sb.w * od.y + sc.w * od.z + sd.w * od.w,
+                    ),
+                )
             }
         }
 
