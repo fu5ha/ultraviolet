@@ -14,12 +14,20 @@
 //! i.e. as a 'bundle' of two different kinds of values.
 //!
 //! The reason we call this type of value a 'rotor' is that if you both left- and
-//! right-multiply (using the geometric product) a rotor with a vector , you will
+//! right-multiply (using the geometric product) a rotor with a vector, you will
 //! rotate the sandwiched vector. For example, if you start with two vectors,
 //! `a` and `b`, and create a rotor `ab` from them, then rotate a vector `u` with this
 //! rotor by doing `ba u ab`, you will end up rotating the vector `u` by in the plane
 //! that corresponds to `a ∧ b` (i.e. the plane which is parallel with both vectors), by
 //! twice the angle between `a` and `b`.
+//!
+//! In `ultraviolet`, the `Mul` trait is implemented for Rotors such that doing
+//!
+//! ```
+//! rotor * vec
+//! ```
+//!
+//! will rotate the Vector `vec` by the Rotor `rotor`.
 
 use crate::bivec::*;
 use crate::vec::*;
