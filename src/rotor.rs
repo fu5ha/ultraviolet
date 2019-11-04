@@ -54,6 +54,27 @@ macro_rules! rotor2s {
                 }
             }
 
+            /// Construct a Rotor that rotates one vector to another.
+            #[inline]
+            pub fn rotation_between(from: $vt, to: $vt) -> Self {
+                Self::new(
+                    $t::from(1.0) + to.dot(from),
+                    to.wedge(from))
+            }
+
+            /// Construct a vector given an angle and a bivector which defines a plane and rotation
+            /// orientation.
+            ///
+            /// This is the equivalent of an axis-angle rotation. The plane bivector
+            /// must be normalized.
+            #[inline]
+            pub fn angle_plane(angle: $t, mut plane: $bt) -> Self {
+                let two = $t::from(2.0);
+                let sina = (angle / two).sin();
+                plane *= -sina;
+                Self::new((angle / two).cos(), plane)
+            }
+
             #[inline]
             pub fn mag_sq(&self) -> $t {
                 self.s * self.s + self.bv.xy * self.bv.xy
@@ -143,9 +164,33 @@ macro_rules! rotor3s {
                 }
             }
 
+            /// Construct a Rotor that rotates one vector to another.
+            #[inline]
+            pub fn rotation_between(from: $vt, to: $vt) -> Self {
+                Self::new(
+                    $t::from(1.0) + to.dot(from),
+                    to.wedge(from))
+            }
+
+            /// Construct a vector given an angle and a bivector which defines a plane and rotation
+            /// orientation.
+            ///
+            /// This is the equivalent of an axis-angle rotation. The plane bivector
+            /// must be normalizes.
+            #[inline]
+            pub fn angle_plane(angle: $t, mut plane: $bt) -> Self {
+                let two = $t::from(2.0);
+                let sina = (angle / two).sin();
+                plane *= -sina;
+                Self::new((angle / two).cos(), plane)
+            }
+
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.s * self.s + self.bv.xy * self.bv.xy + self.bv.xz * self.bv.xz + self.bv.yz * self.bv.yz
+                self.s * self.s
+                    + self.bv.xy * self.bv.xy
+                    + self.bv.xz * self.bv.xz
+                    + self.bv.yz * self.bv.yz
             }
 
             #[inline]
@@ -220,7 +265,22 @@ macro_rules! rotor3s {
             type Output = $vt;
             #[inline]
             fn mul(self, mut rhs: $vt) -> $vt {
-                // TODO
+                let s2 = self.s * self.s;
+                let bxy2 = self.bv.xy * self.bv.xy;
+                let bxz2 = self.bv.xz * self.bv.xz;
+                let byz2 = self.bv.yz * self.bv.yz;
+                let two = $t::from(2.0);
+                let two_s_bxy = two * self.s * self.bv.xy;
+                let two_s_bxz = two * self.s * self.bv.xz;
+                let two_s_byz = two * self.s * self.bv.yz;
+                let two_bxz_byz = two * self.bv.xz * self.bv.yz;
+                let two_bxy_byz = two * self.bv.xy * self.bv.yz;
+                let two_bxy_bxz = two * self.bv.xy * self.bv.xz;
+
+                rhs.x = (s2 - bxy2 - bxz2 - byz2) * rhs.x + (two_s_bxy - two_bxz_byz) * rhs.y + (two_s_bxz + two_bxy_byz) * rhs.z;
+                rhs.y = -(two_s_bxy + two_bxz_byz) * rhs.x + (s2 - bxy2 + bxz2 - byz2) * rhs.y + (two_s_byz - two_bxy_bxz) * rhs.z;
+                rhs.z = (two_bxy_byz - two_s_bxz) * rhs.x - (two_s_byz + two_bxy_bxz) * rhs.y + (s2 + bxy2 - bxz2 + byz2) * rhs.z;
+
                 rhs
             }
         }
@@ -229,3 +289,6 @@ macro_rules! rotor3s {
 }
 
 rotor3s!(Rotor3 => (Vec3, Bivec3, f32), WRotor3 => (Wec3, WBivec3, f32x4));
+
+#[test]
+mod test {}

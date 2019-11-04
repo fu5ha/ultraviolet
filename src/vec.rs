@@ -1,10 +1,11 @@
 use crate::bivec::*;
+use crate::rotor::*;
 use std::ops::*;
 
 use wide::f32x4;
 
 macro_rules! vec2s {
-    ($(($n:ident, $bn:ident) => $t:ident),+) => {
+    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
         $(
         /// A vector in 2d space.
         #[derive(Clone, Copy, Debug)]
@@ -29,9 +30,34 @@ macro_rules! vec2s {
                 self.x * other.x + self.y * other.y
             }
 
+            /// The wedge (aka outer) product of two vectors.
+            ///
+            /// This operation results in a bivector, which represents
+            /// the plane parallel to the two vectors, and which has a
+            /// 'oriented area' equal to the parallelogram created by extending
+            /// the two vectors, oriented such that the positive direction is the
+            /// one which would move `self` closer to `other`.
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
                 $bn::new(self.x * other.y - other.x * self.y)
+            }
+
+            /// The geometric product of this and another vector, which
+            /// is defined as the sum of the dot product and the wedge product.
+            ///
+            /// This operation results in a 'rotor', named as such as it may define
+            /// a rotation of a vector. The rotor which results from the geometric product
+            /// will rotate in the plane parallel to the two vectors, by twice the angle between
+            /// them and in the opposite direction (i.e. it will rotate in the direction that would
+            /// bring `other` towards `self`).
+            #[inline]
+            pub fn geom(&self, other: $n) -> $rn {
+                $rn::new(self.dot(other), self.wedge(other))
+            }
+
+            #[inline]
+            pub fn rotate_by(&self, rotor: $rn) -> Self {
+                rotor * *self
             }
 
             #[inline]
@@ -225,7 +251,7 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!((Vec2, Bivec2) => f32, (Wec2, WBivec2) => f32x4);
+vec2s!((Vec2, Bivec2, Rotor2) => f32, (Wec2, WBivec2, WRotor2) => f32x4);
 
 impl From<[Vec2; 4]> for Wec2 {
     #[inline]
@@ -307,7 +333,7 @@ impl Wec2 {
 }
 
 macro_rules! vec3s {
-    ($(($n:ident, $bn:ident) => $t:ident),+) => {
+    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -346,6 +372,13 @@ macro_rules! vec3s {
                 self.x * other.x + self.y * other.y + self.z * other.z
             }
 
+            /// The wedge (aka outer) product of two vectors.
+            ///
+            /// This operation results in a bivector, which represents
+            /// the plane parallel to the two vectors, and which has a
+            /// 'oriented area' equal to the parallelogram created by extending
+            /// the two vectors, oriented such that the positive direction is the
+            /// one which would move `self` closer to `other`.
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
                 $bn::new(
@@ -353,6 +386,24 @@ macro_rules! vec3s {
                     self.x * other.z - other.x * self.z,
                     self.y * other.x - other.y * self.z
                 )
+            }
+
+            /// The geometric product of this and another vector, which
+            /// is defined as the sum of the dot product and the wedge product.
+            ///
+            /// This operation results in a 'rotor', named as such as it may define
+            /// a rotation of a vector. The rotor which results from the geometric product
+            /// will rotate in the plane parallel to the two vectors, by twice the angle between
+            /// them and in the opposite direction (i.e. it will rotate in the direction that would
+            /// bring `other` towards `self`).
+            #[inline]
+            pub fn geom(&self, other: $n) -> $rn {
+                $rn::new(self.dot(other), self.wedge(other))
+            }
+
+            #[inline]
+            pub fn rotate_by(&self, rotor: $rn) -> Self {
+                rotor * *self
             }
 
             #[inline]
@@ -578,7 +629,7 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!((Vec3, Bivec3) => f32, (Wec3, WBivec3) => f32x4);
+vec3s!((Vec3, Bivec3, Rotor3) => f32, (Wec3, WBivec3, WRotor3) => f32x4);
 
 impl From<Vec2> for Vec3 {
     #[inline]
