@@ -1,5 +1,6 @@
 use crate::bivec::*;
 use crate::rotor::*;
+use crate::util::*;
 use std::ops::*;
 
 use wide::f32x4;
@@ -16,12 +17,12 @@ macro_rules! vec2s {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T) -> Self {
-                $n { x: x.into(), y: y.into() }
+            pub fn new(x: $t, y: $t) -> Self {
+                $n { x, y }
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val)
             }
 
@@ -134,6 +135,12 @@ macro_rules! vec2s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y)
             }
         }
 
@@ -343,12 +350,12 @@ macro_rules! vec3s {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T, z: T) -> Self {
-                $n { x: x.into(), y: y.into(), z: z.into() }
+            pub fn new(x: $t, y: $t, z: $t) -> Self {
+                $n { x, y, z }
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val, val)
             }
 
@@ -382,9 +389,9 @@ macro_rules! vec3s {
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
                 $bn::new(
-                    self.x * other.y - other.x * self.y,
-                    self.x * other.z - other.x * self.z,
-                    self.y * other.x - other.y * self.z
+                    self.x * other.y - self.y * other.x,
+                    self.x * other.z - self.z * other.x,
+                    self.y * other.z - self.z * other.y
                 )
             }
 
@@ -499,6 +506,12 @@ macro_rules! vec3s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z)
             }
         }
 
@@ -891,6 +904,12 @@ macro_rules! vec4s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
             }
         }
 

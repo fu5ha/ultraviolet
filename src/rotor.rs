@@ -3,9 +3,7 @@
 //! denoted for two vectors `u` and `v` as simply `uv`. This operation is
 //! defined as
 //!
-//! ```
-//! uv = u · v + u ∧ v
-//! ```
+//! `uv = u · v + u ∧ v`
 //!
 //! As can be seen, this operation results in the addition of two different
 //! types of values: first, the dot product will result in a scalar, and second,
@@ -23,9 +21,7 @@
 //!
 //! In `ultraviolet`, the `Mul` trait is implemented for Rotors such that doing
 //!
-//! ```
-//! rotor * vec
-//! ```
+//! `rotor * vec`
 //!
 //! will rotate the Vector `vec` by the Rotor `rotor`.
 
@@ -59,7 +55,7 @@ macro_rules! rotor2s {
             pub fn rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
                     $t::from(1.0) + to.dot(from),
-                    to.wedge(from))
+                    to.wedge(from)).normalized()
             }
 
             /// Construct a vector given an angle and a bivector which defines a plane and rotation
@@ -169,7 +165,7 @@ macro_rules! rotor3s {
             pub fn rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
                     $t::from(1.0) + to.dot(from),
-                    to.wedge(from))
+                    to.wedge(from)).normalized()
             }
 
             /// Construct a vector given an angle and a bivector which defines a plane and rotation
@@ -264,7 +260,7 @@ macro_rules! rotor3s {
         impl Mul<$vt> for $rn {
             type Output = $vt;
             #[inline]
-            fn mul(self, mut rhs: $vt) -> $vt {
+            fn mul(self, rhs: $vt) -> $vt {
                 let s2 = self.s * self.s;
                 let bxy2 = self.bv.xy * self.bv.xy;
                 let bxz2 = self.bv.xz * self.bv.xz;
@@ -277,11 +273,10 @@ macro_rules! rotor3s {
                 let two_bxy_byz = two * self.bv.xy * self.bv.yz;
                 let two_bxy_bxz = two * self.bv.xy * self.bv.xz;
 
-                rhs.x = (s2 - bxy2 - bxz2 - byz2) * rhs.x + (two_s_bxy - two_bxz_byz) * rhs.y + (two_s_bxz + two_bxy_byz) * rhs.z;
-                rhs.y = -(two_s_bxy + two_bxz_byz) * rhs.x + (s2 - bxy2 + bxz2 - byz2) * rhs.y + (two_s_byz - two_bxy_bxz) * rhs.z;
-                rhs.z = (two_bxy_byz - two_s_bxz) * rhs.x - (two_s_byz + two_bxy_bxz) * rhs.y + (s2 + bxy2 - bxz2 + byz2) * rhs.z;
-
-                rhs
+                $vt::new(
+                    (s2 - bxy2 - bxz2 - byz2) * rhs.x + (two_s_bxy - two_bxz_byz) * rhs.y + (two_s_bxz + two_bxy_byz) * rhs.z,
+                    -(two_s_bxy + two_bxz_byz) * rhs.x + (s2 - bxy2 + bxz2 - byz2) * rhs.y + (two_s_byz - two_bxy_bxz) * rhs.z,
+                    (-two_s_bxz + two_bxy_byz) * rhs.x - (two_s_byz + two_bxy_bxz) * rhs.y + (s2 + bxy2 - bxz2 - byz2) * rhs.z)
             }
         }
         )+
@@ -290,5 +285,16 @@ macro_rules! rotor3s {
 
 rotor3s!(Rotor3 => (Vec3, Bivec3, f32), WRotor3 => (Wec3, WBivec3, f32x4));
 
-#[test]
-mod test {}
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::util::*;
+    #[test]
+    pub fn rotate_vector_roundtrip() {
+        let a = Vec3::new(1.0, 2.0, 5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let rotor = Rotor3::rotation_between(a, b);
+        let rot = rotor * a;
+        assert!(rot.eq_eps(b));
+    }
+}

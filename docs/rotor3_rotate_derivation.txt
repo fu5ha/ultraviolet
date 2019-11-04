@@ -70,14 +70,14 @@ ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
 - SVxByzE1E2E3 - SVyByzE3 + SVzByzE2
 + BxyByzVxE3 - BxyByzVy1E2E3 + BxyByzVzE1
 - BxzByzVxE2 - BxzByzVyE1 - BxzByzVzE1E2E3
-+ ByzByzVxE1 - ByzByzVyE2 + ByzByzVzE3
++ ByzByzVxE1 - ByzByzVyE2 - ByzByzVzE3
 
 = (SSVx + SBxyVy + SBxzVz + SVyBxy - BxyBxyVx + ByzBxyVz + SVzBxz - BxzBxzVx - ByzBxzVy + BxyByzVz - BxzByzVy + ByzByzVx)E1
 + (SSVy - SBxyVx + SByzVz - SVxBxy - BxyBxyVy - BxzBxyVz - BxyBxzVz + BxzBxzVy - ByzBxzVx + SVzByz - BxzByzVx - ByzByzVy)E2
-+ (SSVz - SBxzVx - SByzVy  + BxyBxyVz - BxzBxyVy + ByzBxyVx - SVxBxz - BxyBxzVy  - BxzBxzVz - SVyByz + BxyByzVx + ByzByzVz)E3
++ (SSVz - SBxzVx - SByzVy  + BxyBxyVz - BxzBxyVy + ByzBxyVx - SVxBxz - BxyBxzVy  - BxzBxzVz - SVyByz + BxyByzVx - ByzByzVz)E3
 + (SBxyVz + SByzVx - SVzBxy + BxzBxyVx + ByzBxzVy + SVyBxz - BxyBxzVx + ByzBxzVz - SVxByz - BxyByzVy - BxzByzVz)E1E2E3
 
 = ((S^2 - Bxy^2 - Bxz^2 + Byz^2)Vx + (2SBxy - 2ByzBxz)Vy + (2SBxz + 2ByzBxy)Vz)E1
 + ((-2SBxy - 2ByzBxz)Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (2SByz - 2BxzBxy)Vz)E2
-+ ((-2SBxz + 2ByzBxy)Vx + (-2SByz - 2BxzBxy)Vy + (S^2 + Bxy^2 - Bxz^2 + Byz^2)Vz)E3
-+ (BxzBxyVx + ByzBxzVy - BxyBxzVx + ByzBxzVz - BxyByzVy - BxzByzVz)E1E2E3
++ ((-2SBxz + 2ByzBxy)Vx + (-2SByz - 2BxzBxy)Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
++ ((BxzBxy - BxyBxz)Vx + (ByzBxz - BxyByz)Vy + (ByzBxz - BxzByz)Vz)E1E2E3

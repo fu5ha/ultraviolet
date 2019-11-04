@@ -17,6 +17,7 @@ pub mod bivec;
 pub mod lerp;
 pub mod mat;
 pub mod rotor;
+mod util;
 pub mod vec;
 
 pub use bivec::*;
