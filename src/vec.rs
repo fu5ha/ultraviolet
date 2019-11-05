@@ -31,7 +31,7 @@ macro_rules! vec2s {
                 self.x * other.x + self.y * other.y
             }
 
-            /// The wedge (aka outer) product of two vectors.
+            /// The wedge (aka exterior) product of two vectors.
             ///
             /// This operation results in a bivector, which represents
             /// the plane parallel to the two vectors, and which has a
@@ -385,7 +385,7 @@ macro_rules! vec3s {
                 self.x * other.x + self.y * other.y + self.z * other.z
             }
 
-            /// The wedge (aka outer) product of two vectors.
+            /// The wedge (aka exterior) product of two vectors.
             ///
             /// This operation results in a bivector, which represents
             /// the plane parallel to the two vectors, and which has a

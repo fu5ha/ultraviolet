@@ -7,7 +7,7 @@
 //!
 //! As can be seen, this operation results in the addition of two different
 //! types of values: first, the dot product will result in a scalar, and second,
-//! the outer product will result in a bivector. The addition of these two different
+//! the exterior product will result in a bivector. The addition of these two different
 //! types is not defined, but can be understood in a similar way as complex numbers,
 //! i.e. as a 'bundle' of two different kinds of values.
 //!
