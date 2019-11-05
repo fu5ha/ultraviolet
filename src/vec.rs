@@ -57,8 +57,14 @@ macro_rules! vec2s {
             }
 
             #[inline]
-            pub fn rotate_by(&self, rotor: $rn) -> Self {
-                rotor * *self
+            pub fn rotate_by(&mut self, rotor: $rn) {
+                rotor.rotate_vec(self);
+            }
+
+            #[inline]
+            pub fn rotated_by(mut self, rotor: $rn) -> Self {
+                rotor.rotate_vec(&mut self);
+                self
             }
 
             #[inline]
@@ -409,8 +415,14 @@ macro_rules! vec3s {
             }
 
             #[inline]
-            pub fn rotate_by(&self, rotor: $rn) -> Self {
-                rotor * *self
+            pub fn rotate_by(&mut self, rotor: $rn) {
+                rotor.rotate_vec(self);
+            }
+
+            #[inline]
+            pub fn rotated_by(mut self, rotor: $rn) -> Self {
+                rotor.rotate_vec(&mut self);
+                self
             }
 
             #[inline]

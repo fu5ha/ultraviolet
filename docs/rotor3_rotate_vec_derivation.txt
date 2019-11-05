@@ -77,7 +77,7 @@ ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
 + (SSVz - SBxzVx - SByzVy  + BxyBxyVz - BxzBxyVy + ByzBxyVx - SVxBxz - BxyBxzVy  - BxzBxzVz - SVyByz + BxyByzVx - ByzByzVz)E3
 + (SBxyVz + SByzVx - SVzBxy + BxzBxyVx + ByzBxzVy + SVyBxz - BxyBxzVx + ByzBxzVz - SVxByz - BxyByzVy - BxzByzVz)E1E2E3
 
-= ((S^2 - Bxy^2 - Bxz^2 + Byz^2)Vx + (2SBxy - 2ByzBxz)Vy + (2SBxz + 2ByzBxy)Vz)E1
-+ ((-2SBxy - 2ByzBxz)Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (2SByz - 2BxzBxy)Vz)E2
-+ ((-2SBxz + 2ByzBxy)Vx + (-2SByz - 2BxzBxy)Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
+= ((S^2 - Bxy^2 - Bxz^2 + Byz^2)Vx + (SBxy - ByzBxz)2Vy + (SBxz + ByzBxy)2Vz)E1
++ (-(SBxy + ByzBxz)2Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (SByz - BxzBxy)2Vz)E2
++ ((-SBxz + ByzBxy)2Vx - (SByz - BxzBxy)2Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
 + ((BxzBxy - BxyBxz)Vx + (ByzBxz - BxyByz)Vy + (ByzBxz - BxzByz)Vz)E1E2E3

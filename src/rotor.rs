@@ -106,22 +106,46 @@ macro_rules! rotor2s {
                 s.reverse();
                 s
             }
+
+            /// Rotates this rotor by another rotor in-place. `self` *must* be normalized!
+            #[inline]
+            pub fn rotate_by(&mut self, other: Self) {
+                let b = *self;
+                let a = other;
+                let sa2_plus_baxy2 = a.s * a.s + a.bv.xy * a.bv.xy;
+
+                self.s = (a.s - b.s) * a.bv.xy * b.bv.xy
+                    + b.s * sa2_plus_baxy2;
+                self.bv.xy = b.bv.xy * sa2_plus_baxy2;
+            }
+
+            /// Rotates this rotor by another rotor and returns the result. `self` *must* be normalized!
+            #[inline]
+            pub fn rotated_by(mut self, other: Self) -> Self {
+                self.rotate_by(other);
+                self
+            }
+
+            /// Rotates a vector by this rotor.
+            ///
+            /// `self` *must* be normalized!
+            #[inline]
+            pub fn rotate_vec(self, vec: &mut $vt) {
+                let bxy2 = self.bv.xy * self.bv.xy;
+                let two = $t::from(2.0);
+
+                let v = *vec;
+
+                vec.x = self.s * (self.s * v.x + two * self.bv.xy * v.y) - bxy2 * v.x;
+                vec.y = self.s * (self.s * v.y - two * self.bv.xy * v.x) - bxy2 * v.y;
+            }
         }
 
         impl Mul for $rn {
             type Output = Self;
             #[inline]
-            fn mul(mut self, rhs: Self) -> Self {
-                self *= rhs;
-                self
-            }
-        }
-
-        impl MulAssign for $rn {
-            #[inline]
-            fn mul_assign(&mut self, rhs: Self) {
-                self.s = self.s * rhs.s - self.bv.xy * rhs.bv.xy;
-                self.bv.xy = self.s * rhs.bv.xy + rhs.s * self.bv.xy;
+            fn mul(self, rhs: Self) -> Self {
+                self.rotated_by(rhs)
             }
         }
 
@@ -129,9 +153,7 @@ macro_rules! rotor2s {
             type Output = $vt;
             #[inline]
             fn mul(self, mut rhs: $vt) -> $vt {
-                let s2xy2 = self.s * self.s + self.bv.xy * self.bv.xy;
-                rhs.x = s2xy2 * rhs.x + ($t::from(1.0) - self.s) * self.bv.xy * rhs.y;
-                rhs.y = s2xy2 * rhs.y;
+                self.rotate_vec(&mut rhs);
                 rhs
             }
         }
@@ -221,62 +243,95 @@ macro_rules! rotor3s {
                 s.reverse();
                 s
             }
+
+            /// Rotates this rotor by another rotor in-place. `self` *must* be normalized!
+            #[inline]
+            pub fn rotate_by(&mut self, rhs: Self) {
+                let b = *self;
+                let a = rhs;
+                let two = $t::from(2.0);
+                let sa2 = a.s * a.s;
+                let baxy2 = a.bv.xy * a.bv.xy;
+                let baxz2 = a.bv.xz * a.bv.xz;
+                let bayz2 = a.bv.yz * a.bv.yz;
+                let sa_baxy = a.s * a.bv.xy;
+                let sa_baxz = a.s * a.bv.xz;
+                let sa_bayz = a.s * a.bv.yz;
+                let baxy_baxz = a.bv.xy * a.bv.xz;
+                let baxy_bayz = a.bv.xy * a.bv.yz;
+                let baxz_bayz = a.bv.xz * a.bv.yz;
+                let two_bbxy = two * b.bv.xy;
+                let two_bbxz = two * b.bv.xz;
+                let two_bbyz = two * b.bv.yz;
+
+                self.s = (sa2 + baxy2 + baxz2 + bayz2) * b.s;
+
+                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2) * b.bv.xy
+                    + (baxy_baxz + sa_bayz) * two_bbxz
+                    + (baxy_bayz - sa_baxz) * two_bbyz;
+
+                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2) * b.bv.xz
+                    + (baxy_baxz - sa_bayz) * two_bbxy
+                    + (baxz_bayz + sa_baxy) * two_bbyz;
+
+                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2) * b.bv.yz
+                    + (baxy_bayz + sa_baxz) * two_bbxy
+                    + (baxz_bayz - sa_baxy) * two_bbxz;
+            }
+
+            /// Rotates this rotor by another rotor and returns the result. `self` *must* be normalized!
+            #[inline]
+            pub fn rotated_by(mut self, rhs: Self) -> Self {
+                self.rotate_by(rhs);
+                self
+            }
+
+            /// Rotates a vector by this rotor.
+            ///
+            /// `self` *must* be normalized!
+            #[inline]
+            pub fn rotate_vec(self, vec: &mut $vt) {
+                let s2 = self.s * self.s;
+                let bxy2 = self.bv.xy * self.bv.xy;
+                let bxz2 = self.bv.xz * self.bv.xz;
+                let byz2 = self.bv.yz * self.bv.yz;
+                let two = $t::from(2.0);
+                let s_bxy = self.s * self.bv.xy;
+                let s_bxz = self.s * self.bv.xz;
+                let s_byz = self.s * self.bv.yz;
+                let bxz_byz = self.bv.xz * self.bv.yz;
+                let bxy_byz = self.bv.xy * self.bv.yz;
+                let bxy_bxz = self.bv.xy * self.bv.xz;
+                let two_vx = two * vec.x;
+                let two_vy = two * vec.y;
+                let two_vz = two * vec.z;
+
+                vec.x = vec.x  * (s2 - bxy2 - bxz2 + byz2)
+                      + two_vy * (s_bxy - bxz_byz)
+                      + two_vz * (s_bxz + bxy_byz);
+                vec.y = two_vx * -(bxz_byz + s_bxy)
+                      + vec.y  * (s2 - bxy2 + bxz2 - byz2)
+                      + two_vz * (s_byz - bxy_bxz);
+                vec.z = two_vx * (bxy_byz - s_bxz)
+                      - two_vy * (bxy_bxz + s_byz)
+                      + vec.z  * (s2 + bxy2 - bxz2 - byz2);
+            }
         }
 
         impl Mul for $rn {
             type Output = Self;
             #[inline]
-            fn mul(mut self, rhs: Self) -> Self {
-                self *= rhs;
-                self
-            }
-        }
-
-        impl MulAssign for $rn {
-            #[inline]
-            fn mul_assign(&mut self, rhs: Self) {
-                self.s = self.s * rhs.s
-                    - self.bv.xy * rhs.bv.xy
-                    - self.bv.xz * rhs.bv.xz
-                    - self.bv.yz * rhs.bv.xz;
-
-                self.bv.xy = self.s * rhs.bv.xy
-                    + self.bv.xy * rhs.s
-                    + self.bv.yz * rhs.bv.xz
-                    - self.bv.xz * rhs.bv.yz;
-
-                self.bv.xz = self.s * rhs.bv.xz
-                    + self.bv.xz * rhs.s
-                    - self.bv.yz * rhs.bv.xy
-                    + self.bv.xy * rhs.bv.yz;
-
-                self.bv.yz = self.s * rhs.bv.yz
-                    + self.bv.yz * rhs.s
-                    + self.bv.xz * rhs.bv.xy
-                    - self.bv.xy * rhs.bv.xz;
+            fn mul(self, rhs: Self) -> Self {
+                self.rotated_by(rhs)
             }
         }
 
         impl Mul<$vt> for $rn {
             type Output = $vt;
             #[inline]
-            fn mul(self, rhs: $vt) -> $vt {
-                let s2 = self.s * self.s;
-                let bxy2 = self.bv.xy * self.bv.xy;
-                let bxz2 = self.bv.xz * self.bv.xz;
-                let byz2 = self.bv.yz * self.bv.yz;
-                let two = $t::from(2.0);
-                let two_s_bxy = two * self.s * self.bv.xy;
-                let two_s_bxz = two * self.s * self.bv.xz;
-                let two_s_byz = two * self.s * self.bv.yz;
-                let two_bxz_byz = two * self.bv.xz * self.bv.yz;
-                let two_bxy_byz = two * self.bv.xy * self.bv.yz;
-                let two_bxy_bxz = two * self.bv.xy * self.bv.xz;
-
-                $vt::new(
-                    (s2 - bxy2 - bxz2 - byz2) * rhs.x + (two_s_bxy - two_bxz_byz) * rhs.y + (two_s_bxz + two_bxy_byz) * rhs.z,
-                    -(two_s_bxy + two_bxz_byz) * rhs.x + (s2 - bxy2 + bxz2 - byz2) * rhs.y + (two_s_byz - two_bxy_bxz) * rhs.z,
-                    (-two_s_bxz + two_bxy_byz) * rhs.x - (two_s_byz + two_bxy_bxz) * rhs.y + (s2 + bxy2 - bxz2 - byz2) * rhs.z)
+            fn mul(self, mut rhs: $vt) -> $vt {
+                self.rotate_vec(&mut rhs);
+                rhs
             }
         }
         )+
@@ -289,12 +344,33 @@ rotor3s!(Rotor3 => (Vec3, Bivec3, f32), WRotor3 => (Wec3, WBivec3, f32x4));
 mod test {
     use super::*;
     use crate::util::*;
+
     #[test]
     pub fn rotate_vector_roundtrip() {
-        let a = Vec3::new(1.0, 2.0, 5.0).normalized();
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
-        let rotor = Rotor3::rotation_between(a, b);
-        let rot = rotor * a;
-        assert!(rot.eq_eps(b));
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let rotor_ab = Rotor3::rotation_between(a, b);
+        let rotor_bc = Rotor3::rotation_between(b, c);
+        let rot_ab = rotor_ab * a;
+        let rot_bc = rotor_bc * rot_ab;
+        let rot_abc = rotor_bc * (rotor_ab * a);
+        assert!(rot_ab.eq_eps(b));
+        assert!(rot_bc.eq_eps(c));
+        assert!(rot_abc.eq_eps(c));
+    }
+
+    #[test]
+    pub fn rotate_rotor_roundtrip() {
+        let a = Vec3::new(1.0, 0.0, 0.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 0.0).normalized();
+        let c = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let d = Vec3::new(0.0, 1.0, 0.0).normalized();
+        let rotor_ab = Rotor3::rotation_between(a, b);
+        let rotor_bc = Rotor3::rotation_between(c, d);
+        let rotor_abbc = rotor_ab * rotor_ab;
+        let rot = rotor_abbc * Vec3::new(1.0, 0.0, 0.0);
+        println!("{:?} {:?} {:?}", rotor_ab, rotor_abbc, rot);
+        assert!(rot.eq_eps(Vec3::new(0.0, 1.0, 0.0).normalized()));
     }
 }
