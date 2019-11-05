@@ -13,6 +13,8 @@
 /// "counter clockwise" in 2d, since such a rotation brings `x` to `y`.
 use wide::f32x4;
 
+use crate::util::*;
+
 use std::ops::*;
 
 macro_rules! bivec2s {
@@ -38,6 +40,12 @@ macro_rules! bivec2s {
             #[inline]
             pub fn unit_xy() -> Self {
                 Self::new($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $bn {
+            fn eq_eps(self, other: Self) -> bool {
+                self.xy.eq_eps(other.xy)
             }
         }
 
@@ -176,6 +184,12 @@ macro_rules! bivec3s {
             pub xy: $t,
             pub xz: $t,
             pub yz: $t,
+        }
+
+        impl EqualsEps for $bn {
+            fn eq_eps(self, other: Self) -> bool {
+                self.xy.eq_eps(other.xy) && self.xz.eq_eps(other.xz) && self.yz.eq_eps(other.yz)
+            }
         }
 
         impl $bn {

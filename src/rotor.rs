@@ -26,6 +26,7 @@
 //! will rotate the Vector `vec` by the Rotor `rotor`.
 
 use crate::bivec::*;
+use crate::util::*;
 use crate::vec::*;
 use wide::f32x4;
 
@@ -141,11 +142,22 @@ macro_rules! rotor2s {
             }
         }
 
+        impl EqualsEps for $rn {
+            fn eq_eps(self, other: Self) -> bool {
+                self.s.eq_eps(other.s) && self.bv.eq_eps(other.bv)
+            }
+        }
+
         impl Mul for $rn {
             type Output = Self;
             #[inline]
             fn mul(self, rhs: Self) -> Self {
-                self.rotated_by(rhs)
+                Self {
+                    s: self.s * rhs.s - self.bv.xy * rhs.bv.xy,
+                    bv: $bt {
+                        xy: self.s * rhs.bv.xy + rhs.s * self.bv.xy
+                    }
+                }
             }
         }
 
@@ -318,13 +330,27 @@ macro_rules! rotor3s {
             }
         }
 
+        impl EqualsEps for $rn {
+            fn eq_eps(self, other: Self) -> bool {
+                self.s.eq_eps(other.s) && self.bv.eq_eps(other.bv)
+            }
+        }
+
         impl Mul for $rn {
             type Output = Self;
             #[inline]
-            fn mul(self, rhs: Self) -> Self {
-                self.rotated_by(rhs)
+            fn mul(self, q: Self) -> Self {
+                Self {
+                    s: self.s * q.s - self.bv.xy * q.bv.xy - self.bv.xz * q.bv.xz - self.bv.yz * q.bv.yz,
+                    bv: $bt {
+                        xy: self.bv.xy * q.s + self.s * q.bv.xy + self.bv.yz * q.bv.xz - self.bv.xz * q.bv.yz,
+                        xz: self.bv.xz * q.s + self.s * q.bv.xz - self.bv.yz * q.bv.xy + self.bv.xy * q.bv.yz,
+                        yz: self.bv.yz * q.s + self.s * q.bv.yz + self.bv.xz * q.bv.xy - self.bv.xy * q.bv.xz,
+                    }
+                }
             }
         }
+
 
         impl Mul<$vt> for $rn {
             type Output = $vt;
@@ -343,7 +369,6 @@ rotor3s!(Rotor3 => (Vec3, Bivec3, f32), WRotor3 => (Wec3, WBivec3, f32x4));
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::util::*;
 
     #[test]
     pub fn rotate_vector_roundtrip() {
@@ -361,6 +386,18 @@ mod test {
     }
 
     #[test]
+    pub fn rotate_rotor_trivial() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let r_ab = Rotor3::rotation_between(a, b);
+        let r_bc = Rotor3::rotation_between(b, c);
+        let res = r_ab.rotated_by(r_bc).rotated_by(r_bc.reversed());
+        println!("{:?} {:?}", r_ab, res);
+        assert!(r_ab.eq_eps(res));
+    }
+
+    #[test]
     pub fn rotate_rotor_roundtrip() {
         let a = Vec3::new(1.0, 0.0, 0.0).normalized();
         let b = Vec3::new(1.0, 1.0, 0.0).normalized();
@@ -368,7 +405,7 @@ mod test {
         let d = Vec3::new(0.0, 1.0, 0.0).normalized();
         let rotor_ab = Rotor3::rotation_between(a, b);
         let rotor_bc = Rotor3::rotation_between(c, d);
-        let rotor_abbc = rotor_ab * rotor_ab;
+        let rotor_abbc = rotor_bc * rotor_ab;
         let rot = rotor_abbc * Vec3::new(1.0, 0.0, 0.0);
         println!("{:?} {:?} {:?}", rotor_ab, rotor_abbc, rot);
         assert!(rot.eq_eps(Vec3::new(0.0, 1.0, 0.0).normalized()));
