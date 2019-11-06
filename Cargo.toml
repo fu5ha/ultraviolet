@@ -1,6 +1,6 @@
 [package]
 name = "ultraviolet"
-version = "0.2.0-alpha5"
+version = "0.2.0-alpha6"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
 description = "A crate to do linear algebra, fast."

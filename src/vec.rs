@@ -151,6 +151,23 @@ macro_rules! vec2s {
             }
 
             #[inline]
+            pub fn abs(&self) -> Self {
+                Self::new(self.x.abs(), self.y.abs())
+            }
+
+            #[inline]
+            pub fn clamp(&mut self, min: Self, max: Self) {
+                self.x = self.x.max(min.x).min(max.x);
+                self.y = self.y.max(min.y).min(max.y);
+            }
+
+            #[inline]
+            pub fn clamped(mut self, min: Self, max: Self) -> Self {
+                self.clamp(min, max);
+                self
+            }
+
+            #[inline]
             pub fn map<F>(&self, f: F) -> Self
                 where F: Fn($t) -> $t
             {
@@ -567,6 +584,24 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn abs(&self) -> Self {
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs())
+            }
+
+            #[inline]
+            pub fn clamp(&mut self, min: Self, max: Self) {
+                self.x = self.x.max(min.x).min(max.x);
+                self.y = self.y.max(min.y).min(max.y);
+                self.z = self.z.max(min.z).min(max.z);
+            }
+
+            #[inline]
+            pub fn clamped(mut self, min: Self, max: Self) -> Self {
+                self.clamp(min, max);
+                self
+            }
+
+            #[inline]
             pub fn map<F>(&self, f: F) -> Self
                 where F: Fn($t) -> $t
             {
@@ -972,6 +1007,25 @@ macro_rules! vec4s {
                     self.z.mul_add(mul.z, add.z),
                     self.w.mul_add(mul.w, add.w),
                 )
+            }
+
+            #[inline]
+            pub fn abs(&self) -> Self {
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
+            }
+
+            #[inline]
+            pub fn clamp(&mut self, min: Self, max: Self) {
+                self.x = self.x.max(min.x).min(max.x);
+                self.y = self.y.max(min.y).min(max.y);
+                self.z = self.z.max(min.z).min(max.z);
+                self.w = self.w.max(min.w).min(max.w);
+            }
+
+            #[inline]
+            pub fn clamped(mut self, min: Self, max: Self) -> Self {
+                self.clamp(min, max);
+                self
             }
 
             #[inline]
