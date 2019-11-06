@@ -169,6 +169,20 @@ macro_rules! vec2s {
             }
 
             #[inline]
+            pub fn max_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.max(other.x);
+                self.y = self.y.max(other.y);
+                self
+            }
+
+            #[inline]
+            pub fn min_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.min(other.x);
+                self.y = self.y.min(other.y);
+                self
+            }
+
+            #[inline]
             pub fn component_max(&self) -> $t {
                 self.x.max(self.y)
             }
@@ -573,6 +587,22 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn max_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.max(other.x);
+                self.y = self.y.max(other.y);
+                self.z = self.z.max(other.z);
+                self
+            }
+
+            #[inline]
+            pub fn min_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.min(other.x);
+                self.y = self.y.min(other.y);
+                self.z = self.z.min(other.z);
+                self
+            }
+
+            #[inline]
             pub fn component_max(&self) -> $t {
                 self.x.max(self.y).max(self.z)
             }
@@ -964,6 +994,24 @@ macro_rules! vec4s {
                 self.y = f(self.y);
                 self.z = f(self.z);
                 self.w = f(self.w);
+            }
+
+            #[inline]
+            pub fn max_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.max(other.x);
+                self.y = self.y.max(other.y);
+                self.z = self.z.max(other.z);
+                self.w = self.w.max(other.w);
+                self
+            }
+
+            #[inline]
+            pub fn min_by_component(mut self, other: Self) -> Self {
+                self.x = self.x.min(other.x);
+                self.y = self.y.min(other.y);
+                self.z = self.z.min(other.z);
+                self.w = self.w.min(other.w);
+                self
             }
 
             #[inline]
