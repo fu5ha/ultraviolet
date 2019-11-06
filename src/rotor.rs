@@ -1,9 +1,12 @@
-//! Objects that perform rotations.
+//! Rotors, i.e. constructs that describe and perform rotations.
 //!
 //! A rotor is the geometric algebra analog of the Quaternion, and they
 //! end up being mathematically equivalent. They are good for doing the same
 //! sorts of things, and for the most part you can use rotors just like you
-//! would a quaternion, if you're already familiar with using those.
+//! would a quaternion, if you're already familiar with using those. However,
+//! they are significantly easier to derive yourself and build intuition for,
+//! and they generalize to both lower and higher dimensions than just 3, which
+//! is the only space for which quaternions are valuable.
 //!
 //! A rotor can be thought of in multiple ways, the first of which
 //! is that a rotor is the result of the 'geometric product' of two vectors,
@@ -57,9 +60,11 @@ use wide::f32x4;
 use std::ops::*;
 
 macro_rules! rotor2s {
-    ($($rn:ident => ($vt:ident, $bt:ident, $t:ident)),+) => {
+    ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
         $(
         /// A Rotor in 2d space.
+        ///
+        /// Please see the module level documentation for more information on rotors!
         #[derive(Clone, Copy, Debug)]
         pub struct $rn {
             pub s: $t,
@@ -170,6 +175,26 @@ macro_rules! rotor2s {
                 vec.x = s2_minus_bxy2 * v.x + two_s_bxy * v.y;
                 vec.y = s2_minus_bxy2 * v.y - two_s_bxy * v.x;
             }
+
+            #[inline]
+            pub fn into_matrix(self) -> $mt {
+                let s2_minus_bxy2 = self.s * self.s - self.bv.xy * self.bv.xy;
+                let two_s_bxy = $t::from(2.0) * self.s * self.bv.xy;
+
+                $mt::new(
+                    $vt::new(
+                        s2_minus_bxy2,
+                        -two_s_bxy),
+                    $vt::new(
+                        two_s_bxy,
+                        s2_minus_bxy2))
+            }
+        }
+
+        impl From<$rn> for $mt {
+            fn from(rotor: $rn) -> $mt {
+                rotor.into_matrix()
+            }
         }
 
         impl EqualsEps for $rn {
@@ -264,12 +289,14 @@ macro_rules! rotor2s {
     }
 }
 
-rotor2s!(Rotor2 => (Vec2, Bivec2, f32), WRotor2 => (Wec2, WBivec2, f32x4));
+rotor2s!(Rotor2 => (Mat2, Vec2, Bivec2, f32), WRotor2 => (Wat2, Wec2, WBivec2, f32x4));
 
 macro_rules! rotor3s {
     ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
         $(
         /// A Rotor in 3d space.
+        ///
+        /// Please see the module level documentation for more information on rotors!
         #[derive(Clone, Copy, Debug)]
         pub struct $rn {
             pub s: $t,
@@ -426,6 +453,7 @@ macro_rules! rotor3s {
                       + vec.z  * (s2 + bxy2 - bxz2 - byz2);
             }
 
+            #[inline]
             pub fn into_matrix(self) -> $mt {
                 let s2 = self.s * self.s;
                 let bxy2 = self.bv.xy * self.bv.xy;

@@ -7,7 +7,7 @@ use std::ops::*;
 use wide::f32x4;
 
 macro_rules! vec2s {
-    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
+    ($(($n:ident, $bn:ident, $rn:ident, $v3t:ident) => $t:ident),+) => {
         $(
         /// A vector in 2d space.
         #[derive(Clone, Copy, Debug)]
@@ -25,6 +25,28 @@ macro_rules! vec2s {
             #[inline]
             pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val)
+            }
+
+            #[inline]
+            pub fn unit_x() -> Self {
+                $n{ x: $t::from(1.0), y: $t::from(0.0) }
+            }
+
+            #[inline]
+            pub fn unit_y() -> Self {
+                $n{ x: $t::from(0.0), y: $t::from(1.0) }
+            }
+
+            #[inline]
+            pub fn into_homogeneous(self) -> $v3t {
+                $v3t { x: self.x, y: self.y, z: $t::from(1.0) }
+            }
+
+            /// Create a 2d vector from homogeneous 2d vector, performing
+            /// division by the homogeneous component.
+            #[inline]
+            pub fn from_homogeneous(v: $v3t) -> Self {
+                Self { x: v.x / v.z, y: v.y / v.z }
             }
 
             #[inline]
@@ -48,10 +70,10 @@ macro_rules! vec2s {
             /// is defined as the sum of the dot product and the wedge product.
             ///
             /// This operation results in a 'rotor', named as such as it may define
-            /// a rotation of a vector. The rotor which results from the geometric product
+            /// a rotation. The rotor which results from the geometric product
             /// will rotate in the plane parallel to the two vectors, by twice the angle between
             /// them and in the opposite direction (i.e. it will rotate in the direction that would
-            /// bring `other` towards `self`).
+            /// bring `other` towards `self`, and rotate in that direction by twice the angle between them).
             #[inline]
             pub fn geom(&self, other: $n) -> $rn {
                 $rn::new(self.dot(other), self.wedge(other))
@@ -265,7 +287,7 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!((Vec2, Bivec2, Rotor2) => f32, (Wec2, WBivec2, WRotor2) => f32x4);
+vec2s!((Vec2, Bivec2, Rotor2, Vec3) => f32, (Wec2, WBivec2, WRotor2, Wec3) => f32x4);
 
 impl From<[Vec2; 4]> for Wec2 {
     #[inline]
@@ -304,11 +326,6 @@ impl Vec2 {
             i * eta - n * (eta * ndi * k.sqrt())
         }
     }
-
-    #[inline]
-    pub fn into_homogeneous(self) -> Vec3 {
-        Vec3::new(self.x, self.y, 1.0)
-    }
 }
 
 impl Wec2 {
@@ -339,15 +356,10 @@ impl Wec2 {
 
         Self::merge(mask, out, Self::zero())
     }
-
-    #[inline]
-    pub fn into_homogeneous(self) -> Wec3 {
-        Wec3::new(self.x, self.y, f32x4::from(1.0))
-    }
 }
 
 macro_rules! vec3s {
-    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
+    ($(($n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -382,6 +394,18 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn into_homogeneous(self) -> $v4t {
+                $v4t{ x: self.x, y: self.y, z: self.z, w: $t::from(1.0) }
+            }
+
+            /// Create a 3d vector from homogeneous 3d vector, performing
+            /// division by the homogeneous component.
+            #[inline]
+            pub fn from_homogeneous(v: $v4t) -> Self {
+                Self { x: v.x / v.w, y: v.y / v.w, z: v.z / v.w }
+            }
+
+            #[inline]
             pub fn dot(&self, other: $n) -> $t {
                 self.x * other.x + self.y * other.y + self.z * other.z
             }
@@ -406,10 +430,10 @@ macro_rules! vec3s {
             /// is defined as the sum of the dot product and the wedge product.
             ///
             /// This operation results in a 'rotor', named as such as it may define
-            /// a rotation of a vector. The rotor which results from the geometric product
+            /// a rotation. The rotor which results from the geometric product
             /// will rotate in the plane parallel to the two vectors, by twice the angle between
             /// them and in the opposite direction (i.e. it will rotate in the direction that would
-            /// bring `other` towards `self`).
+            /// bring `other` towards `self`, and rotate in that direction by twice the angle between them).
             #[inline]
             pub fn geom(&self, other: $n) -> $rn {
                 $rn::new(self.dot(other), self.wedge(other))
@@ -655,7 +679,7 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!((Vec3, Bivec3, Rotor3) => f32, (Wec3, WBivec3, WRotor3) => f32x4);
+vec3s!((Vec3, Bivec3, Rotor3, Vec4) => f32, (Wec3, WBivec3, WRotor3, Wec4) => f32x4);
 
 impl From<Vec2> for Vec3 {
     #[inline]
@@ -714,11 +738,6 @@ impl Vec3 {
             i * eta - n * (eta * ndi * k.sqrt())
         }
     }
-
-    #[inline]
-    pub fn into_homogeneous(self) -> Vec4 {
-        Vec4::new(self.x, self.y, self.z, 1.0)
-    }
 }
 
 impl Wec3 {
@@ -749,11 +768,6 @@ impl Wec3 {
         let out = i * eta - n * (eta * ndi * k.sqrt());
 
         Self::merge(mask, out, Self::zero())
-    }
-
-    #[inline]
-    pub fn into_homogeneous(self) -> Wec4 {
-        Wec4::new(self.x, self.y, self.z, f32x4::from(1.0))
     }
 }
 

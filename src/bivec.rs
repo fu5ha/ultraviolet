@@ -5,17 +5,37 @@
 //! `u ∧ v`. This means it is the *oriented area* of the parallelogram
 //! created by attaching two vectors and then extending them into a parallelogram.
 //!
-//! A normalized bivector can also be thought of as representing a plane and the *direction of rotation*
-//! about that plane such that a *positive* rotation follows the orientation of the bivector. When
+//! This may be hard to visualize at first, but bivectors are as fundamental as vectors. If vectors
+//! are a representation of *lines*, then bivectors are a representation of *planes*.
+//!
+//! A normalized bivector can be thought of as representing a plane of rotation and the *direction of rotation*
+//! inside that plane such that a *positive* rotation follows the orientation of the bivector. When
 //! you obtain a bivector by taking the exterior product of two vectors, the positive direction of rotation
 //! is defined as the one that *brings the first vector closer to the second*. For example, a bivector
 //! created by taking the exterior product `x ∧ y` of the x and y basis vectors will create a unit
 //! bivector that represents the xy plane, with orientation such that a positive rotation of `x` inside
 //! the plane would bring `x` closer to `y`. This is why positive rotation is generally defined as
 //! "counter clockwise" in 2d, since such a rotation brings `x` to `y`.
+//!
+//! Much like vectors can be represented as a linear combination of *basis vectors*, i.e.
+//! a vector "component representation," bivectors can be represented as a linear combination
+//! of *basis bivectors*. If the basis vectors are the unit vectors in the direction of each
+//! canonical axis of a space, then the basis bivectors are the *unit area planes* in each of the
+//! canonical planes.
+//!
+//! In 2d, there is only one basis plane, the xy plane, which represents all of 2d space. As such, in 2d
+//! there is only *one* basis bivector, while there are *two* basis vectors. This means that a 2d bivector
+//! has only one component.
+//!
+//! In 3d, there are three basis planes, the xy plane, the xz plane, and the yz plane, which are respectively
+//! the planes parallel to those combinations of the x, y, and z basis vectors. Therefore, a 3d bivector has
+//! three components, each of which represents the *projected area* of that bivector onto one of the three
+//! basis bivectors. This is analogous to how vector components represent the *projected length* of that vector
+//! onto each unit vector.
 use wide::f32x4;
 
 use crate::util::*;
+use crate::vec::*;
 
 use std::ops::*;
 
@@ -26,6 +46,8 @@ macro_rules! bivec2s {
         ///
         /// Since in 2d there is only one plane in the whole of 2d space, a 2d bivector
         /// has only one component.
+        ///
+        /// Please see the module level documentation for more information on bivectors generally!
         #[derive(Clone, Copy, Debug)]
         pub struct $bn {
             pub xy: $t
@@ -171,7 +193,7 @@ macro_rules! bivec2s {
 bivec2s!((Bivec2) => f32, (WBivec2) => f32x4);
 
 macro_rules! bivec3s {
-    ($(($bn:ident) => $t:ident),+) => {
+    ($($bn:ident => ($vt:ident, $t:ident)),+) => {
         $(
         /// A bivector in 3d space.
         ///
@@ -181,6 +203,8 @@ macro_rules! bivec3s {
         /// *projected length* of the vector onto the three basis *vectors. Since in 3d, there are three
         /// components for both vectors and bivectors, 3d bivectors have been historically confused with
         /// 3d vectors quite a lot.
+        ///
+        /// Please see the module level documentation for more information on bivectors generally!
         #[derive(Clone, Copy, Debug)]
         pub struct $bn {
             pub xy: $t,
@@ -200,6 +224,13 @@ macro_rules! bivec3s {
                 Self {
                     xy, xz, yz
                 }
+            }
+
+            /// Create the bivector which represents the same plane of rotation as a given
+            /// normalized 'axis vector'
+            #[inline]
+            pub fn from_normalized_axis(v: $vt) -> Self {
+                Self::new(v.z, v.y, v.x)
             }
 
             #[inline]
@@ -349,4 +380,4 @@ macro_rules! bivec3s {
     }
 }
 
-bivec3s!((Bivec3) => f32, (WBivec3) => f32x4);
+bivec3s!(Bivec3 => (Vec3, f32), WBivec3 => (Wec3, f32x4));

@@ -3,8 +3,70 @@ use std::ops::*;
 
 use crate::vec::*;
 
+macro_rules! mat2s {
+    ($($n:ident => $t:ident),+) => {
+        /// A 2x2 square matrix.
+        ///
+        /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
+        $(#[derive(Clone, Copy, Debug)]
+        pub struct $n {
+            pub cols: [$t; 2],
+        }
+
+        impl $n {
+            #[inline]
+            pub fn new(col1: $t, col2: $t) -> Self {
+                $n {
+                    cols: [col1, col2],
+                }
+            }
+        }
+
+        impl Mul for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(self, rhs: Self) -> Self {
+                let sa = self.cols[0];
+                let sb = self.cols[1];
+                let oa = rhs.cols[0];
+                let ob = rhs.cols[1];
+                Self::new(
+                    $t::new(
+                        sa.x * oa.x + sb.x * oa.y,
+                        sa.x * ob.x + sb.x * ob.y,
+                    ),
+                    $t::new(
+                        sa.y * oa.x + sb.y * oa.y,
+                        sa.y * ob.x + sb.y * ob.y,
+                    ),
+                )
+            }
+        }
+
+        impl Mul<$t> for $n {
+            type Output = $t;
+            #[inline]
+            fn mul(self, rhs: $t) -> $t {
+                let a = self.cols[0];
+                let b = self.cols[1];
+                $t::new(
+                    a.x * rhs.x + b.x * rhs.y,
+                    a.y * rhs.x + b.y * rhs.y,
+                )
+            }
+        })+
+    }
+}
+
+mat2s!(Mat2 => Vec2, Wat2 => Wec2);
+
 macro_rules! mat3s {
     ($($n:ident => $t:ident),+) => {
+        /// A 3x3 square matrix.
+        ///
+        /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
+        /// or for performing arbitrary transformations (linear + translation, projection, etc)
+        /// on homogeneous 2d vectors
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub cols: [$t; 3],
@@ -70,6 +132,11 @@ mat3s!(Mat3 => Vec3, Wat3 => Wec3);
 
 macro_rules! mat4s {
     ($($n:ident => $t:ident),+) => {
+        /// A 4x4 square matrix.
+        ///
+        /// Useful for performing linear transformations (rotation, scaling) on 4d vectors,
+        /// or for performing arbitrary transformations (linear + translation, projection, etc)
+        /// on homogeneous 3d vectors
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub cols: [$t; 4],
