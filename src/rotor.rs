@@ -1,3 +1,10 @@
+//! Objects that perform rotations.
+//!
+//! A rotor is the geometric algebra analog of the Quaternion, and they
+//! end up being mathematically equivalent. They are good for doing the same
+//! sorts of things, and for the most part you can use rotors just like you
+//! would a quaternion, if you're already familiar with using those.
+//!
 //! A rotor can be thought of in multiple ways, the first of which
 //! is that a rotor is the result of the 'geometric product' of two vectors,
 //! denoted for two vectors `u` and `v` as simply `uv`. This operation is

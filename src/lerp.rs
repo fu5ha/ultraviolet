@@ -1,3 +1,4 @@
+//! Linear interpolation on types for which it makes sense.
 use wide::f32x4;
 
 use crate::bivec::*;

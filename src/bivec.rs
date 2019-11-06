@@ -1,16 +1,18 @@
-/// A bivector is an *oriented area*, and is equivalent
-/// to the result of the exterior (wedge) product of two vectors, i.e.
-/// `u ∧ v`. This means it is the *oriented area* of the parallelogram
-/// created by attaching two vectors and then extending them into a parallelogram.
-///
-/// A normalized bivector can also be thought of as representing a plane and the *direction of rotation*
-/// about that plane such that a *positive* rotation follows the orientation of the bivector. When
-/// you obtain a bivector by taking the exterior product of two vectors, the positive direction of rotation
-/// is defined as the one that *brings the first vector closer to the second*. For example, a bivector
-/// created by taking the exterior product `x ∧ y` of the x and y basis vectors will create a unit
-/// bivector that represents the xy plane, with orientation such that a positive rotation of `x` inside
-/// the plane would bring `x` closer to `y`. This is why positive rotation is generally defined as
-/// "counter clockwise" in 2d, since such a rotation brings `x` to `y`.
+//! Bivectors, i.e. oriented areas.
+//!
+//! A bivector is an *oriented area*, and is equivalent
+//! to the result of the exterior (wedge) product of two vectors, i.e.
+//! `u ∧ v`. This means it is the *oriented area* of the parallelogram
+//! created by attaching two vectors and then extending them into a parallelogram.
+//!
+//! A normalized bivector can also be thought of as representing a plane and the *direction of rotation*
+//! about that plane such that a *positive* rotation follows the orientation of the bivector. When
+//! you obtain a bivector by taking the exterior product of two vectors, the positive direction of rotation
+//! is defined as the one that *brings the first vector closer to the second*. For example, a bivector
+//! created by taking the exterior product `x ∧ y` of the x and y basis vectors will create a unit
+//! bivector that represents the xy plane, with orientation such that a positive rotation of `x` inside
+//! the plane would bring `x` closer to `y`. This is why positive rotation is generally defined as
+//! "counter clockwise" in 2d, since such a rotation brings `x` to `y`.
 use wide::f32x4;
 
 use crate::util::*;

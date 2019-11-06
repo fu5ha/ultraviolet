@@ -1,3 +1,4 @@
+//! Square matrices.
 use std::ops::*;
 
 use crate::vec::*;

@@ -1,3 +1,4 @@
+//! Vectors, i.e. directed line segments.
 use crate::bivec::*;
 use crate::rotor::*;
 use crate::util::*;
