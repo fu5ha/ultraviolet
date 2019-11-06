@@ -1,5 +1,7 @@
 use wide::f32x4;
 
+use crate::bivec::*;
+use crate::rotor::*;
 use crate::vec::*;
 
 pub trait Lerp<T> {
@@ -17,4 +19,6 @@ macro_rules! impl_lerp {
     };
 }
 
-impl_lerp!(f32 => (Vec2, Vec3), f32x4 => (Wec2, Wec3));
+impl_lerp!(
+    f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2, Rotor3),
+    f32x4 => (Wec2, Wec3, Wec4, WBivec2, WBivec3, WRotor2, WRotor3));

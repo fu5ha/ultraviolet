@@ -78,6 +78,30 @@ ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
 + (SBxyVz + SByzVx - SVzBxy + BxzBxyVx + ByzBxzVy + SVyBxz - BxyBxzVx + ByzBxzVz - SVxByz - BxyByzVy - BxzByzVz)E1E2E3
 
 = ((S^2 - Bxy^2 - Bxz^2 + Byz^2)Vx + (SBxy - ByzBxz)2Vy + (SBxz + ByzBxy)2Vz)E1
-+ (-(SBxy + ByzBxz)2Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (SByz - BxzBxy)2Vz)E2
-+ ((-SBxz + ByzBxy)2Vx - (SByz - BxzBxy)2Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
++ (-(ByzBxz + SBxy)2Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (SByz - BxzBxy)2Vz)E2
++ ((ByzBxy - SBxz)2Vx - (SByz - BxzBxy)2Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
 + ((BxzBxy - BxyBxz)Vx + (ByzBxz - BxyByz)Vy + (ByzBxz - BxzByz)Vz)E1E2E3
+
+------------
+
+convert rotor3 into mat3
+
+rotate basis vectors by the rotor.
+
+first, x basis vector, i.e. (Vx = 1, Vy = 0, Vz = 0)
+
+= (S^2 - Bxy^2 - Bxz^2 + Byz^2)E1
++ (-2(ByzBxz + SBxy))E2
++ (2(ByzBxy - SBxz))E3
+
+y basis vector, i.e. (Vx = 0, Vy = 1, Vz = 0)
+
+= (2(SBxy - ByzBxz))E1
++ (S^2 - Bxy^2 + Bxz^2 - Byz^2)E2
++ (2(SByz - BxzBxy))E3
+
+z basis vector, i.e. (Vz = 0, Vy = 0, Vz = 1)
+
+= (2(SBxz + ByzBxy))E1
++ (2(SByz - BxzBxy))E2
++ (S^2 + Bxy^2 - Bxz^2 - Byz^2)E3

@@ -3,16 +3,16 @@ given u and v are basis vectors,
 uu = 1
 uv = -vu
 
-want to compute: ab cd ba (geometric product)
-where ab is a rotor, cd is another rotor
+want to compute: a b (rotor multiplication, i.e. composition) and a b a* (rotor rotation)
+where a, b are rotors, a* is reverse of a
 
-ab = Sa + BaxyE1E2
-cd = Sb + BbxyE1E2
-ba = Sa - BaxyE1E2
+a = Sa + BaxyE1E2
+b = Sb + BbxyE1E2
+a* = Sa - BaxyE1E2
 
 -------------
 
-ab cd = (Sa + BaxyE1E2)(Sb + BbxyE1E2)
+a b = (Sa + BaxyE1E2)(Sb + BbxyE1E2)
 
 = SaSb + SaBbxyE1E2
 + SbBaxyE1E2 + BaxyBbxyE1E2E1E2
@@ -22,7 +22,7 @@ ab cd = (Sa + BaxyE1E2)(Sb + BbxyE1E2)
 
 -------------
 
-ab cd ba = (ab cd)(Sa - BaxyE1E2)
+a b a* = (a b)(Sa - BaxyE1E2)
 
 = (SaSb - BaxyBbxy + SaBbxyE1E2 + SbBaxyE1E2)(Sa - BaxyE1E2)
 

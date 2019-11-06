@@ -39,5 +39,21 @@ ab v ba = (ab v)(S - BxyE1E2)
 = (SSVx + SBxyVy - BxyBxyVx + SBxyVy)E1
 + (-SBxyVx + SSVy - SBxyVx - BxyBxyVy)E2
 
-= (S(SVx + 2BxyVy) - Bxy^2Vx)E1
-+ (S(SVy - 2BxyVx) - Bxy^2Vy)E2
+= ((S^2 - Bxy^2)Vx + 2SBxyVy)E1
++ (-2SBxyVx + (S^2 - Bxy^2)Vy)E2
+
+------------------
+
+convert rotor3 into mat3
+
+rotate basis vectors by the rotor.
+
+first, x basis vector, i.e. (Vx = 1, Vy = 0)
+
+= (S^2 - Bxy^2)E1
++ (-2SBxy)E2
+
+y basis vector, i.e. (Vx = 0, Vy = 1)
+
+= (2SBxy)E1
++ (S^2 - Bxy^2)E2

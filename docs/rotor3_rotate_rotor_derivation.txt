@@ -3,7 +3,7 @@ given u and v are basis vectors,
 uu = 1
 uv = -vu
 
-want to compute: a b a* (geometric product)
+want to compute: a b (rotor composition) and a b a* (rotor rotation)
 where a, b are rotors, a* = reverse(a)
 
 a = Sa + BaxyE1E2 + BaxzE1E3 + BayzE2E3
