@@ -1,0 +1,59 @@
+E1, E2 = basis vectors, geometric multiplication rules:
+given u and v are basis vectors,
+uu = 1
+uv = -vu
+
+want to compute: ab v ba (geometric product)
+where ab is a rotor
+
+ab = s + BxyE1E2
+v = VxE1 + VyE2
+ba = s - BxyE1E2
+
+-------------
+
+ab v = (s + BxyE1E2)(VxE1 + VyE2)
+
+= SVxE1 + SVyE2
++ BxyVxE1E2E1 + BxyVyE1E2E2
+
+= SVxE1 + SVyE2
+- BxyVxE2 + BxyVyE1
+
+-------------
+
+ab v ba = (ab v)(S - BxyE1E2)
+
+= (SVxE1 + SVyE2 - BxyVxE2 + BxyVyE1)(S - BxyE1E2)
+
+= SSVxE1 - SBxyVxE1E1E2
++ SSVyE2 - SBxyVyE2E1E2
+- SBxyVxVE2 + BxyBxyVxE2E1E2
++ SBxyVyE1 - BxyBxyVyE1E1E2
+
+= SSVxE1 - SBxyVxE2
++ SSVyE2 + SBxyVyE1
+- SBxyVxE2 - BxyBxyVxE1
++ SBxyVyE1 - BxyBxyVyE2
+
+= (SSVx + SBxyVy - BxyBxyVx + SBxyVy)E1
++ (-SBxyVx + SSVy - SBxyVx - BxyBxyVy)E2
+
+= ((S^2 - Bxy^2)Vx + 2SBxyVy)E1
++ (-2SBxyVx + (S^2 - Bxy^2)Vy)E2
+
+------------------
+
+convert rotor3 into mat3
+
+rotate basis vectors by the rotor.
+
+first, x basis vector, i.e. (Vx = 1, Vy = 0)
+
+= (S^2 - Bxy^2)E1
++ (-2SBxy)E2
+
+y basis vector, i.e. (Vx = 0, Vy = 1)
+
+= (2SBxy)E1
++ (S^2 - Bxy^2)E2

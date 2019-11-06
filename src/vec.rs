@@ -1,10 +1,15 @@
+use crate::bivec::*;
+use crate::rotor::*;
+use crate::util::*;
 use std::ops::*;
 
 use wide::f32x4;
 
 macro_rules! vec2s {
-    ($($n:ident => $t:ident),+) => {
-        $(#[derive(Clone, Copy, Debug)]
+    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
+        $(
+        /// A vector in 2d space.
+        #[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -12,18 +17,54 @@ macro_rules! vec2s {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T) -> Self {
-                $n { x: x.into(), y: y.into() }
+            pub fn new(x: $t, y: $t) -> Self {
+                $n { x, y }
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val)
             }
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
                 self.x * other.x + self.y * other.y
+            }
+
+            /// The wedge (aka exterior) product of two vectors.
+            ///
+            /// This operation results in a bivector, which represents
+            /// the plane parallel to the two vectors, and which has a
+            /// 'oriented area' equal to the parallelogram created by extending
+            /// the two vectors, oriented such that the positive direction is the
+            /// one which would move `self` closer to `other`.
+            #[inline]
+            pub fn wedge(&self, other: $n) -> $bn {
+                $bn::new(self.x * other.y - other.x * self.y)
+            }
+
+            /// The geometric product of this and another vector, which
+            /// is defined as the sum of the dot product and the wedge product.
+            ///
+            /// This operation results in a 'rotor', named as such as it may define
+            /// a rotation of a vector. The rotor which results from the geometric product
+            /// will rotate in the plane parallel to the two vectors, by twice the angle between
+            /// them and in the opposite direction (i.e. it will rotate in the direction that would
+            /// bring `other` towards `self`).
+            #[inline]
+            pub fn geom(&self, other: $n) -> $rn {
+                $rn::new(self.dot(other), self.wedge(other))
+            }
+
+            #[inline]
+            pub fn rotate_by(&mut self, rotor: $rn) {
+                rotor.rotate_vec(self);
+            }
+
+            #[inline]
+            pub fn rotated_by(mut self, rotor: $rn) -> Self {
+                rotor.rotate_vec(&mut self);
+                self
             }
 
             #[inline]
@@ -100,6 +141,12 @@ macro_rules! vec2s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y)
             }
         }
 
@@ -217,7 +264,7 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!(Vec2 => f32, Wec2 => f32x4);
+vec2s!((Vec2, Bivec2, Rotor2) => f32, (Wec2, WBivec2, WRotor2) => f32x4);
 
 impl From<[Vec2; 4]> for Wec2 {
     #[inline]
@@ -299,7 +346,7 @@ impl Wec2 {
 }
 
 macro_rules! vec3s {
-    ($($n:ident => $t:ident),+) => {
+    ($(($n:ident, $bn:ident, $rn:ident) => $t:ident),+) => {
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -309,12 +356,12 @@ macro_rules! vec3s {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T, z: T) -> Self {
-                $n { x: x.into(), y: y.into(), z: z.into() }
+            pub fn new(x: $t, y: $t, z: $t) -> Self {
+                $n { x, y, z }
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val, val)
             }
 
@@ -336,6 +383,46 @@ macro_rules! vec3s {
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
                 self.x * other.x + self.y * other.y + self.z * other.z
+            }
+
+            /// The wedge (aka exterior) product of two vectors.
+            ///
+            /// This operation results in a bivector, which represents
+            /// the plane parallel to the two vectors, and which has a
+            /// 'oriented area' equal to the parallelogram created by extending
+            /// the two vectors, oriented such that the positive direction is the
+            /// one which would move `self` closer to `other`.
+            #[inline]
+            pub fn wedge(&self, other: $n) -> $bn {
+                $bn::new(
+                    self.x * other.y - self.y * other.x,
+                    self.x * other.z - self.z * other.x,
+                    self.y * other.z - self.z * other.y
+                )
+            }
+
+            /// The geometric product of this and another vector, which
+            /// is defined as the sum of the dot product and the wedge product.
+            ///
+            /// This operation results in a 'rotor', named as such as it may define
+            /// a rotation of a vector. The rotor which results from the geometric product
+            /// will rotate in the plane parallel to the two vectors, by twice the angle between
+            /// them and in the opposite direction (i.e. it will rotate in the direction that would
+            /// bring `other` towards `self`).
+            #[inline]
+            pub fn geom(&self, other: $n) -> $rn {
+                $rn::new(self.dot(other), self.wedge(other))
+            }
+
+            #[inline]
+            pub fn rotate_by(&mut self, rotor: $rn) {
+                rotor.rotate_vec(self);
+            }
+
+            #[inline]
+            pub fn rotated_by(mut self, rotor: $rn) -> Self {
+                rotor.rotate_vec(&mut self);
+                self
             }
 
             #[inline]
@@ -431,6 +518,12 @@ macro_rules! vec3s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z)
             }
         }
 
@@ -561,7 +654,7 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!(Vec3 => f32, Wec3 => f32x4);
+vec3s!((Vec3, Bivec3, Rotor3) => f32, (Wec3, WBivec3, WRotor3) => f32x4);
 
 impl From<Vec2> for Vec3 {
     #[inline]
@@ -823,6 +916,12 @@ macro_rules! vec4s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
             }
         }
 

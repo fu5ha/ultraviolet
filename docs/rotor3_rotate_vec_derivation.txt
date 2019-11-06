@@ -1,0 +1,107 @@
+E1, E2, E3 = basis vectors, geometric multiplication rules:
+given u and v are basis vectors,
+uu = 1
+uv = -vu
+
+want to compute: ab v ba (geometric product)
+where ab is a rotor
+
+ab = s + BxyE1E2 + BxzE1E3 + ByzE2E3
+v = VxE1 + VyE2 + VzE3
+ba = s - BxyE1E2 - BxzE1E3 - ByzE2E3
+
+-------------
+
+ab v = (s + BxyE1E2 + BxzE1E3 + ByzE2E3)(VxE1 + VyE2 + VzE3)
+= SVxE1 + SVyE2 + SVzE3
++ BxyVxE1E2E1 + BxyVyE1E2E2 + BxyVzE1E2E3
++ BxzVxE1E3E1 + BxzVyE1E3E2 + BxzVzE1E3E3
++ ByzVxE2E3E1 + ByzVyE2E3E2 + ByzVzE2E3E3
+
+= SVxE1 + SVyE2 + SVzE3
+- BxyVxE2 + BxyVyE1 + BxyVzE1E2E3
+- BxzVxE3 - BxzVyE1E2E3 + BxzVzE1
++ ByzVxE1E2E3 - ByzVyE3 + ByzVzE2
+
+(factored, though we dont end up using this)
+= (SVx + BxyVy + BxzBz)E1
++ (SVy - BxyVx + ByzVz)E2
++ (SVz - BxzVx - ByzVy)E3
++ (BxyVz - BxzVy + ByzVx)E1E2E3
+
+-------------
+
+ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
+= S * (SVxE1 + SVyE2 + SVzE3
+- BxyVxE2 + BxyVyE1 + BxyVzE1E2E3
+- BxzVxE3 - BxzVyE1E2E3 + BxzVzE1
++ ByzVxE1E2E3 - ByzVyE3 + ByzVzE2)
+
+- SVxBxyE1E1E2 - SVyBxyE2E1E2 - SVzBxyE3E1E2
++ BxyBxyVxE2E1E2 - BxyBxyVyE1E1E2 - BxyBxyVzE1E2E3E1E2
++ BxzBxyVxE3E1E2 + BxzBxyVyE1E2E3E1E2 - BxzBxyVzE1E1E2
+- ByzBxyVxE1E2E3E1E2 + ByzBxzVyE3E1E2 - ByzBxyVzE2E1E2
+
+- SVxBxzE1E1E3 - SVyBxzE2E1E3 - SVzBxzE3E1E3
++ BxyBxzVxE2E1E3 - BxyBxzVyE1E1E3 - BxyBxzVzE1E2E3E1E3
++ BxzBxzVxE3E1E3 + BxzBxzVyE1E2E3E1E3 - BxzBxzVzE1E1E3
+- ByzBxzVxE1E2E3E1E3 + ByzBxzVyE3E1E3 - ByzBxzVzE2E1E3
+
+- SVxByzE1E2E3 - SVyByzE2E2E3 - SVzByzE3E2E3
++ BxyByzVxE2E2E3 - BxyByzVyE1E2E3 - BxyByzVzE1E2E3E2E3
++ BxzByzVxE3E2E3 + BxzByzVyE1E2E3E2E3 - BxzByzVzE1E2E3
+- ByzByzVxE1E2E3E2E3 + ByzByzVyE3E2E3 - ByzByzVzE2E2E3
+
+= SSVxE1 + SSVyE2 + SSVzE3
+- SBxyVxE2 + SBxyVyE1 + SBxyVzE1E2E3
+- SBxzVxE3 - SBxzVyE1E2E3 + SBxzVzE1
++ SByzVxE1E2E3 - SByzVyE3 + SByzVzE2
+
+- SVxBxyE2 + SVyBxyE1 - SVzBxyE1E2E3
+- BxyBxyVxE1 - BxyBxyVyE2 + BxyBxyVzE3
++ BxzBxyVxE1E2E3 - BxzBxyVyE3 - BxzBxyVzE2
++ ByzBxyVxE3 + ByzBxzVyE1E2E3 + ByzBxyVzE1
+
+- SVxBxzE3 + SVyBxzE1E2E3 + SVzBxzE1
+- BxyBxzVxE1E2E3 - BxyBxzVyE3 - BxyBxzVzE2
+- BxzBxzVxE1 + BxzBxzVyE2 - BxzBxzVzE3
+- ByzBxzVxE2 - ByzBxzVyE1 + ByzBxzVzE1E2E3
+
+- SVxByzE1E2E3 - SVyByzE3 + SVzByzE2
++ BxyByzVxE3 - BxyByzVy1E2E3 + BxyByzVzE1
+- BxzByzVxE2 - BxzByzVyE1 - BxzByzVzE1E2E3
++ ByzByzVxE1 - ByzByzVyE2 - ByzByzVzE3
+
+= (SSVx + SBxyVy + SBxzVz + SVyBxy - BxyBxyVx + ByzBxyVz + SVzBxz - BxzBxzVx - ByzBxzVy + BxyByzVz - BxzByzVy + ByzByzVx)E1
++ (SSVy - SBxyVx + SByzVz - SVxBxy - BxyBxyVy - BxzBxyVz - BxyBxzVz + BxzBxzVy - ByzBxzVx + SVzByz - BxzByzVx - ByzByzVy)E2
++ (SSVz - SBxzVx - SByzVy  + BxyBxyVz - BxzBxyVy + ByzBxyVx - SVxBxz - BxyBxzVy  - BxzBxzVz - SVyByz + BxyByzVx - ByzByzVz)E3
++ (SBxyVz + SByzVx - SVzBxy + BxzBxyVx + ByzBxzVy + SVyBxz - BxyBxzVx + ByzBxzVz - SVxByz - BxyByzVy - BxzByzVz)E1E2E3
+
+= ((S^2 - Bxy^2 - Bxz^2 + Byz^2)Vx + (SBxy - ByzBxz)2Vy + (SBxz + ByzBxy)2Vz)E1
++ (-(ByzBxz + SBxy)2Vx + (S^2 - Bxy^2 + Bxz^2 - Byz^2)Vy + (SByz - BxzBxy)2Vz)E2
++ ((ByzBxy - SBxz)2Vx - (SByz - BxzBxy)2Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
++ ((BxzBxy - BxyBxz)Vx + (ByzBxz - BxyByz)Vy + (ByzBxz - BxzByz)Vz)E1E2E3
+
+------------
+
+convert rotor3 into mat3
+
+rotate basis vectors by the rotor.
+
+first, x basis vector, i.e. (Vx = 1, Vy = 0, Vz = 0)
+
+= (S^2 - Bxy^2 - Bxz^2 + Byz^2)E1
++ (-2(ByzBxz + SBxy))E2
++ (2(ByzBxy - SBxz))E3
+
+y basis vector, i.e. (Vx = 0, Vy = 1, Vz = 0)
+
+= (2(SBxy - ByzBxz))E1
++ (S^2 - Bxy^2 + Bxz^2 - Byz^2)E2
++ (2(SByz - BxzBxy))E3
+
+z basis vector, i.e. (Vz = 0, Vy = 0, Vz = 1)
+
+= (2(SBxz + ByzBxy))E1
++ (2(SByz - BxzBxy))E2
++ (S^2 + Bxy^2 - Bxz^2 - Byz^2)E3

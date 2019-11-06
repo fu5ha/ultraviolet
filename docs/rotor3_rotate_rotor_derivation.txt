@@ -1,0 +1,140 @@
+E1, E2, E3 = basis vectors, geometric multiplication rules:
+given u and v are basis vectors,
+uu = 1
+uv = -vu
+
+want to compute: a b (rotor composition) and a b a* (rotor rotation)
+where a, b are rotors, a* = reverse(a)
+
+a = Sa + BaxyE1E2 + BaxzE1E3 + BayzE2E3
+b = Sb + BbxyE1E2 + BbxzE1E3 + BbyzE2E3
+a* = Sa - BaxyE1E2 - BaxzE1E3 - BayzE2E3
+
+-------------
+
+a b = (Sa + BaxyE1E2 + BaxzE1E3 + BayzE2E3)(Sb + BbxyE1E2 + BbxzE1E3 + BbyzE2E3)
+
+= SaSb + SaBbxyE1E2 + SaBbxzE1E3 + SaBbyzE2E3
++ SbBaxyE1E2 + BaxyBbxyE1E2E1E2 + BaxyBbxzE1E2E1E3 + BaxyBbyzE1E2E2E3
++ SbBaxzE1E3 + BaxzBbxyE1E3E1E2 + BaxzBbxzE1E3E1E3 + BaxzBbyzE1E3E2E3
++ SbBayzE2E3 + BayzBbxyE2E3E1E2 + BayzBbxzE2E3E1E3 + BayzBbyzE2E3E2E3
+
+= SaSb + SaBbxyE1E2 + SaBbxzE1E3 + SaBbyzE2E3
++ SbBaxyE1E2 - BaxyBbxy - BaxyBbxzE2E3 + BaxyBbyzE1E3
++ SbBaxzE1E3 + BaxzBbxyE2E3 - BaxzBbxz - BaxzBbyzE1E2
++ SbBayzE2E3 - BayzBbxyE1E3 + BayzBbxzE1E2 - BayzBbyz
+
+= SaSb - BaxyBbxy - BaxzBbxz - BayzBbyz
++ SaBbxyE1E2 + SbBaxyE1E2 - BaxzBbyzE1E2 + BayzBbxzE1E2
++ SaBbxzE1E3 + SbBaxzE1E3 + BaxyBbyzE1E3 - BayzBbxyE1E3
++ SaBbyzE2E3 + SbBayzE2E3 - BaxyBbxzE2E3 + BaxzBbxyE2E3
+
+-------------
+
+a b a* = (a b)(Sa - BaxyE1E2 - BaxzE1E3 - BayzE2E3)
+
+= (SaSb - BaxyBbxy - BaxzBbxz - BayzBbyz
++ SaBbxyE1E2 + SbBaxyE1E2 - BaxzBbyzE1E2 + BayzBbxzE1E2
++ SaBbxzE1E3 + SbBaxzE1E3 + BaxyBbyzE1E3 - BayzBbxyE1E3
++ SaBbyzE2E3 + SbBayzE2E3 - BaxyBbxzE2E3 + BaxzBbxyE2E3)
+* (Sa - BaxyE1E2 - BaxzE1E3 - BayzE2E3)
+
+
+= SaSaSb - SaBaxyBbxy - SaBaxzBbxz - SaBayzBbyz
++ SaSaBbxyE1E2 + SaSbBaxyE1E2 - SaBaxzBbyzE1E2 + SaBayzBbxzE1E2
++ SaSaBbxzE1E3 + SaSbBaxzE1E3 + SaBaxyBbyzE1E3 - SaBayzBbxyE1E3
++ SaSaBbyzE2E3 + SaSbBayzE2E3 - SaBaxyBbxzE2E3 + SaBaxzBbxyE2E3
+
+- SaSbBaxyE1E2 + BaxyBaxyBbxyE1E2 + BaxyBaxzBbxzE1E2 + BaxyBayzBbyzE1E2
+- SaBaxyBbxyE1E2E1E2 - SbBaxyBaxyE1E2E1E2 + BaxyBaxzBbyzE1E2E1E2 - BaxyBayzBbxzE1E2E1E2
+- SaBaxyBbxzE1E3E1E2 - SbBaxyBaxzE1E3E1E2 - BaxyBaxyBbyzE1E3E1E2 + BaxyBayzBbxyE1E3E1E2
+- SaBaxyBbyzE2E3E1E2 - SbBaxyBayzE2E3E1E2 + BaxyBaxyBbxzE2E3E1E2 - BaxyBaxzBbxyE2E3E1E2
+
+- SaSbBaxzE1E3 + BaxyBaxzBbxyE1E3 + BaxzBaxzBbxzE1E3 + BaxzBayzBbyzE1E3
+- SaBaxzBbxyE1E2E1E3 - SbBaxyBaxzE1E2E1E3 + BaxzBaxzBbyzE1E2E1E3 - BaxzBayzBbxzE1E2E1E3
+- SaBaxzBbxzE1E3E1E3 - SbBaxzBaxzE1E3E1E3 - BaxyBaxzBbyzE1E3E1E3 + BaxzBayzBbxyE1E3E1E3
+- SaBaxzBbyzE2E3E1E3 - SbBaxzBayzE2E3E1E3 + BaxyBaxzBbxzE2E3E1E3 - BaxzBaxzBbxyE2E3E1E3
+
+- SaSbBayzE2E3 + BaxyBayzBbxyE2E3 + BaxzBayzBbxzE2E3 + BayzBayzBbyzE2E3
+- SaBayzBbxyE1E2E2E3 - SbBaxyBayzE1E2E2E3 + BaxzBayzBbyzE1E2E2E3 - BayzBayzBbxzE1E2E2E3
+- SaBayzBbxzE1E3E2E3 - SbBaxzBayzE1E3E2E3 - BaxyBayzBbyzE1E3E2E3 + BayzBayzBbxyE1E3E2E3
+- SaBayzBbyzE2E3E2E3 - SbBayzBayzE2E3E2E3 + BaxyBayzBbxzE2E3E2E3 - BaxzBayzBbxyE2E3E2E3
+
+
+= SaSaSb - SaBaxyBbxy - SaBaxzBbxz - SaBayzBbyz
++ SaSaBbxyE1E2 + SaSbBaxyE1E2 - SaBaxzBbyzE1E2 + SaBayzBbxzE1E2
++ SaSaBbxzE1E3 + SaSbBaxzE1E3 + SaBaxyBbyzE1E3 - SaBayzBbxyE1E3
++ SaSaBbyzE2E3 + SaSbBayzE2E3 - SaBaxyBbxzE2E3 + SaBaxzBbxyE2E3
+
+- SaSbBaxyE1E2 + BaxyBaxyBbxyE1E2 + BaxyBaxzBbxzE1E2 + BaxyBayzBbyzE1E2
++ SaBaxyBbxy + SbBaxyBaxy - BaxyBaxzBbyz + BaxyBayzBbxz
+- SaBaxyBbxzE2E3 - SbBaxyBaxzE2E3 - BaxyBaxyBbyzE2E3 + BaxyBayzBbxyE2E3
++ SaBaxyBbyzE1E3 + SbBaxyBayzE1E3 - BaxyBaxyBbxzE1E3 + BaxyBaxzBbxyE1E3
+
+- SaSbBaxzE1E3 + BaxyBaxzBbxyE1E3 + BaxzBaxzBbxzE1E3 + BaxzBayzBbyzE1E3
++ SaBaxzBbxyE2E3 + SbBaxyBaxzE2E3 - BaxzBaxzBbyzE2E3 + BaxzBayzBbxzE2E3
++ SaBaxzBbxz + SbBaxzBaxz + BaxyBaxzBbyz - BaxzBayzBbxy
+- SaBaxzBbyzE1E2 - SbBaxzBayzE1E2 + BaxyBaxzBbxzE1E2 - BaxzBaxzBbxyE1E2
+
+- SaSbBayzE2E3 + BaxyBayzBbxyE2E3 + BaxzBayzBbxzE2E3 + BayzBayzBbyzE2E3
+- SaBayzBbxyE1E3 - SbBaxyBayzE1E3 + BaxzBayzBbyzE1E3 - BayzBayzBbxzE1E3
++ SaBayzBbxzE1E2 + SbBaxzBayzE1E2 + BaxyBayzBbyzE1E2 - BayzBayzBbxyE1E2
++ SaBayzBbyz + SbBayzBayz - BaxyBayzBbxz + BaxzBayzBbxy
+
+
+= SaSaSb - SaBaxyBbxy - SaBaxzBbxz - SaBayzBbyz
++ SaBaxyBbxy + SbBaxyBaxy - BaxyBaxzBbyz + BaxyBayzBbxz
++ SaBaxzBbxz + SbBaxzBaxz + BaxyBaxzBbyz - BaxzBayzBbxy
++ SaBayzBbyz + SbBayzBayz - BaxyBayzBbxz + BaxzBayzBbxy
+
++(SaSaBbxy + SaSbBaxy - SaBaxzBbyz + SaBayzBbxz
+- SaSbBaxy + BaxyBaxyBbxy + BaxyBaxzBbxz + BaxyBayzBbyz
++ SaBayzBbxz + SbBaxzBayz + BaxyBayzBbyz - BayzBayzBbxy
+- SaBaxzBbyz - SbBaxzBayz + BaxyBaxzBbxz - BaxzBaxzBbxy)E1E2
+
++(SaSaBbxz + SaSbBaxz + SaBaxyBbyz - SaBayzBbxy
+- SaSbBaxz + BaxyBaxzBbxy + BaxzBaxzBbxz + BaxzBayzBbyz
++ SaBaxyBbyz + SbBaxyBayzE1E3 - BaxyBaxyBbxz + BaxyBaxzBbxy
+- SaBayzBbxy - SbBaxyBayzE1E3 + BaxzBayzBbyz - BayzBayzBbxz)E1E3
+
++(SaSaBbyz + SaSbBayz - SaBaxyBbxz + SaBaxzBbxy
+- SaSbBayz + BaxyBayzBbxy + BaxzBayzBbxz + BayzBayzBbyz
+- SaBaxyBbxz - SbBaxyBaxz - BaxyBaxyBbyz + BaxyBayzBbxy
++ SaBaxzBbxy + SbBaxyBaxz - BaxzBaxzBbyz + BaxzBayzBbxz)E2E3
+
+
+= SaSaSb 
++ SbBaxyBaxy 
++ SbBaxzBaxz
++ SbBayzBayz
+
++(SaSaBbxy + 2SaBayzBbxz
++ BaxyBaxyBbxy + 2BaxyBaxzBbxz + 2BaxyBayzBbyz
+- BayzBayzBbxy
+- 2SaBaxzBbyz - BaxzBaxzBbxy)E1E2
+
++(SaSaBbxz + 2SaBaxyBbyz - 2SaBayzBbxy
++ 2BaxyBaxzBbxy + BaxyBaxzBbxz + 2BaxzBayzBbyz
+- BaxyBaxyBbxz - BayzBayzBbxz)E1E3
+
++(SaSaBbyz - 2SaBaxyBbxz + 2SaBaxzBbxy
++ 2BaxyBayzBbxy + 2BaxzBayzBbxz + BayzBayzBbyz
+- BaxyBaxyBbyz
+- BaxzBaxzBbyz)E2E3
+
+= (Sa^2 + Baxy^2 + Baxz^2 + Bayz^2) * Sb
+
++((Sa^2 + Baxy^2 - Baxz^2 - Bayz^2) * Bbxy
++ (BaxyBaxz + SaBayz) * 2Bbxz
++ (BaxyBayz - SaBaxz) * 2Bbyz
+)E1E2
+
++((Sa^2 - Baxy^2 + Baxz^2 - Bayz^2) * Bbxz
++ (BaxyBaxz - SaBayz) * 2Bbxy
++ (BaxzBayz + SaBaxy) * 2Bbyz
+)E1E3
+
++((Sa^2 - Baxy^2 - Baxz^2 + Bayz^2) * Bbyz
++ (BaxyBayz + SaBaxz) * 2Bbxy
++ (BaxzBayz - SaBaxy) * 2Bbxz
+)E2E3

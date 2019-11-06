@@ -1,0 +1,41 @@
+E1, E2 = basis vectors, geometric multiplication rules:
+given u and v are basis vectors,
+uu = 1
+uv = -vu
+
+want to compute: a b (rotor multiplication, i.e. composition) and a b a* (rotor rotation)
+where a, b are rotors, a* is reverse of a
+
+a = Sa + BaxyE1E2
+b = Sb + BbxyE1E2
+a* = Sa - BaxyE1E2
+
+-------------
+
+a b = (Sa + BaxyE1E2)(Sb + BbxyE1E2)
+
+= SaSb + SaBbxyE1E2
++ SbBaxyE1E2 + BaxyBbxyE1E2E1E2
+
+= SaSb - BaxyBbxy
++ (SaBbxy + SbBaxy)E1E2
+
+-------------
+
+a b a* = (a b)(Sa - BaxyE1E2)
+
+= (SaSb - BaxyBbxy + SaBbxyE1E2 + SbBaxyE1E2)(Sa - BaxyE1E2)
+
+= SaSaSb - SaSbBaxyE1E2
+- SaBaxyBbxy + BaxyBaxyBbxyE1E2
++ SaSaBbxyE1E2 - SaBaxyBbxyE1E2E1E2
++ SaSbBaxyE1E2 - SbBaxyBaxyE1E2E1E2
+
+= Sa^2Sb - SaBaxyBbxy + SbBaxyBbxy + SbBaxy^2
++ (Baxy^2Bbxy - SaSbBaxy + Sa^2Bbxy + SaSbBaxy)E1E2
+
+= (SaSb - BaxyBbxy)Sa + (BaxyBbxy + Baxy^2)Sb
++ (Baxy^2Bbxy + Sa^2Bbxy)E1E2
+
+= (Sb - Sa)BaxyBbxy + (Sa^2 + Baxy^2)Sb
++ ((Baxy^2 + Sa^2)Bbxy)E1E1
