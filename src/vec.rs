@@ -1,4 +1,4 @@
-//! Vectors, i.e. directed line segments.
+//! Vectors and points, i.e. directed line segments and locations.
 use crate::bivec::*;
 use crate::rotor::*;
 use crate::util::*;
@@ -9,7 +9,11 @@ use wide::f32x4;
 macro_rules! vec2s {
     ($(($n:ident, $bn:ident, $rn:ident, $v3t:ident) => $t:ident),+) => {
         $(
-        /// A vector in 2d space.
+        /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
+        ///
+        /// Generally this distinction between a point and vector is more of a pain than it is worth
+        /// to distinguish on a type level, however when converting to and from homogeneous
+        /// coordinates it is quite important.
         #[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -37,16 +41,34 @@ macro_rules! vec2s {
                 $n{ x: $t::from(0.0), y: $t::from(1.0) }
             }
 
+            /// Create a homogeneous 2d *point* from this vector interpreted as a point,
+            /// meaning the homogeneous component will start with a value of 1.0.
             #[inline]
-            pub fn into_homogeneous(self) -> $v3t {
+            pub fn into_homogeneous_point(self) -> $v3t {
                 $v3t { x: self.x, y: self.y, z: $t::from(1.0) }
             }
 
-            /// Create a 2d vector from homogeneous 2d vector, performing
-            /// division by the homogeneous component.
+            /// Create a homogeneous 2d *vector* from this vector,
+            /// meaning the homogeneous component will always have a value of 0.0.
             #[inline]
-            pub fn from_homogeneous(v: $v3t) -> Self {
+            pub fn into_homogeneous_vector(self) -> $v3t {
+                $v3t { x: self.x, y: self.y, z: $t::from(0.0) }
+            }
+
+            /// Create a 2d point from a homogeneous 2d *point*, performing
+            /// division by the homogeneous component. This should not be used
+            /// for homogeneous 2d *vectors*, which will have 0 as their
+            /// homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_point(v: $v3t) -> Self {
                 Self { x: v.x / v.z, y: v.y / v.z }
+            }
+
+            /// Create a 2d vector from homogeneous 2d *vector*, which simply
+            /// discards the homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_vector(v: $v3t) -> Self {
+                v.into()
             }
 
             #[inline]
@@ -360,6 +382,12 @@ impl Wec2 {
 
 macro_rules! vec3s {
     ($(($n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
+        /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
+        /// or as a homogeneous 2d vector or point.
+        ///
+        /// Generally this distinction between a point and vector is more of a pain than it is worth
+        /// to distinguish on a type level, however when converting to and from homogeneous
+        /// coordinates it is quite important.
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
@@ -393,17 +421,36 @@ macro_rules! vec3s {
                 $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0) }
             }
 
+            /// Create a homogeneous 3d *point* from this vector interpreted as a point,
+            /// meaning the homogeneous component will start with a value of 1.0.
             #[inline]
-            pub fn into_homogeneous(self) -> $v4t {
-                $v4t{ x: self.x, y: self.y, z: self.z, w: $t::from(1.0) }
+            pub fn into_homogeneous_point(self) -> $v4t {
+                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(1.0) }
             }
 
-            /// Create a 3d vector from homogeneous 3d vector, performing
-            /// division by the homogeneous component.
+            /// Create a homogeneous 3d *vector* from this vector,
+            /// meaning the homogeneous component will always have a value of 0.0.
             #[inline]
-            pub fn from_homogeneous(v: $v4t) -> Self {
+            pub fn into_homogeneous_vector(self) -> $v4t {
+                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(0.0) }
+            }
+
+            /// Create a 3d point from a homogeneous 3d *point*, performing
+            /// division by the homogeneous component. This should not be used
+            /// for homogeneous 3d *vectors*, which will have 0 as their
+            /// homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_point(v: $v4t) -> Self {
                 Self { x: v.x / v.w, y: v.y / v.w, z: v.z / v.w }
             }
+
+            /// Create a 3d vector from homogeneous 2d *vector*, which simply
+            /// discards the homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_vector(v: $v4t) -> Self {
+                v.into()
+            }
+
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
@@ -799,6 +846,12 @@ impl From<[Vec3; 4]> for Wec3 {
 
 macro_rules! vec4s {
     ($($n:ident => $t:ident),+) => {
+        /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
+        /// or as a homogeneous 3d vector or point.
+        ///
+        /// Generally this distinction between a point and vector is more of a pain than it is worth
+        /// to distinguish on a type level, however when converting to and from homogeneous
+        /// coordinates it is quite important.
         $(#[derive(Clone, Copy, Debug)]
         pub struct $n {
             pub x: $t,
