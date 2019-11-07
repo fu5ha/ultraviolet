@@ -383,6 +383,14 @@ impl Vec2 {
 
 impl Wec2 {
     #[inline]
+    pub fn new_splat(x: f32, y: f32) -> Self {
+        Self {
+            x: f32x4::from(x),
+            y: f32x4::from(y),
+        }
+    }
+
+    #[inline]
     pub fn splat(vec: Vec2) -> Self {
         Self::from([vec, vec, vec, vec])
     }
@@ -854,6 +862,15 @@ impl Vec3 {
 
 impl Wec3 {
     #[inline]
+    pub fn new_splat(x: f32, y: f32, z: f32) -> Self {
+        Self {
+            x: f32x4::from(x),
+            y: f32x4::from(y),
+            z: f32x4::from(z),
+        }
+    }
+
+    #[inline]
     pub fn splat(vec: Vec3) -> Self {
         Self::from([vec, vec, vec, vec])
     }
@@ -1270,6 +1287,16 @@ impl Vec4 {
 }
 
 impl Wec4 {
+    #[inline]
+    pub fn new_splat(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Self {
+            x: f32x4::from(x),
+            y: f32x4::from(y),
+            z: f32x4::from(z),
+            w: f32x4::from(w),
+        }
+    }
+
     #[inline]
     pub fn splat(vec: Vec4) -> Self {
         Self::from([vec, vec, vec, vec])
