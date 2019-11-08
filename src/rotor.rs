@@ -82,23 +82,26 @@ macro_rules! rotor2s {
 
             /// Construct a Rotor that rotates one vector to another.
             #[inline]
-            pub fn rotation_between(from: $vt, to: $vt) -> Self {
+            pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
                     $t::from(1.0) + to.dot(from),
                     to.wedge(from)).normalized()
             }
 
-            /// Construct a vector given an angle and a bivector which defines a plane and rotation
-            /// orientation.
+            /// Construct a rotor given a bivector which defines a plane, rotation orientation,
+            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
+            /// defines the angle of rotation in radians.
             ///
             /// This is the equivalent of an axis-angle rotation. The plane bivector
-            /// must be normalized.
+            /// must be normalizes.
             #[inline]
-            pub fn angle_plane(angle: $t, mut plane: $bt) -> Self {
+            pub fn from_angle_plane(mut planeangle: $bt) -> Self {
+                let angle = planeangle.mag();
+                planeangle /= angle;
                 let two = $t::from(2.0);
                 let sina = (angle / two).sin();
-                plane *= -sina;
-                Self::new((angle / two).cos(), plane)
+                planeangle *= -sina;
+                Self::new((angle / two).cos(), planeangle)
             }
 
             #[inline]
@@ -314,23 +317,38 @@ macro_rules! rotor3s {
 
             /// Construct a Rotor that rotates one vector to another.
             #[inline]
-            pub fn rotation_between(from: $vt, to: $vt) -> Self {
+            pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
                     $t::from(1.0) + to.dot(from),
                     to.wedge(from)).normalized()
             }
 
-            /// Construct a vector given an angle and a bivector which defines a plane and rotation
-            /// orientation.
+            /// Construct a rotor given a bivector which defines a plane, rotation orientation,
+            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
+            /// defines the angle of rotation in radians.
             ///
             /// This is the equivalent of an axis-angle rotation. The plane bivector
             /// must be normalizes.
             #[inline]
-            pub fn angle_plane(angle: $t, mut plane: $bt) -> Self {
+            pub fn from_angle_plane(mut planeangle: $bt) -> Self {
+                let angle = planeangle.mag();
+                planeangle /= angle;
                 let two = $t::from(2.0);
                 let sina = (angle / two).sin();
-                plane *= -sina;
-                Self::new((angle / two).cos(), plane)
+                planeangle *= -sina;
+                Self::new((angle / two).cos(), planeangle)
+            }
+
+            /// Angles are applied in the order roll -> pitch -> yaw
+            ///
+            /// - Yaw is rotation inside the xz plane ("around the y axis")
+            /// - Pitch is rotation inside the yz plane ("around the x axis")
+            /// - Roll is rotation inside the xy plane ("around the z axis")
+            #[inline]
+            pub fn from_euler_angles(yaw: $t, pitch: $t, roll: $t) -> Self {
+                Self::from_angle_plane(yaw * $bt::unit_xz())
+                    * Self::from_angle_plane(pitch * $bt::unit_yz())
+                    * Self::from_angle_plane(roll * $bt::unit_xy())
             }
 
             #[inline]
@@ -599,8 +617,8 @@ mod test {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
         let c = Vec3::new(2.0, 3.0, -3.0).normalized();
-        let rotor_ab = Rotor3::rotation_between(a, b);
-        let rotor_bc = Rotor3::rotation_between(b, c);
+        let rotor_ab = Rotor3::from_rotation_between(a, b);
+        let rotor_bc = Rotor3::from_rotation_between(b, c);
         let rot_ab = rotor_ab * a;
         let rot_bc = rotor_bc * rot_ab;
         let rot_abc = rotor_bc * (rotor_ab * a);
@@ -614,8 +632,8 @@ mod test {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
         let c = Vec3::new(2.0, 3.0, -3.0).normalized();
-        let r_ab = Rotor3::rotation_between(a, b);
-        let r_bc = Rotor3::rotation_between(b, c);
+        let r_ab = Rotor3::from_rotation_between(a, b);
+        let r_bc = Rotor3::from_rotation_between(b, c);
         let res = r_ab.rotated_by(r_bc).rotated_by(r_bc.reversed());
         println!("{:?} {:?}", r_ab, res);
         assert!(r_ab.eq_eps(res));
@@ -626,8 +644,8 @@ mod test {
         let a = Vec3::new(1.0, 0.0, 0.0).normalized();
         let b = Vec3::new(0.0, 1.0, 0.0).normalized();
         let c = Vec3::new(0.0, 0.0, 1.0).normalized();
-        let rotor_ab = Rotor3::rotation_between(a, b);
-        let rotor_bc = Rotor3::rotation_between(b, c);
+        let rotor_ab = Rotor3::from_rotation_between(a, b);
+        let rotor_bc = Rotor3::from_rotation_between(b, c);
         let rotor_abbc = rotor_bc * rotor_ab;
         let res = rotor_abbc * a;
         println!("{:#?} {:#?}", rotor_abbc, res);

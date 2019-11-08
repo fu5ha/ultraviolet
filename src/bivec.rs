@@ -65,6 +65,30 @@ macro_rules! bivec2s {
             pub fn unit_xy() -> Self {
                 Self::new($t::from(1.0))
             }
+
+            #[inline]
+            pub fn mag_sq(&self) -> $t {
+                self.xy * self.xy
+            }
+
+            #[inline]
+            pub fn mag(&self) -> $t {
+                self.mag_sq().sqrt()
+            }
+
+            #[inline]
+            pub fn normalize(&mut self) {
+                let mag = self.mag();
+                self.xy /= mag;
+            }
+
+            #[inline]
+            pub fn normalized(&self) -> Self {
+                let mut r = self.clone();
+                r.normalize();
+                r
+            }
+
         }
 
         impl EqualsEps for $bn {
@@ -246,6 +270,31 @@ macro_rules! bivec3s {
             #[inline]
             pub fn unit_yz() -> Self {
                 Self::new($t::from(0.0), $t::from(0.0), $t::from(1.0))
+            }
+
+            #[inline]
+            pub fn mag_sq(&self) -> $t {
+                self.xy * self.xy + self.xz * self.xz + self.yz * self.yz
+            }
+
+            #[inline]
+            pub fn mag(&self) -> $t {
+                self.mag_sq().sqrt()
+            }
+
+            #[inline]
+            pub fn normalize(&mut self) {
+                let mag = self.mag();
+                self.xy /= mag;
+                self.xz /= mag;
+                self.yz /= mag;
+            }
+
+            #[inline]
+            pub fn normalized(&self) -> Self {
+                let mut r = self.clone();
+                r.normalize();
+                r
             }
         }
 
