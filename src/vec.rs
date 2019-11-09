@@ -547,7 +547,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self = *self - ($t::from(2.0) * self.dot(normal) * normal);
+                *self -= $t::from(2.0) * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -807,7 +807,7 @@ impl From<Vec2> for Vec3 {
         Self {
             x: vec.x,
             y: vec.y,
-            z: f32::from(0.0),
+            z: 0.0,
         }
     }
 }
@@ -980,7 +980,7 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self = *self - ($t::from(2.0) * self.dot(normal) * normal);
+                *self -= $t::from(2.0) * self.dot(normal) * normal;
             }
 
             #[inline]
