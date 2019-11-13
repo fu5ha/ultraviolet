@@ -106,7 +106,7 @@ macro_rules! rotor2s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.s * self.s + self.bv.xy * self.bv.xy
+                self.s.mul_add(self.s, self.bv.mag_sq())
             }
 
             #[inline]
@@ -148,7 +148,7 @@ macro_rules! rotor2s {
             pub fn rotate_by(&mut self, other: Self) {
                 let b = *self;
                 let a = other;
-                let sa2_plus_baxy2 = a.s * a.s + a.bv.xy * a.bv.xy;
+                let sa2_plus_baxy2 = a.s.mul_add(a.s, a.bv.xy * a.bv.xy);
 
                 self.s = (a.s - b.s) * a.bv.xy * b.bv.xy
                     + b.s * sa2_plus_baxy2;
@@ -175,8 +175,8 @@ macro_rules! rotor2s {
 
                 let v = *vec;
 
-                vec.x = s2_minus_bxy2 * v.x + two_s_bxy * v.y;
-                vec.y = s2_minus_bxy2 * v.y - two_s_bxy * v.x;
+                vec.x = s2_minus_bxy2.mul_add(v.x, two_s_bxy * v.y);
+                vec.y = s2_minus_bxy2.mul_add(v.y, -(two_s_bxy * v.x));
             }
 
             #[inline]
@@ -213,9 +213,9 @@ macro_rules! rotor2s {
             #[inline]
             fn mul(self, rhs: Self) -> Self {
                 Self {
-                    s: self.s * rhs.s - self.bv.xy * rhs.bv.xy,
+                    s: self.s.mul_add(rhs.s, -(self.bv.xy * rhs.bv.xy)),
                     bv: $bt {
-                        xy: self.s * rhs.bv.xy + rhs.s * self.bv.xy
+                        xy: self.s.mul_add(rhs.bv.xy, rhs.s * self.bv.xy)
                     }
                 }
             }
@@ -353,10 +353,7 @@ macro_rules! rotor3s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.s * self.s
-                    + self.bv.xy * self.bv.xy
-                    + self.bv.xz * self.bv.xz
-                    + self.bv.yz * self.bv.yz
+                self.s.mul_add(self.s, self.bv.mag_sq())
             }
 
             #[inline]
@@ -417,17 +414,23 @@ macro_rules! rotor3s {
 
                 self.s = (sa2 + baxy2 + baxz2 + bayz2) * b.s;
 
-                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2) * b.bv.xy
-                    + (baxy_baxz + sa_bayz) * two_bbxz
-                    + (baxy_bayz - sa_baxz) * two_bbyz;
+                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2).mul_add(
+                    b.bv.xy,
+                    (baxy_baxz + sa_bayz).mul_add(
+                        two_bbxz,
+                        (baxy_bayz - sa_baxz) * two_bbyz));
 
-                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2) * b.bv.xz
-                    + (baxy_baxz - sa_bayz) * two_bbxy
-                    + (baxz_bayz + sa_baxy) * two_bbyz;
+                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2).mul_add(
+                    b.bv.xz,
+                    (baxy_baxz - sa_bayz).mul_add(
+                        two_bbxy,
+                        (baxz_bayz + sa_baxy) * two_bbyz));
 
-                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2) * b.bv.yz
-                    + (baxy_bayz + sa_baxz) * two_bbxy
-                    + (baxz_bayz - sa_baxy) * two_bbxz;
+                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2).mul_add(
+                    b.bv.yz,
+                    (baxy_bayz + sa_baxz).mul_add(
+                        two_bbxy,
+                        (baxz_bayz - sa_baxy) * two_bbxz));
             }
 
             /// Rotates this rotor by another rotor and returns the result. Note that if you
@@ -460,15 +463,21 @@ macro_rules! rotor3s {
                 let two_vy = two * vec.y;
                 let two_vz = two * vec.z;
 
-                vec.x = vec.x  * (s2 - bxy2 - bxz2 + byz2)
-                      + two_vy * (s_bxy - bxz_byz)
-                      + two_vz * (s_bxz + bxy_byz);
-                vec.y = two_vx * -(bxz_byz + s_bxy)
-                      + vec.y  * (s2 - bxy2 + bxz2 - byz2)
-                      + two_vz * (s_byz - bxy_bxz);
-                vec.z = two_vx * (bxy_byz - s_bxz)
-                      - two_vy * (bxy_bxz + s_byz)
-                      + vec.z  * (s2 + bxy2 - bxz2 - byz2);
+                vec.x = vec.x.mul_add(
+                    s2 - bxy2 - bxz2 + byz2,
+                    two_vy.mul_add(
+                        s_bxy - bxz_byz,
+                        two_vz * (s_bxz + bxy_byz)));
+                vec.y = two_vx.mul_add(
+                    -(bxz_byz + s_bxy),
+                    vec.y.mul_add(
+                        s2 - bxy2 + bxz2 - byz2,
+                        two_vz * (s_byz - bxy_bxz)));
+                vec.z = two_vx.mul_add(
+                    bxy_byz - s_bxz,
+                    -two_vy.mul_add(
+                        bxy_bxz + s_byz,
+                        -(vec.z  * (s2 + bxy2 - bxz2 - byz2))));
             }
 
             #[inline]
@@ -525,11 +534,11 @@ macro_rules! rotor3s {
             #[inline]
             fn mul(self, q: Self) -> Self {
                 Self {
-                    s: self.s * q.s - self.bv.xy * q.bv.xy - self.bv.xz * q.bv.xz - self.bv.yz * q.bv.yz,
+                    s: self.s.mul_add(q.s, -self.bv.xy.mul_add(q.bv.xy, self.bv.xz.mul_add(q.bv.xz, self.bv.yz * q.bv.yz))),
                     bv: $bt {
-                        xy: self.bv.xy * q.s + self.s * q.bv.xy + self.bv.yz * q.bv.xz - self.bv.xz * q.bv.yz,
-                        xz: self.bv.xz * q.s + self.s * q.bv.xz - self.bv.yz * q.bv.xy + self.bv.xy * q.bv.yz,
-                        yz: self.bv.yz * q.s + self.s * q.bv.yz + self.bv.xz * q.bv.xy - self.bv.xy * q.bv.xz,
+                        xy: self.bv.xy.mul_add(q.s, self.s.mul_add(q.bv.xy, self.bv.yz.mul_add(q.bv.xz, -(self.bv.xz * q.bv.yz)))),
+                        xz: self.bv.xz.mul_add(q.s, self.s.mul_add(q.bv.xz, -self.bv.yz.mul_add(q.bv.xy, -(self.bv.xy * q.bv.yz)))),
+                        yz: self.bv.yz.mul_add(q.s, self.s.mul_add(q.bv.yz, self.bv.xz.mul_add(q.bv.xy, -(self.bv.xy * q.bv.xz)))),
                     }
                 }
             }
@@ -620,8 +629,11 @@ mod test {
         let rotor_ab = Rotor3::from_rotation_between(a, b);
         let rotor_bc = Rotor3::from_rotation_between(b, c);
         let rot_ab = rotor_ab * a;
-        let rot_bc = rotor_bc * rot_ab;
+        let rot_bc = rotor_bc * b;
         let rot_abc = rotor_bc * (rotor_ab * a);
+        println!("{:?} = {:?}", rot_ab, b);
+        println!("{:?} = {:?}", rot_bc, c);
+        println!("{:?} = {:?}", rot_abc, c);
         assert!(rot_ab.eq_eps(b));
         assert!(rot_bc.eq_eps(c));
         assert!(rot_abc.eq_eps(c));

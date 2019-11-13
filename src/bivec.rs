@@ -274,7 +274,7 @@ macro_rules! bivec3s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.xy * self.xy + self.xz * self.xz + self.yz * self.yz
+                self.xy.mul_add(self.xy, self.xz.mul_add(self.xz, self.yz * self.yz))
             }
 
             #[inline]

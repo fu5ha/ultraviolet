@@ -1,6 +1,6 @@
 [package]
 name = "ultraviolet"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
 description = "A crate to do linear algebra, fast."
@@ -10,4 +10,5 @@ keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+# wide = { path = "../wide" }
 wide = "0.2"
