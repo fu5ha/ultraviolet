@@ -395,11 +395,16 @@ impl Wec2 {
         Self::from([vec, vec, vec, vec])
     }
 
+    /// Merge two vectors together lanewise using `mask` as a mask.
+    ///
+    /// This is essentially a bitwise merge operation, such that any point where
+    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, a: Self, b: Self) -> Self {
+    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: f32x4::merge(mask, a.x, b.x),
-            y: f32x4::merge(mask, a.y, b.y),
+            x: mask.merge(tru.x, fals.x),
+            y: mask.merge(tru.y, fals.y),
         }
     }
 
@@ -415,7 +420,7 @@ impl Wec2 {
 
         let out = i * eta - n * (eta * ndi * k.sqrt());
 
-        Self::merge(mask, out, Self::zero())
+        Self::merge(mask, Self::zero(), out)
     }
 }
 
@@ -875,12 +880,17 @@ impl Wec3 {
         Self::from([vec, vec, vec, vec])
     }
 
+    /// Merge two vectors together lanewise using `mask` as a mask.
+    ///
+    /// This is essentially a bitwise merge operation, such that any point where
+    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, a: Self, b: Self) -> Self {
+    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: f32x4::merge(mask, a.x, b.x),
-            y: f32x4::merge(mask, a.y, b.y),
-            z: f32x4::merge(mask, a.z, b.z),
+            x: mask.merge(tru.x, fals.x),
+            y: mask.merge(tru.y, fals.y),
+            z: mask.merge(tru.z, fals.z),
         }
     }
 
@@ -896,7 +906,7 @@ impl Wec3 {
 
         let out = i.mul_add(Wec3::broadcast(eta), -n * (eta * ndi * k.sqrt()));
 
-        Self::merge(mask, out, Self::zero())
+        Self::merge(mask, Self::zero(), out)
     }
 }
 
@@ -1302,29 +1312,19 @@ impl Wec4 {
         Self::from([vec, vec, vec, vec])
     }
 
+    /// Merge two vectors together lanewise using `mask` as a mask.
+    ///
+    /// This is essentially a bitwise merge operation, such that any point where
+    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, a: Self, b: Self) -> Self {
+    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: f32x4::merge(mask, a.x, b.x),
-            y: f32x4::merge(mask, a.y, b.y),
-            z: f32x4::merge(mask, a.z, b.z),
-            w: f32x4::merge(mask, a.w, b.w),
+            x: mask.merge(tru.x, fals.x),
+            y: mask.merge(tru.y, fals.y),
+            z: mask.merge(tru.z, fals.z),
+            w: mask.merge(tru.w, fals.w),
         }
-    }
-
-    #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32x4) -> Self {
-        let n = normal;
-        let i = *self;
-        let one = f32x4::from(1.0);
-        let ndi = n.dot(i);
-
-        let k = one - eta * eta * (one - ndi * ndi);
-        let mask = k.cmp_lt(f32x4::from(0.0));
-
-        let out = i * eta - n * (eta * ndi * k.sqrt());
-
-        Self::merge(mask, out, Self::zero())
     }
 }
 

@@ -11,4 +11,4 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 # wide = { path = "../wide" }
-wide = "0.2"
+wide = "0.3"
