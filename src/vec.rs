@@ -346,8 +346,8 @@ impl From<[Vec2; 4]> for Wec2 {
     #[inline]
     fn from(vecs: [Vec2; 4]) -> Self {
         Self {
-            x: f32x4::new(vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x),
-            y: f32x4::new(vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y),
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
         }
     }
 }
@@ -919,9 +919,9 @@ impl From<[Vec3; 4]> for Wec3 {
     #[inline]
     fn from(vecs: [Vec3; 4]) -> Self {
         Self {
-            x: f32x4::new(vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x),
-            y: f32x4::new(vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y),
-            z: f32x4::new(vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z),
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
+            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
         }
     }
 }
@@ -1348,10 +1348,10 @@ impl From<[Vec4; 4]> for Wec4 {
     #[inline]
     fn from(vecs: [Vec4; 4]) -> Self {
         Self {
-            x: f32x4::new(vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x),
-            y: f32x4::new(vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y),
-            z: f32x4::new(vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z),
-            w: f32x4::new(vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w),
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
+            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
+            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
         }
     }
 }
