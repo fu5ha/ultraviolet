@@ -62,6 +62,11 @@ macro_rules! bivec2s {
             }
 
             #[inline]
+            pub fn zero() -> Self {
+                Self::new($t::from(0.0))
+            }
+
+            #[inline]
             pub fn unit_xy() -> Self {
                 Self::new($t::from(1.0))
             }
@@ -89,6 +94,10 @@ macro_rules! bivec2s {
                 r
             }
 
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
         }
 
         impl EqualsEps for $bn {
@@ -250,6 +259,11 @@ macro_rules! bivec3s {
                 }
             }
 
+            #[inline]
+            pub fn zero() -> Self {
+                Self::new($t::from(0.0), $t::from(0.0), $t::from(0.0))
+            }
+
             /// Create the bivector which represents the same plane of rotation as a given
             /// normalized 'axis vector'
             #[inline]
@@ -295,6 +309,11 @@ macro_rules! bivec3s {
                 let mut r = self.clone();
                 r.normalize();
                 r
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 

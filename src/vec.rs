@@ -218,6 +218,11 @@ macro_rules! vec2s {
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
             }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
         }
 
         impl EqualsEps for $n {
@@ -669,6 +674,11 @@ macro_rules! vec3s {
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
             }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
         }
 
         impl EqualsEps for $n {
@@ -1113,6 +1123,11 @@ macro_rules! vec4s {
             #[inline]
             pub fn one() -> Self {
                 Self::broadcast($t::from(1.0))
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 

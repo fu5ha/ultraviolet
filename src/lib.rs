@@ -13,6 +13,8 @@
 //! If it's missing something you need it to do, bug me on the GitHub issue tracker and/or Rust
 //! community discord server (I'm Fusha there) and I'll try to add it for you :)
 
+extern crate alloc;
+
 pub mod bivec;
 pub mod lerp;
 pub mod mat;

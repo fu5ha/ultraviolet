@@ -80,6 +80,14 @@ macro_rules! rotor2s {
                 }
             }
 
+            #[inline]
+            pub fn identity() -> Self {
+                Self {
+                    s: $t::from(1.0),
+                    bv: $bt::zero(),
+                }
+            }
+
             /// Construct a Rotor that rotates one vector to another.
             #[inline]
             pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
@@ -191,6 +199,11 @@ macro_rules! rotor2s {
                     $vt::new(
                         two_s_bxy,
                         s2_minus_bxy2))
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 
@@ -312,6 +325,14 @@ macro_rules! rotor3s {
                 Self {
                     s: scalar,
                     bv: bivector,
+                }
+            }
+
+            #[inline]
+            pub fn identity() -> Self {
+                Self {
+                    s: $t::from(1.0),
+                    bv: $bt::zero(),
                 }
             }
 
@@ -511,6 +532,11 @@ macro_rules! rotor3s {
                         s2 + bxy2 - bxz2 - byz2
                     )
                 )
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 

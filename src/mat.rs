@@ -22,6 +22,11 @@ macro_rules! mat2s {
                     cols: [col1, col2],
                 }
             }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
         }
 
         impl Mul for $n {
@@ -105,6 +110,11 @@ macro_rules! mat3s {
                     $vt::new(cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr),
                     $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr),
                     $vt::new(-sp, cp * sr, cp * cr))
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 
@@ -211,6 +221,11 @@ macro_rules! mat4s {
                     $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, $t::from(0.0)),
                     $vt::new(-sp, cp * sr, cp * cr, $t::from(0.0)),
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
+            }
+
+            #[inline]
+            pub fn layout() -> alloc::alloc::Layout {
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
         }
 
