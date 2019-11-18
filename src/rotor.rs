@@ -98,18 +98,26 @@ macro_rules! rotor2s {
 
             /// Construct a rotor given a bivector which defines a plane, rotation orientation,
             /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
-            /// defines the angle of rotation in radians.
-            ///
-            /// This is the equivalent of an axis-angle rotation. The plane bivector
-            /// must be normalizes.
+            /// defines the angle of rotation in radians. In 2d, there is only one possible plane of
+            /// rotation, but two possible orientations of rotation in that plane.
             #[inline]
-            pub fn from_angle_plane(mut planeangle: $bt) -> Self {
+            pub fn from_angle_plane(planeangle: $bt) -> Self {
                 let angle = planeangle.mag();
-                planeangle /= angle;
-                let two = $t::from(2.0);
-                let sina = (angle / two).sin();
-                planeangle *= -sina;
-                Self::new((angle / two).cos(), planeangle)
+                let plane = planeangle / angle;
+                let half_angle = angle / $t::from(2.0);
+                let (sin, cos) = half_angle.sin_cos();
+                Self::new(cos, plane * -sin)
+            }
+
+            /// Construct a rotor given only an angle. This is possible in 2d since there is only one
+            /// possible plane of rotation. However, there are two possible orientations. This function
+            /// uses the common definition of positive angle in 2d as meaning the direction which brings
+            /// the x unit vector towards the y unit vector.
+            #[inline]
+            pub fn from_angle(angle: $t) -> Self {
+                let half_angle = angle / $t::from(2.0);
+                let (sin, cos) = half_angle.sin_cos();
+                Self::new(cos, $bt::new(-sin))
             }
 
             #[inline]
@@ -348,16 +356,14 @@ macro_rules! rotor3s {
             /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
             /// defines the angle of rotation in radians.
             ///
-            /// This is the equivalent of an axis-angle rotation. The plane bivector
-            /// must be normalizes.
+            /// This is the equivalent of an axis-angle rotation.
             #[inline]
-            pub fn from_angle_plane(mut planeangle: $bt) -> Self {
+            pub fn from_angle_plane(planeangle: $bt) -> Self {
                 let angle = planeangle.mag();
-                planeangle /= angle;
-                let two = $t::from(2.0);
-                let sina = (angle / two).sin();
-                planeangle *= -sina;
-                Self::new((angle / two).cos(), planeangle)
+                let plane = planeangle / angle;
+                let half_angle = angle / $t::from(2.0);
+                let (sin, cos) = half_angle.sin_cos();
+                Self::new(cos, plane * -sin)
             }
 
             /// Angles are applied in the order roll -> pitch -> yaw
