@@ -18,6 +18,7 @@ extern crate alloc;
 pub mod bivec;
 pub mod lerp;
 pub mod mat;
+pub mod projection;
 pub mod rotor;
 mod util;
 pub mod vec;
