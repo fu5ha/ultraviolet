@@ -7,7 +7,7 @@ description = "A crate to do linear algebra, fast."
 repository = "https://github.com/termhn/ultraviolet"
 readme = "README.md"
 keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]
-license = "MIT OR Apache-2.0"
+license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
 # wide = { path = "../wide" }
