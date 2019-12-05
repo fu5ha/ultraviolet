@@ -15,6 +15,7 @@ macro_rules! vec2s {
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
         #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -438,6 +439,7 @@ macro_rules! vec3s {
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
         $(#[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
@@ -955,6 +957,7 @@ macro_rules! vec4s {
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
         $(#[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub x: $t,
             pub y: $t,

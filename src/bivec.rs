@@ -49,6 +49,7 @@ macro_rules! bivec2s {
         ///
         /// Please see the module level documentation for more information on bivectors generally!
         #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $bn {
             pub xy: $t
         }
@@ -239,6 +240,7 @@ macro_rules! bivec3s {
         ///
         /// Please see the module level documentation for more information on bivectors generally!
         #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $bn {
             pub xy: $t,
             pub xz: $t,

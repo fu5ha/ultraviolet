@@ -66,6 +66,7 @@ macro_rules! rotor2s {
         ///
         /// Please see the module level documentation for more information on rotors!
         #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $rn {
             pub s: $t,
             pub bv: $bt,
@@ -322,6 +323,7 @@ macro_rules! rotor3s {
         ///
         /// Please see the module level documentation for more information on rotors!
         #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $rn {
             pub s: $t,
             pub bv: $bt,

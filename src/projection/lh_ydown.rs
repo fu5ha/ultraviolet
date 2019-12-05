@@ -6,9 +6,11 @@
 use crate::mat::*;
 use crate::vec::*;
 
-/// Orthographic projection matrix meant to be used to convert a left-handed, y-down
-/// coordinate space to be used with OpenGL,
-/// which has a left-handed, y-up coordinate space where Z (depth) clip goes from -1.0 (close) to 1.0 (far).
+/// Orthographic projection matrix for use with OpenGL.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// and the destination space is left-handed
+/// and y-up, with Z (depth) clip extending from -1.0 (close) to 1.0 (far).
 #[inline]
 pub fn orthographic_gl(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Mat4 {
     let rml = right - left;
@@ -25,9 +27,11 @@ pub fn orthographic_gl(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     )
 }
 
-/// Orthographic projection matrix meant to be used to convert a left-handed, y-down
-/// coordinate space to be used with Vulkan,
-/// which has a right-handed, y-down coordinate space where Z (depth) clip goes from 0.0 (close) to 1.0 (far).
+/// Orthographic projection matrix for use with Vulkan.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// and the destination space is right-handed
+/// and y-down, with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn orthographic_vk(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Mat4 {
     let rml = right - left;
@@ -43,9 +47,11 @@ pub fn orthographic_vk(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     )
 }
 
-/// Orthographic projection matrix meant to be used to convert a left-handed, y-down
-/// coordinate space to be used with DirectX,
-/// which has a left-handed, y-up coordinate space where Z (depth) clip goes from 0.0 (close) to 1.0 (far).
+/// Orthographic projection matrix for use with OpenGL.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// and the destination space is be left-handed
+/// and y-up, with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn orthographic_dx(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Mat4 {
     let rml = right - left;

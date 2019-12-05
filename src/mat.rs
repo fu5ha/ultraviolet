@@ -1,7 +1,7 @@
 //! Square matrices.
 use std::ops::*;
 
-use crate::vec::*;
+use crate::*;
 
 use wide::f32x4;
 
@@ -11,6 +11,7 @@ macro_rules! mat2s {
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
         $(#[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub cols: [$t; 2],
         }
@@ -68,13 +69,14 @@ macro_rules! mat2s {
 mat2s!(Mat2 => Vec2, Wat2 => Wec2);
 
 macro_rules! mat3s {
-    ($($n:ident => $vt:ident, $t:ident),+) => {
+    ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $vt:ident, $t:ident),+) => {
         /// A 3x3 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
         /// or for performing arbitrary transformations (linear + translation, projection, etc)
         /// on homogeneous 2d vectors
         $(#[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 3],
         }
@@ -85,6 +87,26 @@ macro_rules! mat3s {
                 $n {
                     cols: [col1, col2, col3],
                 }
+            }
+
+            #[inline]
+            pub fn from_scale(scale: $t) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale, zero, zero),
+                    $vt::new(zero, scale, zero),
+                    $vt::new(zero, zero, scale),
+                )
+            }
+
+            #[inline]
+            pub fn from_nonuniform_scale(scale: $vt) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale.x, zero, zero),
+                    $vt::new(zero, scale.y, zero),
+                    $vt::new(zero, zero, scale.z),
+                )
             }
 
             #[inline]
@@ -110,6 +132,55 @@ macro_rules! mat3s {
                     $vt::new(cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr),
                     $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr),
                     $vt::new(-sp, cp * sr, cp * cr))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the x axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the yz plane*.
+            #[inline]
+            pub fn from_rotation_x(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles($t::from(0.0), angle, $t::from(0.0))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the y axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the xz plane*.
+            #[inline]
+            pub fn from_rotation_y(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the z axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the xy plane*.
+            #[inline]
+            pub fn from_rotation_z(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+            }
+
+            /// Construct a rotation matrix given a bivector which defines a plane, rotation orientation,
+            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
+            /// defines the angle of rotation in radians.
+            ///
+            /// This is the equivalent of an axis-angle rotation.
+            #[inline]
+            pub fn from_angle_plane(planeangle: $bt) -> Self {
+                $rt::from_angle_plane(planeangle).into_matrix()
+            }
+
+            #[inline]
+            pub fn into_homogeneous(self) -> $m4t {
+                let zero = $t::from(0.0);
+                let one = $t::from(1.0);
+                $m4t::new(
+                    self.cols[0].into(),
+                    self.cols[1].into(),
+                    self.cols[2].into(),
+                    $v4t::new(zero, zero, zero, one)
+                )
             }
 
             #[inline]
@@ -165,16 +236,20 @@ macro_rules! mat3s {
     }
 }
 
-mat3s!(Mat3 => Vec3, f32, Wat3 => Wec3, f32x4);
+mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec3, f32x4);
 
 macro_rules! mat4s {
-    ($($n:ident => $vt:ident, $v3t:ident, $t:ident),+) => {
+    ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
         /// A 4x4 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 4d vectors,
         /// or for performing arbitrary transformations (linear + translation, projection, etc)
-        /// on homogeneous 3d vectors
+        /// on homogeneous 3d vectors.
+        ///
+        /// Note that most constructors assume that the matrix will be used as a homogeneous 3d
+        /// transformation matrix.
         $(#[derive(Clone, Copy, Debug)]
+        #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 4],
         }
@@ -196,6 +271,7 @@ macro_rules! mat4s {
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
             }
 
+            /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_translation(trans: $v3t) -> Self {
                 Self::new(
@@ -205,11 +281,37 @@ macro_rules! mat4s {
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
             }
 
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_scale(scale: $t) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale, zero, zero, zero),
+                    $vt::new(zero, scale, zero, zero),
+                    $vt::new(zero, zero, scale, zero),
+                    $vt::new(zero, zero, zero, $t::from(1.0)),
+                )
+            }
+
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_nonuniform_scale(scale: $vt) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale.x, zero, zero, zero),
+                    $vt::new(zero, scale.y, zero, zero),
+                    $vt::new(zero, zero, scale.z, zero),
+                    $vt::new(zero, zero, zero, $t::from(1.0)),
+                )
+            }
+
             /// Angles are applied in the order roll -> pitch -> yaw
             ///
             /// - Yaw is rotation inside the xz plane ("around the y axis")
             /// - Pitch is rotation inside the yz plane ("around the x axis")
             /// - Roll is rotation inside the xy plane ("around the z axis")
+            ///
+            /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
                 let (sr, cr) = roll.sin_cos();
@@ -221,6 +323,51 @@ macro_rules! mat4s {
                     $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, $t::from(0.0)),
                     $vt::new(-sp, cp * sr, cp * cr, $t::from(0.0)),
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the x axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the yz plane*.
+            ///
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_rotation_x(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles($t::from(0.0), angle, $t::from(0.0))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the y axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the xz plane*.
+            ///
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_rotation_y(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+            }
+
+            /// Create a new rotation matrix from a rotation "about the z axis". This is
+            /// here as a convenience function for users coming from other libraries; it is
+            /// more proper to think of this as a rotation *in the xy plane*.
+            ///
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_rotation_z(angle: $t) -> Self {
+                // TODO: Easy optimization target.
+                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+            }
+
+            /// Construct a rotation matrix given a bivector which defines a plane, rotation orientation,
+            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
+            /// defines the angle of rotation in radians.
+            ///
+            /// This is the equivalent of an axis-angle rotation.
+            ///
+            /// Assumes homogeneous 3d coordinates.
+            #[inline]
+            pub fn from_angle_plane(planeangle: $bt) -> Self {
+                $rt::from_angle_plane(planeangle).into_matrix().into_homogeneous()
             }
 
             #[inline]
@@ -289,4 +436,4 @@ macro_rules! mat4s {
     }
 }
 
-mat4s!(Mat4 => Vec4, Vec3, f32, Wat4 => Wec4, Wec3, f32x4);
+mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, Wec3, f32x4);
