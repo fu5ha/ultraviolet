@@ -6,19 +6,19 @@ use crate::*;
 use wide::f32x4;
 
 macro_rules! mat2s {
-    ($($n:ident => $t:ident),+) => {
+    ($($n:ident, $vt:ident => $t:ident),+) => {
         /// A 2x2 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
         $(#[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
-            pub cols: [$t; 2],
+            pub cols: [$vt; 2],
         }
 
         impl $n {
             #[inline]
-            pub fn new(col1: $t, col2: $t) -> Self {
+            pub fn new(col1: $vt, col2: $vt) -> Self {
                 $n {
                     cols: [col1, col2],
                 }
@@ -26,7 +26,61 @@ macro_rules! mat2s {
 
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
-                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+                alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$vt>()).unwrap()
+            }
+
+            #[inline]
+            pub fn as_slice(&self) -> &[$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 4)
+                }
+            }
+
+            #[inline]
+            pub fn as_component_slice(&self) -> &[$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 2)
+                }
+            }
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 4 * std::mem::size_of::<$t>())
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 4)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 2)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 4 * std::mem::size_of::<$t>())
+                }
             }
         }
 
@@ -39,11 +93,11 @@ macro_rules! mat2s {
                 let oa = rhs.cols[0];
                 let ob = rhs.cols[1];
                 Self::new(
-                    $t::new(
+                    $vt::new(
                         sa.x * oa.x + sb.x * oa.y,
                         sa.x * ob.x + sb.x * ob.y,
                     ),
-                    $t::new(
+                    $vt::new(
                         sa.y * oa.x + sb.y * oa.y,
                         sa.y * ob.x + sb.y * ob.y,
                     ),
@@ -51,22 +105,48 @@ macro_rules! mat2s {
             }
         }
 
-        impl Mul<$t> for $n {
-            type Output = $t;
+        impl Mul<$vt> for $n {
+            type Output = $vt;
             #[inline]
-            fn mul(self, rhs: $t) -> $t {
+            fn mul(self, rhs: $vt) -> $vt {
                 let a = self.cols[0];
                 let b = self.cols[1];
-                $t::new(
+                $vt::new(
                     a.x * rhs.x + b.x * rhs.y,
                     a.y * rhs.x + b.y * rhs.y,
                 )
             }
-        })+
+        }
+
+        impl From<[$t; 4]> for $n {
+            #[inline]
+            fn from(comps: [$t; 4]) -> Self {
+                Self::new(
+                    $vt::new(comps[0], comps[1]),
+                    $vt::new(comps[2], comps[3])
+                )
+            }
+        }
+
+        impl From<&[$t; 4]> for $n {
+            #[inline]
+            fn from(comps: &[$t; 4]) -> Self {
+                Self::from(*comps)
+            }
+        }
+
+        impl From<&mut [$t; 4]> for $n {
+            #[inline]
+            fn from(comps: &mut [$t; 4]) -> Self {
+                Self::from(*comps)
+            }
+        }
+
+        )+
     }
 }
 
-mat2s!(Mat2 => Vec2, Wat2 => Wec2);
+mat2s!(Mat2, Vec2 => f32 , Wat2, Wec2 => f32x4);
 
 macro_rules! mat3s {
     ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $vt:ident, $t:ident),+) => {
@@ -223,6 +303,88 @@ macro_rules! mat3s {
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
+
+            #[inline]
+            pub fn as_slice(&self) -> &[$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 9)
+                }
+            }
+
+            #[inline]
+            pub fn as_component_slice(&self) -> &[$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 3)
+                }
+            }
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 9 * std::mem::size_of::<$t>())
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 9)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 3)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 9 * std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Returns a constant unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_ptr(&self) -> *const $t {
+                unsafe {
+                    std::mem::transmute(self)
+                }
+            }
+
+            /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_mut_ptr(&self) -> *mut $t {
+                unsafe {
+                    std::mem::transmute(self)
+                }
+            }
         }
 
         impl Mul for $n {
@@ -268,7 +430,33 @@ macro_rules! mat3s {
                     a.z * rhs.x + b.z * rhs.y + c.z * rhs.z,
                 )
             }
-        })+
+        }
+
+        impl From<[$t; 9]> for $n {
+            #[inline]
+            fn from(comps: [$t; 9]) -> Self {
+                Self::new(
+                    $vt::new(comps[0], comps[1], comps[2]),
+                    $vt::new(comps[3], comps[4], comps[5]),
+                    $vt::new(comps[6], comps[7], comps[8])
+                )
+            }
+        }
+
+        impl From<&[$t; 9]> for $n {
+            #[inline]
+            fn from(comps: &[$t; 9]) -> Self {
+                Self::from(*comps)
+            }
+        }
+
+        impl From<&mut [$t; 9]> for $n {
+            #[inline]
+            fn from(comps: &mut [$t; 9]) -> Self {
+                Self::from(*comps)
+            }
+        }
+        )+
     }
 }
 
@@ -446,6 +634,88 @@ macro_rules! mat4s {
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
+
+            #[inline]
+            pub fn as_slice(&self) -> &[$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 16)
+                }
+            }
+
+            #[inline]
+            pub fn as_component_slice(&self) -> &[$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 4)
+                }
+            }
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(std::mem::transmute(self), 16 * std::mem::size_of::<$t>())
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 16)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 4)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 16 * std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Returns a constant unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_ptr(&self) -> *const $t {
+                unsafe {
+                    std::mem::transmute(self)
+                }
+            }
+
+            /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_mut_ptr(&self) -> *mut $t {
+                unsafe {
+                    std::mem::transmute(self)
+                }
+            }
         }
 
         impl Mul for $n {
@@ -504,7 +774,35 @@ macro_rules! mat4s {
                     a.w * rhs.x + b.w * rhs.y + c.w * rhs.z + d.z * rhs.w,
                 )
             }
-        })+
+        }
+
+        impl From<[$t; 16]> for $n {
+            #[inline]
+            fn from(comps: [$t; 16]) -> Self {
+                Self::new(
+                    $vt::new(comps[0], comps[1], comps[2], comps[3]),
+                    $vt::new(comps[4], comps[5], comps[6], comps[7]),
+                    $vt::new(comps[8], comps[9], comps[10], comps[11]),
+                    $vt::new(comps[12], comps[13], comps[14], comps[15]),
+                )
+            }
+        }
+
+        impl From<&[$t; 16]> for $n {
+            #[inline]
+            fn from(comps: &[$t; 16]) -> Self {
+                Self::from(*comps)
+            }
+        }
+
+        impl From<&mut [$t; 16]> for $n {
+            #[inline]
+            fn from(comps: &mut [$t; 16]) -> Self {
+                Self::from(*comps)
+            }
+        }
+
+        )+
     }
 }
 
