@@ -552,8 +552,8 @@ macro_rules! mat4s {
                 let (sy, cy) = yaw.sin_cos();
 
                 Self::new(
-                    $vt::new(cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr, $t::from(0.0)),
-                    $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, $t::from(0.0)),
+                    $vt::new(cy * cp, cy * sp * sr + sy * cr, cy * sp * cr + sy * sr, $t::from(0.0)),
+                    $vt::new(-sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, $t::from(0.0)),
                     $vt::new(-sp, cp * sr, cp * cr, $t::from(0.0)),
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
             }
