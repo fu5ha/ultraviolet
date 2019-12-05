@@ -117,11 +117,20 @@ macro_rules! mat3s {
                     $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0)))
             }
 
-            /// Angles are applied in the order roll -> pitch -> yaw
+            /// Angles are applied in the order roll -> pitch -> yaw.
             ///
             /// - Yaw is rotation inside the xz plane ("around the y axis")
             /// - Pitch is rotation inside the yz plane ("around the x axis")
             /// - Roll is rotation inside the xy plane ("around the z axis")
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
                 let (sr, cr) = roll.sin_cos();
@@ -137,6 +146,15 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "about the x axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the yz plane*.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 // TODO: Easy optimization target.
@@ -146,6 +164,15 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "about the y axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xz plane*.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 // TODO: Easy optimization target.
@@ -155,6 +182,15 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "about the z axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xy plane*.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
@@ -312,6 +348,15 @@ macro_rules! mat4s {
             /// - Roll is rotation inside the xy plane ("around the z axis")
             ///
             /// Assumes homogeneous 3d coordinates.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
                 let (sr, cr) = roll.sin_cos();
@@ -330,6 +375,15 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the yz plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 // TODO: Easy optimization target.
@@ -341,6 +395,15 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the xz plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 // TODO: Easy optimization target.
@@ -352,6 +415,15 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the xy plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
