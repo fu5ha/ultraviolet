@@ -531,7 +531,7 @@ macro_rules! rotor3s {
                     $vt::new(
                         two * (s_bxy - bxz_byz),
                         s2 - bxy2 + bxz2 - byz2,
-                        two * (s_byz - bxy_bxz)
+                        -two * (s_byz - bxy_bxz)
                     ),
                     $vt::new(
                         two * (s_bxz + bxy_byz),

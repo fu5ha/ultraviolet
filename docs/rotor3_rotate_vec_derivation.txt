@@ -98,7 +98,7 @@ y basis vector, i.e. (Vx = 0, Vy = 1, Vz = 0)
 
 = (2(SBxy - ByzBxz))E1
 + (S^2 - Bxy^2 + Bxz^2 - Byz^2)E2
-+ (2(SByz - BxzBxy))E3
+- (2(SByz - BxzBxy))E3
 
 z basis vector, i.e. (Vz = 0, Vy = 0, Vz = 1)
 
