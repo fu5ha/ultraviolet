@@ -66,3 +66,292 @@ pub fn orthographic_dx(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
         Vec4::new(-(rpl / rml), -(tpb / tmb), -(near / fmn), 1.0),
     )
 }
+
+/// Perspective projection matrix meant to be used with OpenGL.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from -1.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+    let nmf = z_near - z_far;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, (z_far + z_near) / nmf, 1.0),
+        Vec4::new(0.0, 0.0, 2.0 * z_near * z_far / nmf, 0.0),
+    )
+}
+
+/// Perspective projection matrix meant to be used with DirectX.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+    let nmf = z_near - z_far;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, 1.0),
+        Vec4::new(0.0, 0.0, z_near * z_far / nmf, 0.0),
+    )
+}
+
+/// Perspective projection matrix meant to be used with Vulkan.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+    let nmf = z_near - z_far;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, 1.0),
+        Vec4::new(0.0, 0.0, z_near * z_far / nmf, 0.0),
+    )
+}
+
+/// Perspective projection matrix with infinite z-far plane meant to be used with OpenGL.
+///
+/// This is useful for extremely large scenes where having a far clip plane is extraneous anyway,
+/// as allowing it to approach infinity it eliminates several approximate numerical computations
+/// and so can improve z-fighting behavior.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from -1.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_infinite_z_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, 1.0),
+        Vec4::new(0.0, 0.0, -2.0 * z_near, 0.0),
+    )
+}
+
+/// Perspective projection matrix with infinite z-far plane meant to be used with Vulkan.
+///
+/// This is useful for extremely large scenes where having a far clip plane is extraneous anyway,
+/// as allowing it to approach infinity it eliminates several approximate numerical computations
+/// and so can improve z-fighting behavior.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, 1.0),
+        Vec4::new(0.0, 0.0, -z_near, 0.0),
+    )
+}
+
+/// Perspective projection matrix with infinite z-far plane meant to be used with DirectX.
+///
+/// This is useful for extremely large scenes where having a far clip plane is extraneous anyway,
+/// as allowing it to approach infinity it eliminates several approximate numerical computations
+/// and so can improve z-fighting behavior.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_infinite_z_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, 1.0),
+        Vec4::new(0.0, 0.0, -z_near, 0.0),
+    )
+}
+
+/// Perspective projection matrix with reversed z-axis meant to be used with DirectX or OpenGL.
+///
+/// Reversed-Z provides significantly better precision and therefore reduced z-fighting
+/// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
+/// a reversed depth comparison function and depth clear value when using this projection.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+///
+/// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
+/// and set the z clip from 0.0 to 1.0 rather than the default -1.0 to 1.0**
+#[inline]
+pub fn perspective_reversed_z_dx_gl(
+    vertical_fov: f32,
+    aspect_ratio: f32,
+    z_near: f32,
+    z_far: f32,
+) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+    let nmf = z_near - z_far;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, -z_far / nmf - 1.0, 1.0),
+        Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
+    )
+}
+
+/// Perspective projection matrix with reversed z-axis meant to be used with Vulkan.
+///
+/// Reversed-Z provides significantly better precision and therefore reduced z-fighting
+/// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
+/// a reversed depth comparison function and depth clear value when using this projection.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_reversed_z_vk(
+    vertical_fov: f32,
+    aspect_ratio: f32,
+    z_near: f32,
+    z_far: f32,
+) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+    let nmf = z_near - z_far;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, 1.0),
+        Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
+    )
+}
+
+/// Perspective projection matrix with reversed and infinite z-axis meant to be used with OpenGL or DirectX.
+///
+/// Reversed-Z provides significantly better precision and therefore reduced z-fighting
+/// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
+/// a reversed depth comparison function and depth clear value when using this projection.
+///
+/// Infinte-Z is useful for extremely large scenes where having a far clip plane is extraneous anyway,
+/// as allowing it to approach infinity it eliminates several approximate numerical computations
+/// and so can improve z-fighting behavior.
+///
+/// Combining them gives the best of both worlds for large scenes.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+///
+/// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
+/// and set the z clip from 0.0 to 1.0 rather than the default -1.0 to 1.0**
+#[inline]
+pub fn perspective_reversed_infinite_z_dx_gl(
+    vertical_fov: f32,
+    aspect_ratio: f32,
+    z_near: f32,
+) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, 0.0, 1.0),
+        Vec4::new(0.0, 0.0, z_near, 0.0),
+    )
+}
+
+/// Perspective projection matrix with reversed and infinite z-axis meant to be used with Vulkan.
+///
+/// Reversed-Z provides significantly better precision and therefore reduced z-fighting
+/// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
+/// a reversed depth comparison function and depth clear value when using this projection.
+///
+/// Infinte-Z is useful for extremely large scenes where having a far clip plane is extraneous anyway,
+/// as allowing it to approach infinity it eliminates several approximate numerical computations
+/// and so can improve z-fighting behavior.
+///
+/// Combining them gives the best of both worlds for large scenes.
+///
+/// * `vertical_fov` should be provided in radians.
+/// * `aspect_ratio` should be the quotient `width / height`.
+///
+/// This matrix is meant to be used when the source coordinate space is left-handed and y-down
+/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
+#[inline]
+pub fn perspective_reversed_infinite_z_vk(
+    vertical_fov: f32,
+    aspect_ratio: f32,
+    z_near: f32,
+) -> Mat4 {
+    let t = (vertical_fov / 2.0).tan();
+    let sy = 1.0 / t;
+    let sx = sy / aspect_ratio;
+
+    Mat4::new(
+        Vec4::new(sx, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, sy, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, 0.0, 1.0),
+        Vec4::new(0.0, 0.0, z_near, 0.0),
+    )
+}

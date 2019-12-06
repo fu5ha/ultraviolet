@@ -603,6 +603,39 @@ macro_rules! mat4s {
                 $rt::from_angle_plane(angle, plane).into_matrix().into_homogeneous()
             }
 
+            /// Constructs a 'look-at' matrix from an eye position, a focus position to look towards,
+            /// and a vector that defines the 'up' direction.
+            ///
+            /// This function assumes a right-handed, y-up coordinate space.
+            #[inline]
+            pub fn look_at(eye: $v3t, at: $v3t, up: $v3t) -> Self {
+                let forward = (at - eye).normalized();
+                let right = forward.cross(up).normalized();
+                let up = right.cross(forward);
+                Self::new(
+                    right.into(),
+                    up.into(),
+                    (-forward).into(),
+                    $vt::new(-right.dot(eye), -up.dot(eye), forward.dot(eye), $t::from(1.0))
+                )
+            }
+
+            /// Constructs a 'look-at' matrix from an eye position, a focus position to look towards,
+            /// and a vector that defines the 'up' direction.
+            ///
+            /// This function assumes a *left*-handed, y-up coordinate space.
+            #[inline]
+            pub fn look_at_lh(eye: $v3t, at: $v3t, up: $v3t) -> Self {
+                let forward = (at - eye).normalized();
+                let right = forward.cross(up).normalized();
+                let up = right.cross(forward);
+                Self::new(
+                    right.into(),
+                    up.into(),
+                    forward.into(),
+                    $vt::new(-right.dot(eye), -up.dot(eye), -forward.dot(eye), $t::from(1.0))
+                )
+            }
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
