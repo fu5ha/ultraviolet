@@ -354,15 +354,14 @@ macro_rules! rotor3s {
                     to.wedge(from)).normalized()
             }
 
-            /// Construct a rotor given a bivector which defines a plane, rotation orientation,
-            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
-            /// defines the angle of rotation in radians.
+            /// Construct a rotor given a bivector which defines a plane and rotation orientation,
+            /// and a rotation angle.
+            ///
+            /// `plane` must be normalized!
             ///
             /// This is the equivalent of an axis-angle rotation.
             #[inline]
-            pub fn from_angle_plane(planeangle: $bt) -> Self {
-                let angle = planeangle.mag();
-                let plane = planeangle / angle;
+            pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
                 let half_angle = angle / $t::from(2.0);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, plane * -sin)
@@ -370,14 +369,14 @@ macro_rules! rotor3s {
 
             /// Angles are applied in the order roll -> pitch -> yaw
             ///
-            /// - Yaw is rotation inside the xz plane ("around the y axis")
-            /// - Pitch is rotation inside the yz plane ("around the x axis")
             /// - Roll is rotation inside the xy plane ("around the z axis")
+            /// - Pitch is rotation inside the yz plane ("around the x axis")
+            /// - Yaw is rotation inside the xz plane ("around the y axis")
             #[inline]
-            pub fn from_euler_angles(yaw: $t, pitch: $t, roll: $t) -> Self {
-                Self::from_angle_plane(yaw * $bt::unit_xz())
-                    * Self::from_angle_plane(pitch * $bt::unit_yz())
-                    * Self::from_angle_plane(roll * $bt::unit_xy())
+            pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
+                Self::from_angle_plane(yaw, $bt::unit_xz())
+                    * Self::from_angle_plane(pitch, $bt::unit_yz())
+                    * Self::from_angle_plane(roll, $bt::unit_xy())
             }
 
             #[inline]

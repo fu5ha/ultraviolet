@@ -134,14 +134,6 @@ macro_rules! mat2s {
                 Self::from(*comps)
             }
         }
-
-        impl From<&mut [$t; 4]> for $n {
-            #[inline]
-            fn from(comps: &mut [$t; 4]) -> Self {
-                Self::from(*comps)
-            }
-        }
-
         )+
     }
 }
@@ -213,14 +205,8 @@ macro_rules! mat3s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
-                let (sr, cr) = roll.sin_cos();
-                let (sp, cp) = pitch.sin_cos();
-                let (sy, cy) = yaw.sin_cos();
-
-                Self::new(
-                    $vt::new(cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr),
-                    $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr),
-                    $vt::new(-sp, cp * sr, cp * cr))
+                let rotor = $rt::from_euler_angles(roll, pitch, yaw);
+                rotor.into_matrix()
             }
 
             /// Create a new rotation matrix from a rotation "about the x axis". This is
@@ -256,7 +242,7 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
             }
 
             /// Create a new rotation matrix from a rotation "about the z axis". This is
@@ -274,17 +260,18 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
             }
 
-            /// Construct a rotation matrix given a bivector which defines a plane, rotation orientation,
-            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
-            /// defines the angle of rotation in radians.
+            /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
+            /// and a rotation angle.
+            ///
+            /// `plane` must be normalized!
             ///
             /// This is the equivalent of an axis-angle rotation.
             #[inline]
-            pub fn from_angle_plane(planeangle: $bt) -> Self {
-                $rt::from_angle_plane(planeangle).into_matrix()
+            pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
+                $rt::from_angle_plane(angle, plane).into_matrix()
             }
 
             #[inline]
@@ -400,18 +387,18 @@ macro_rules! mat3s {
                 Self::new(
                     $vt::new(
                         sa.x * oa.x + sb.x * oa.y + sc.x * oa.z,
-                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z,
-                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z
-                    ),
-                    $vt::new(
                         sa.y * oa.x + sb.y * oa.y + sc.y * oa.z,
-                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z,
-                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z
+                        sa.z * oa.x + sb.z * oa.y + sc.z * oa.z,
                     ),
                     $vt::new(
-                        sa.z * oa.x + sb.z * oa.y + sc.z * oa.z,
+                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z,
+                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z,
                         sa.z * ob.x + sb.z * ob.y + sc.z * ob.z,
-                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z
+                    ),
+                    $vt::new(
+                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z,
+                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z,
+                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z,
                     ),
                 )
             }
@@ -446,13 +433,6 @@ macro_rules! mat3s {
         impl From<&[$t; 9]> for $n {
             #[inline]
             fn from(comps: &[$t; 9]) -> Self {
-                Self::from(*comps)
-            }
-        }
-
-        impl From<&mut [$t; 9]> for $n {
-            #[inline]
-            fn from(comps: &mut [$t; 9]) -> Self {
                 Self::from(*comps)
             }
         }
@@ -499,10 +479,10 @@ macro_rules! mat4s {
             #[inline]
             pub fn from_translation(trans: $v3t) -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0), trans.x),
-                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0), trans.y),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0), trans.z),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
+                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0), $t::from(0.0)),
+                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0), $t::from(0.0)),
+                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0), $t::from(0.0)),
+                    $vt::new(trans.x, trans.y, trans.z, $t::from(1.0)))
             }
 
             /// Assumes homogeneous 3d coordinates.
@@ -531,9 +511,9 @@ macro_rules! mat4s {
 
             /// Angles are applied in the order roll -> pitch -> yaw
             ///
-            /// - Yaw is rotation inside the xz plane ("around the y axis")
-            /// - Pitch is rotation inside the yz plane ("around the x axis")
             /// - Roll is rotation inside the xy plane ("around the z axis")
+            /// - Pitch is rotation inside the yz plane ("around the x axis")
+            /// - Yaw is rotation inside the xz plane ("around the y axis")
             ///
             /// Assumes homogeneous 3d coordinates.
             ///
@@ -547,15 +527,8 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
-                let (sr, cr) = roll.sin_cos();
-                let (sp, cp) = pitch.sin_cos();
-                let (sy, cy) = yaw.sin_cos();
-
-                Self::new(
-                    $vt::new(cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr, $t::from(0.0)),
-                    $vt::new(sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr, $t::from(0.0)),
-                    $vt::new(-sp, cp * sr, cp * cr, $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
+                let rotor = $rt::from_euler_angles(roll, pitch, yaw);
+                rotor.into_matrix().into_homogeneous()
             }
 
             /// Create a new rotation matrix from a rotation "about the x axis". This is
@@ -594,8 +567,7 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
             }
 
             /// Create a new rotation matrix from a rotation "about the z axis". This is
@@ -615,19 +587,20 @@ macro_rules! mat4s {
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
             }
 
-            /// Construct a rotation matrix given a bivector which defines a plane, rotation orientation,
-            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
-            /// defines the angle of rotation in radians.
+            /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
+            /// and a rotation angle.
+            ///
+            /// `plane` must be normalized!
             ///
             /// This is the equivalent of an axis-angle rotation.
             ///
             /// Assumes homogeneous 3d coordinates.
             #[inline]
-            pub fn from_angle_plane(planeangle: $bt) -> Self {
-                $rt::from_angle_plane(planeangle).into_matrix().into_homogeneous()
+            pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
+                $rt::from_angle_plane(angle, plane).into_matrix().into_homogeneous()
             }
 
             #[inline]
@@ -733,26 +706,26 @@ macro_rules! mat4s {
                 Self::new(
                     $vt::new(
                         sa.x * oa.x + sb.x * oa.y + sc.x * oa.z + sd.x * oa.w,
-                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z + sd.x * ob.w,
-                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z + sd.x * oc.w,
-                        sa.x * od.x + sb.x * od.y + sc.x * od.z + sd.x * od.w,
-                    ),
-                    $vt::new(
                         sa.y * oa.x + sb.y * oa.y + sc.y * oa.z + sd.y * oa.w,
-                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z + sd.y * ob.w,
-                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z + sd.y * oc.w,
-                        sa.y * od.x + sb.y * od.y + sc.y * od.z + sd.y * od.w,
-                    ),
-                    $vt::new(
                         sa.z * oa.x + sb.z * oa.y + sc.z * oa.z + sd.z * oa.w,
-                        sa.z * ob.x + sb.z * ob.y + sc.z * ob.z + sd.z * ob.w,
-                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z + sd.z * oc.w,
-                        sa.z * od.x + sb.z * od.y + sc.z * od.z + sd.z * od.w,
+                        sa.w * oa.x + sb.w * oa.y + sc.w * oa.z + sd.w * oa.w,
                     ),
                     $vt::new(
-                        sa.w * oa.x + sb.w * oa.y + sc.w * oa.z + sd.w * oa.w,
-                        sa.w * ob.x + sb.w * ob.y + sc.w * ob.z + sd.w * oa.w,
+                        sa.x * ob.x + sb.x * ob.y + sc.x * ob.z + sd.x * ob.w,
+                        sa.y * ob.x + sb.y * ob.y + sc.y * ob.z + sd.y * ob.w,
+                        sa.z * ob.x + sb.z * ob.y + sc.z * ob.z + sd.z * ob.w,
+                        sa.w * ob.x + sb.w * ob.y + sc.w * ob.z + sd.w * ob.w,
+                    ),
+                    $vt::new(
+                        sa.x * oc.x + sb.x * oc.y + sc.x * oc.z + sd.x * oc.w,
+                        sa.y * oc.x + sb.y * oc.y + sc.y * oc.z + sd.y * oc.w,
+                        sa.z * oc.x + sb.z * oc.y + sc.z * oc.z + sd.z * oc.w,
                         sa.w * oc.x + sb.w * oc.y + sc.w * oc.z + sd.w * oc.w,
+                    ),
+                    $vt::new(
+                        sa.x * od.x + sb.x * od.y + sc.x * od.z + sd.x * od.w,
+                        sa.y * od.x + sb.y * od.y + sc.y * od.z + sd.y * od.w,
+                        sa.z * od.x + sb.z * od.y + sc.z * od.z + sd.z * od.w,
                         sa.w * od.x + sb.w * od.y + sc.w * od.z + sd.w * od.w,
                     ),
                 )
@@ -794,14 +767,6 @@ macro_rules! mat4s {
                 Self::from(*comps)
             }
         }
-
-        impl From<&mut [$t; 16]> for $n {
-            #[inline]
-            fn from(comps: &mut [$t; 16]) -> Self {
-                Self::from(*comps)
-            }
-        }
-
         )+
     }
 }

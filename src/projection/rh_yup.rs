@@ -86,8 +86,8 @@ pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, (z_far + z_near) / nmf, 2.0 * z_near * z_far / nmf),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, (z_far + z_near) / nmf, -1.0),
+        Vec4::new(0.0, 0.0, 2.0 * z_near * z_far / nmf, 0.0),
     )
 }
 
@@ -109,8 +109,8 @@ pub fn perspective_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, z_near * z_far / nmf),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, -1.0),
+        Vec4::new(0.0, 0.0, z_near * z_far / nmf, 0.0),
     )
 }
 
@@ -132,8 +132,8 @@ pub fn perspective_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, -sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, z_near * z_far / nmf),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, -1.0),
+        Vec4::new(0.0, 0.0, z_near * z_far / nmf, 0.0),
     )
 }
 
@@ -158,8 +158,8 @@ pub fn perspective_infinite_z_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, -1.0, -2.0 * z_near),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, -1.0),
+        Vec4::new(0.0, 0.0, -2.0 * z_near, 0.0),
     )
 }
 
@@ -184,8 +184,8 @@ pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, -sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, -1.0, -z_near),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, -1.0),
+        Vec4::new(0.0, 0.0, -z_near, 0.0),
     )
 }
 
@@ -210,8 +210,8 @@ pub fn perspective_infinite_z_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, -1.0, -z_near),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, -1.0, -1.0),
+        Vec4::new(0.0, 0.0, -z_near, 0.0),
     )
 }
 
@@ -245,8 +245,8 @@ pub fn perspective_reversed_z_dx_gl(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, -z_far / nmf - 1.0, -z_near * z_far / nmf),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, -z_far / nmf - 1.0, -1.0),
+        Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
     )
 }
 
@@ -277,8 +277,8 @@ pub fn perspective_reversed_z_vk(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, -sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, z_near * z_far / nmf),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, z_far / nmf, -1.0),
+        Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
     )
 }
 
@@ -316,8 +316,8 @@ pub fn perspective_reversed_infinite_z_dx_gl(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, 0.0, z_near),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, 0.0, -1.0),
+        Vec4::new(0.0, 0.0, z_near, 0.0),
     )
 }
 
@@ -352,7 +352,7 @@ pub fn perspective_reversed_infinite_z_vk(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, -sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, 0.0, z_near),
-        Vec4::new(0.0, 0.0, -1.0, 0.0),
+        Vec4::new(0.0, 0.0, 0.0, -1.0),
+        Vec4::new(0.0, 0.0, z_near, 0.0),
     )
 }

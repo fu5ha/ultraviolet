@@ -1614,7 +1614,7 @@ impl From<Vec3> for Vec4 {
         Self {
             x: vec.x,
             y: vec.y,
-            z: vec.x,
+            z: vec.z,
             w: 0.0,
         }
     }
