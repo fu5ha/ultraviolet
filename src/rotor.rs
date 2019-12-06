@@ -367,6 +367,27 @@ macro_rules! rotor3s {
                 Self::new(cos, plane * -sin)
             }
 
+            /// Create new Rotor from a rotation in the xy plane (also known as
+            /// "around the z axis").
+            #[inline]
+            pub fn from_rotation_xy(angle: $t) -> Self {
+                Self::from_angle_plane(angle, $bt::unit_xy())
+            }
+
+            /// Create new Rotor from a rotation in the xz plane (also known as
+            /// "around the y axis").
+            #[inline]
+            pub fn from_rotation_xz(angle: $t) -> Self {
+                Self::from_angle_plane(angle, $bt::unit_xz())
+            }
+
+            /// Create new Rotor from a rotation in the yz plane (also known as
+            /// "around the x axis").
+            #[inline]
+            pub fn from_rotation_yz(angle: $t) -> Self {
+                Self::from_angle_plane(angle, $bt::unit_yz())
+            }
+
             /// Angles are applied in the order roll -> pitch -> yaw
             ///
             /// - Roll is rotation inside the xy plane ("around the z axis")
@@ -531,7 +552,7 @@ macro_rules! rotor3s {
                     $vt::new(
                         two * (s_bxy - bxz_byz),
                         s2 - bxy2 + bxz2 - byz2,
-                        -two * (s_byz - bxy_bxz)
+                        -two * (s_byz + bxy_bxz)
                     ),
                     $vt::new(
                         two * (s_bxz + bxy_byz),
@@ -686,9 +707,9 @@ mod test {
 
     #[test]
     pub fn compose_rotor_roundtrip() {
-        let a = Vec3::new(1.0, 0.0, 0.0).normalized();
-        let b = Vec3::new(0.0, 1.0, 0.0).normalized();
-        let c = Vec3::new(0.0, 0.0, 1.0).normalized();
+        let a = Vec3::new(0.25, -5.0, 1.0).normalized();
+        let b = Vec3::new(-5.0, 2.0, 4.0).normalized();
+        let c = Vec3::new(-3.0, 0.0, -1.0).normalized();
         let rotor_ab = Rotor3::from_rotation_between(a, b);
         let rotor_bc = Rotor3::from_rotation_between(b, c);
         let rotor_abbc = rotor_bc * rotor_ab;
