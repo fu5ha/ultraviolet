@@ -20,10 +20,10 @@ pub fn orthographic_gl(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     let fmn = far - near;
     let fpn = far + near;
     Mat4::new(
-        Vec4::new(2.0 / rml, 0.0, 0.0, -(rpl / rml)),
-        Vec4::new(0.0, -2.0 / tmb, 0.0, -(tpb / tmb)),
-        Vec4::new(0.0, 0.0, 2.0 / fmn, -(fpn / fmn)),
-        Vec4::new(0.0, 0.0, 0.0, 1.0),
+        Vec4::new(2.0 / rml, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -2.0 / tmb, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, 2.0 / fmn, 0.0),
+        Vec4::new(-(rpl / rml), -(tpb / tmb), -(fpn / fmn), 1.0),
     )
 }
 
@@ -38,12 +38,12 @@ pub fn orthographic_vk(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     let rpl = right + left;
     let tmb = top - bottom;
     let tpb = top + bottom;
-    let nmf = near - far;
+    let fmn = far - near;
     Mat4::new(
-        Vec4::new(2.0 / rml, 0.0, 0.0, -(rpl / rml)),
-        Vec4::new(0.0, -2.0 / tmb, 0.0, -(tpb / tmb)),
-        Vec4::new(0.0, 0.0, 1.0 / nmf, -(near / nmf)),
-        Vec4::new(0.0, 0.0, 0.0, 1.0),
+        Vec4::new(2.0 / rml, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, 2.0 / tmb, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, 1.0 / fmn, 0.0),
+        Vec4::new(-(rpl / rml), -(tpb / tmb), -(near / fmn), 1.0),
     )
 }
 
@@ -58,11 +58,11 @@ pub fn orthographic_dx(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     let rpl = right + left;
     let tmb = top - bottom;
     let tpb = top + bottom;
-    let nmf = near - far;
+    let fmn = far - near;
     Mat4::new(
-        Vec4::new(2.0 / rml, 0.0, 0.0, -(rpl / rml)),
-        Vec4::new(0.0, -2.0 / tmb, 0.0, -(tpb / tmb)),
-        Vec4::new(0.0, 0.0, 1.0 / nmf, -(near / nmf)),
-        Vec4::new(0.0, 0.0, 0.0, 1.0),
+        Vec4::new(2.0 / rml, 0.0, 0.0, 0.0),
+        Vec4::new(0.0, -2.0 / tmb, 0.0, 0.0),
+        Vec4::new(0.0, 0.0, 1.0 / fmn, 0.0),
+        Vec4::new(-(rpl / rml), -(tpb / tmb), -(near / fmn), 1.0),
     )
 }
