@@ -240,16 +240,17 @@ macro_rules! vec2s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 2)
+                    std::slice::from_raw_parts(self as *const $n as *const $t, 2)
                 }
             }
+
 
             #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 2 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 2 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -258,7 +259,7 @@ macro_rules! vec2s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 2)
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 2)
                 }
             }
 
@@ -267,7 +268,7 @@ macro_rules! vec2s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 2 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 2 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -280,9 +281,7 @@ macro_rules! vec2s {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub fn as_ptr(&self) -> *const $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+                self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
@@ -293,10 +292,8 @@ macro_rules! vec2s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_mut_ptr(&self) -> *mut $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $n as *mut $t
             }
         }
 
@@ -832,7 +829,7 @@ macro_rules! vec3s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 3)
+                    std::slice::from_raw_parts(self as *const $n as *const $t, 3)
                 }
             }
 
@@ -841,7 +838,7 @@ macro_rules! vec3s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 3 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 3 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -850,7 +847,7 @@ macro_rules! vec3s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 3)
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 3)
                 }
             }
 
@@ -859,7 +856,7 @@ macro_rules! vec3s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 3 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 3 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -872,9 +869,7 @@ macro_rules! vec3s {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub fn as_ptr(&self) -> *const $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+                self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
@@ -885,10 +880,8 @@ macro_rules! vec3s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_mut_ptr(&self) -> *mut $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $n as *mut $t
             }
         }
 
@@ -1419,7 +1412,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 4)
+                    std::slice::from_raw_parts(self as *const $n as *const $t, 4)
                 }
             }
 
@@ -1428,7 +1421,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(std::mem::transmute(self), 4 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -1437,7 +1430,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 4)
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 4)
                 }
             }
 
@@ -1446,7 +1439,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(std::mem::transmute(self), 4 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 4 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -1459,9 +1452,7 @@ macro_rules! vec4s {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub fn as_ptr(&self) -> *const $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+                 self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
@@ -1472,10 +1463,8 @@ macro_rules! vec4s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_mut_ptr(&self) -> *mut $t {
-                unsafe {
-                    std::mem::transmute(self)
-                }
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $n as *mut $t
             }
         }
 
