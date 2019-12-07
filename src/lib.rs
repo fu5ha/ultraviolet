@@ -10,7 +10,7 @@
 //!
 //! This crate is currently being dogfooded in my ray tracer [`rayn`](https://github.com/termhn/rayn),
 //! and it does what I need it to do.
-//! If it's missing something you need it to do, bug me on the GitHub issue tracker and/or Rust
+//! If it's missing something you need it to do, bug me on the [GitHub issue tracker](https://github.com/termhn/ultraviolet/issues) and/or Rust
 //! community discord server (I'm Fusha there) and I'll try to add it for you :)
 
 extern crate alloc;
