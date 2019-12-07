@@ -48,7 +48,7 @@
 //! than composition of matrices, however, the operation of rotating a vector by a rotor, i.e. the
 //! `rotor * vec` product,  is *more expensive* to
 //! compute than the `matrix * vec` product. So, rotors are excellent for *building* and *interpolating*
-//! rotations, but it may be preferrable to convert them into matrices before applying them to
+//! rotations, but it may be preferable to convert them into matrices before applying them to
 //! vectors/points, if the same rotation will be applied to many vectors.
 
 use crate::bivec::*;
@@ -217,6 +217,7 @@ macro_rules! rotor2s {
         }
 
         impl From<$rn> for $mt {
+            #[inline]
             fn from(rotor: $rn) -> $mt {
                 rotor.into_matrix()
             }
@@ -569,6 +570,7 @@ macro_rules! rotor3s {
         }
 
         impl From<$rn> for $mt {
+            #[inline]
             fn from(rotor: $rn) -> $mt {
                 rotor.into_matrix()
             }

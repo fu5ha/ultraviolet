@@ -298,30 +298,35 @@ macro_rules! vec2s {
         }
 
         impl From<[$t; 2]> for $n {
+            #[inline]
             fn from(comps: [$t; 2]) -> Self {
                 Self::new(comps[0], comps[1])
             }
         }
 
         impl From<&[$t; 2]> for $n {
+            #[inline]
             fn from(comps: &[$t; 2]) -> Self {
                 Self::from(*comps)
             }
         }
 
         impl From<&mut [$t; 2]> for $n {
+            #[inline]
             fn from(comps: &mut [$t; 2]) -> Self {
                 Self::from(*comps)
             }
         }
 
         impl From<($t, $t)> for $n {
+            #[inline]
             fn from(comps: ($t, $t)) -> Self {
                 Self::new(comps.0, comps.1)
             }
         }
 
         impl From<&($t, $t)> for $n {
+            #[inline]
             fn from(comps: &($t, $t)) -> Self {
                 Self::from(*comps)
             }
@@ -329,6 +334,7 @@ macro_rules! vec2s {
 
 
         impl From<&mut ($t, $t)> for $n {
+            #[inline]
             fn from(comps: &mut ($t, $t)) -> Self {
                 Self::from(*comps)
             }
