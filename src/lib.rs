@@ -20,6 +20,7 @@ pub mod lerp;
 pub mod mat;
 pub mod projection;
 pub mod rotor;
+pub mod transform;
 mod util;
 pub mod vec;
 
@@ -27,6 +28,7 @@ pub use bivec::*;
 pub use lerp::*;
 pub use mat::*;
 pub use rotor::*;
+pub use transform::*;
 pub use vec::*;
 
 pub use wide;
