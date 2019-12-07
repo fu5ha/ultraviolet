@@ -453,7 +453,30 @@ macro_rules! vec2s {
             fn neg(self) -> $n {
                 self * $t::from(-1.0)
             }
-        })+
+        }
+
+        impl Index<usize> for $n {
+            type Output = $t;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                match index {
+                    0 => &self.x,
+                    1 => &self.y,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                match index {
+                    0 => &mut self.x,
+                    1 => &mut self.y,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+        )+
     };
 }
 
@@ -1034,7 +1057,32 @@ macro_rules! vec3s {
             fn neg(self) -> $n {
                 self * $t::from(-1.0)
             }
-        })+
+        }
+
+        impl Index<usize> for $n {
+            type Output = $t;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                match index {
+                    0 => &self.x,
+                    1 => &self.y,
+                    2 => &self.z,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                match index {
+                    0 => &mut self.x,
+                    1 => &mut self.y,
+                    2 => &mut self.z,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+        )+
     }
 }
 
@@ -1602,7 +1650,34 @@ macro_rules! vec4s {
             fn neg(self) -> $n {
                 self * $t::from(-1.0)
             }
-        })+
+        }
+
+        impl Index<usize> for $n {
+            type Output = $t;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                match index {
+                    0 => &self.x,
+                    1 => &self.y,
+                    2 => &self.z,
+                    3 => &self.w,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                match index {
+                    0 => &mut self.x,
+                    1 => &mut self.y,
+                    2 => &mut self.z,
+                    3 => &mut self.w,
+                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
+                }
+            }
+        }
+        )+
     }
 }
 

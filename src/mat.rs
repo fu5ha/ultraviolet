@@ -134,6 +134,20 @@ macro_rules! mat2s {
                 Self::from(*comps)
             }
         }
+
+        impl Index<usize> for $n {
+            type Output = $vt;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                &self.cols[index]
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                &mut self.cols[index]
+            }
+        }
         )+
     }
 }
@@ -434,6 +448,20 @@ macro_rules! mat3s {
             #[inline]
             fn from(comps: &[$t; 9]) -> Self {
                 Self::from(*comps)
+            }
+        }
+
+        impl Index<usize> for $n {
+            type Output = $vt;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                &self.cols[index]
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                &mut self.cols[index]
             }
         }
         )+
@@ -800,6 +828,22 @@ macro_rules! mat4s {
                 Self::from(*comps)
             }
         }
+
+
+        impl Index<usize> for $n {
+            type Output = $vt;
+
+            fn index(&self, index: usize) -> &Self::Output {
+                &self.cols[index]
+            }
+        }
+
+        impl IndexMut<usize> for $n {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                &mut self.cols[index]
+            }
+        }
+
         )+
     }
 }
