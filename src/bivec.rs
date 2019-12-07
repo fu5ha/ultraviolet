@@ -99,6 +99,67 @@ macro_rules! bivec2s {
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
+
+             #[inline]
+            pub fn as_slice(&self) -> &[$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $bn as *const $t, 1)
+                }
+            }
+
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $bn as *const u8, std::mem::size_of::<$t>())
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(self as *mut $bn as *mut $t, 1)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(self as *mut $bn as *mut u8, std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Returns a constant unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_ptr(&self) -> *const $t {
+                self as *const $bn as *const $t
+            }
+
+            /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $bn as *mut $t
+            }
         }
 
         impl EqualsEps for $bn {
@@ -316,6 +377,67 @@ macro_rules! bivec3s {
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
+
+             #[inline]
+            pub fn as_slice(&self) -> &[$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $bn as *const $t, 3)
+                }
+            }
+
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $bn as *const u8, 3 * std::mem::size_of::<$t>())
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$t] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(self as *mut $bn as *mut $t, 3)
+                }
+            }
+
+            #[inline]
+            pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts_mut(self as *mut $bn as *mut u8, 3 * std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Returns a constant unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_ptr(&self) -> *const $t {
+                self as *const $bn as *const $t
+            }
+
+            /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $bn as *mut $t
             }
         }
 
