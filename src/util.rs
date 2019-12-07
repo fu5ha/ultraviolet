@@ -21,3 +21,15 @@ impl EqualsEps for f32 {
         (self - other).abs() <= 0.01
     }
 }
+
+#[macro_export]
+macro_rules! derive_default_identity {
+    ($t:ident) => {
+        impl Default for $t {
+            #[inline]
+            fn default() -> Self {
+                Self::identity()
+            }
+        }
+    }
+}

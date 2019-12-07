@@ -8,12 +8,14 @@ macro_rules! isometries {
         $(
         /// An Isometry, also known as a "rigid body transformation", i.e. a rotation followed
         /// by a translation.
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $ison {
             pub translation: $vt,
             pub rotation: $rt,
         }
+
+        derive_default_identity!($ison);
 
         impl $ison {
             #[inline]
@@ -140,13 +142,15 @@ macro_rules! similarities {
         $(
         /// A Similarity, also known as a "rigid body transformation", i.e. a uniform scaling
         /// followed by a rotation followed by a translation.
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $sn {
             pub translation: $vt,
             pub rotation: $rt,
             pub scale: $t,
         }
+
+        derive_default_identity!($sn);
 
         impl $sn {
             #[inline]

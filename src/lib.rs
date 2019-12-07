@@ -15,13 +15,14 @@
 
 extern crate alloc;
 
+mod util;
+
 pub mod bivec;
 pub mod lerp;
 pub mod mat;
 pub mod projection;
 pub mod rotor;
 pub mod transform;
-mod util;
 pub mod vec;
 
 pub use bivec::*;

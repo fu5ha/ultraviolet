@@ -10,11 +10,13 @@ macro_rules! mat2s {
         /// A 2x2 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 2],
         }
+
+        derive_default_identity!($n);
 
         impl $n {
             #[inline]
@@ -22,6 +24,14 @@ macro_rules! mat2s {
                 $n {
                     cols: [col1, col2],
                 }
+            }
+
+            #[inline]
+            pub fn identity() -> Self {
+                Self::new(
+                    $vt::new($t::from(1.0), $t::from(0.0)),
+                    $vt::new($t::from(0.0), $t::from(1.0)),
+                )
             }
 
             #[inline]
@@ -161,11 +171,13 @@ macro_rules! mat3s {
         /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
         /// or for performing arbitrary transformations (linear + translation, projection, etc)
         /// on homogeneous 2d vectors
-        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 3],
         }
+
+        derive_default_identity!($n);
 
         impl $n {
             #[inline]
@@ -476,11 +488,13 @@ macro_rules! mat4s {
         ///
         /// Note that most constructors assume that the matrix will be used as a homogeneous 3d
         /// transformation matrix.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 4],
         }
+
+        derive_default_identity!($n);
 
         impl $n {
             #[inline]

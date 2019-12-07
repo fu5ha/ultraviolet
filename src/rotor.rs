@@ -51,10 +51,9 @@
 //! rotations, but it may be preferable to convert them into matrices before applying them to
 //! vectors/points, if the same rotation will be applied to many vectors.
 
-use crate::bivec::*;
-use crate::mat::*;
+use crate::*;
 use crate::util::*;
-use crate::vec::*;
+
 use wide::f32x4;
 
 use std::ops::*;
@@ -65,12 +64,14 @@ macro_rules! rotor2s {
         /// A Rotor in 2d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,
             pub bv: $bt,
         }
+
+        derive_default_identity!($rn);
 
         impl $rn {
             #[inline]
@@ -323,12 +324,14 @@ macro_rules! rotor3s {
         /// A Rotor in 3d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,
             pub bv: $bt,
         }
+
+        derive_default_identity!($rn);
 
         impl $rn {
             #[inline]
