@@ -65,7 +65,7 @@ macro_rules! rotor2s {
         /// A Rotor in 2d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,
@@ -322,7 +322,7 @@ macro_rules! rotor3s {
         /// A Rotor in 3d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,

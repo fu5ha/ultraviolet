@@ -48,7 +48,7 @@ macro_rules! bivec2s {
         /// has only one component.
         ///
         /// Please see the module level documentation for more information on bivectors generally!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $bn {
             pub xy: $t
@@ -239,7 +239,7 @@ macro_rules! bivec3s {
         /// 3d vectors quite a lot.
         ///
         /// Please see the module level documentation for more information on bivectors generally!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $bn {
             pub xy: $t,

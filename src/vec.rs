@@ -14,7 +14,7 @@ macro_rules! vec2s {
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -549,7 +549,7 @@ macro_rules! vec3s {
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug)]
+        $(#[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -1178,7 +1178,7 @@ macro_rules! vec4s {
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug)]
+        $(#[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
