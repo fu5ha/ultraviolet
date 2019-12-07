@@ -609,14 +609,14 @@ macro_rules! mat4s {
             /// This function assumes a right-handed, y-up coordinate space.
             #[inline]
             pub fn look_at(eye: $v3t, at: $v3t, up: $v3t) -> Self {
-                let forward = (at - eye).normalized();
-                let right = forward.cross(up).normalized();
-                let up = right.cross(forward);
+                let f = (at - eye).normalized();
+                let r = f.cross(up).normalized();
+                let u = r.cross(f);
                 Self::new(
-                    right.into(),
-                    up.into(),
-                    (-forward).into(),
-                    $vt::new(-right.dot(eye), -up.dot(eye), forward.dot(eye), $t::from(1.0))
+                    $vt::new(r.x, u.x, -f.x, $t::from(0.0)),
+                    $vt::new(r.y, u.y, -f.y, $t::from(0.0)),
+                    $vt::new(r.z, u.z, -f.z, $t::from(0.0)),
+                    $vt::new(-r.dot(eye), -u.dot(eye), f.dot(eye), $t::from(1.0))
                 )
             }
 
@@ -626,14 +626,14 @@ macro_rules! mat4s {
             /// This function assumes a *left*-handed, y-up coordinate space.
             #[inline]
             pub fn look_at_lh(eye: $v3t, at: $v3t, up: $v3t) -> Self {
-                let forward = (at - eye).normalized();
-                let right = forward.cross(up).normalized();
-                let up = right.cross(forward);
+                let f = (at - eye).normalized();
+                let r = f.cross(up).normalized();
+                let u = r.cross(f);
                 Self::new(
-                    right.into(),
-                    up.into(),
-                    forward.into(),
-                    $vt::new(-right.dot(eye), -up.dot(eye), -forward.dot(eye), $t::from(1.0))
+                    $vt::new(r.x, u.x, f.x, $t::from(0.0)),
+                    $vt::new(r.y, u.y, f.y, $t::from(0.0)),
+                    $vt::new(r.z, u.z, f.z, $t::from(0.0)),
+                    $vt::new(-r.dot(eye), -u.dot(eye), -f.dot(eye), $t::from(1.0))
                 )
             }
             #[inline]
