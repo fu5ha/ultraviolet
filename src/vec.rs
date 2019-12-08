@@ -332,11 +332,10 @@ macro_rules! vec2s {
             }
         }
 
-
-        impl From<&mut ($t, $t)> for $n {
+        impl From<$n> for ($t, $t) {
             #[inline]
-            fn from(comps: &mut ($t, $t)) -> Self {
-                Self::from(*comps)
+            fn from(v: $n) -> Self {
+                (v.x, v.y)
             }
         }
 
@@ -932,13 +931,12 @@ macro_rules! vec3s {
             }
         }
 
-        impl From<&mut ($t, $t, $t)> for $n {
+        impl From<$n> for ($t, $t, $t) {
             #[inline]
-            fn from(comps: &mut ($t, $t, $t)) -> Self {
-                Self::from(*comps)
+            fn from(v: $n) -> Self {
+                (v.x, v.y, v.z)
             }
         }
-
 
         impl Add for $n {
             type Output = Self;
@@ -1515,13 +1513,12 @@ macro_rules! vec4s {
             }
         }
 
-        impl From<&mut ($t, $t, $t, $t)> for $n {
+        impl From<$n> for ($t, $t, $t, $t) {
             #[inline]
-            fn from(comps: &mut ($t, $t, $t, $t)) -> Self {
-                Self::from(*comps)
+            fn from(v: $n) -> Self {
+                (v.x, v.y, v.z, v.w)
             }
         }
-
 
         impl Add for $n {
             type Output = Self;

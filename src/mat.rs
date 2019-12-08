@@ -756,6 +756,89 @@ macro_rules! mat4s {
             pub fn as_mut_ptr(&mut self) -> *mut $t {
                 self as *mut $n as *mut $t
             }
+
+            /// If this matrix is not currently invertable, this function will return
+            /// an invalid inverse. This status is not checked by the library.
+            #[inline]
+            pub fn inverse(&mut self) {
+                *self = self.inversed();
+            }
+
+            /// If this matrix is not currently invertable, this function will return
+            /// an invalid inverse. This status is not checked by the library.
+            #[inline]
+            pub fn inversed(&self) -> Self {
+                let (m00, m01, m02, m03) = self.cols[0].into();
+                let (m10, m11, m12, m13) = self.cols[1].into();
+                let (m20, m21, m22, m23) = self.cols[2].into();
+                let (m30, m31, m32, m33) = self.cols[3].into();
+
+                let coef00 = m22 * m33 - m32 * m23;
+                let coef02 = m12 * m33 - m32 * m13;
+                let coef03 = m12 * m23 - m22 * m13;
+
+                let coef04 = m21 * m33 - m31 * m23;
+                let coef06 = m11 * m33 - m31 * m13;
+                let coef07 = m11 * m23 - m21 * m13;
+
+                let coef08 = m21 * m32 - m31 * m22;
+                let coef10 = m11 * m32 - m31 * m12;
+                let coef11 = m11 * m22 - m21 * m12;
+
+                let coef12 = m20 * m33 - m30 * m23;
+                let coef14 = m10 * m33 - m30 * m13;
+                let coef15 = m10 * m23 - m20 * m13;
+
+                let coef16 = m20 * m32 - m30 * m22;
+                let coef18 = m10 * m32 - m30 * m12;
+                let coef19 = m10 * m22 - m20 * m12;
+
+                let coef20 = m20 * m31 - m30 * m21;
+                let coef22 = m10 * m31 - m30 * m11;
+                let coef23 = m10 * m21 - m20 * m11;
+
+                let fac0 = $vt::new(coef00, coef00, coef02, coef03);
+                let fac1 = $vt::new(coef04, coef04, coef06, coef07);
+                let fac2 = $vt::new(coef08, coef08, coef10, coef11);
+                let fac3 = $vt::new(coef12, coef12, coef14, coef15);
+                let fac4 = $vt::new(coef16, coef16, coef18, coef19);
+                let fac5 = $vt::new(coef20, coef20, coef22, coef23);
+
+                let vec0 = $vt::new(m10, m00, m00, m00);
+                let vec1 = $vt::new(m11, m01, m01, m01);
+                let vec2 = $vt::new(m12, m02, m02, m02);
+                let vec3 = $vt::new(m13, m03, m03, m03);
+
+                let inv0 = vec1 * fac0 - vec2 * fac1 + vec3 * fac2;
+                let inv1 = vec0 * fac0 - vec2 * fac3 + vec3 * fac4;
+                let inv2 = vec0 * fac1 - vec1 * fac3 + vec3 * fac5;
+                let inv3 = vec0 * fac2 - vec1 * fac4 + vec2 * fac5;
+
+                let sign_a = $vt::new($t::from(1.0), $t::from(-1.0), $t::from(1.0), $t::from(-1.0));
+                let sign_b = $vt::new($t::from(-1.0), $t::from(1.0), $t::from(-1.0), $t::from(1.0));
+
+                let inverse = Self {
+                    cols: [
+                        inv0 * sign_a,
+                        inv1 * sign_b,
+                        inv2 * sign_a,
+                        inv3 * sign_b,
+                    ]
+                };
+
+                let row0 = $vt::new(
+                    inverse.cols[0].x,
+                    inverse.cols[1].x,
+                    inverse.cols[2].x,
+                    inverse.cols[3].x,
+                );
+
+                let dot0 = self.cols[0] * row0;
+                let dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
+
+                let rcp_det = $t::from(1.0) / dot1;
+                inverse * rcp_det
+            }
         }
 
         impl Mul for $n {
@@ -813,6 +896,15 @@ macro_rules! mat4s {
                     a.z * rhs.x + b.z * rhs.y + c.z * rhs.z + d.z * rhs.w,
                     a.w * rhs.x + b.w * rhs.y + c.w * rhs.z + d.z * rhs.w,
                 )
+            }
+        }
+
+        impl Mul<$t> for $n {
+            type Output = Self;
+            #[inline]
+            fn mul(mut self, rhs: $t) -> Self {
+                self.cols.iter_mut().for_each(|c| *c = rhs * *c);
+                self
             }
         }
 

@@ -1,4 +1,8 @@
 //! Dedicated transformation types as the combination of primitives.
+//! 
+//! Note that you may want to us these types over the corresponding type of
+//! homogeneous transformation matrix because they are faster in most operations,
+//! especially composition and inverse.
 use crate::*;
 
 use std::ops::*;
@@ -8,6 +12,10 @@ macro_rules! isometries {
         $(
         /// An Isometry, also known as a "rigid body transformation", i.e. a rotation followed
         /// by a translation.
+        /// 
+        /// You may want to us this type over the corresponding type of
+        /// homogeneous transformation matrix because it will be faster in most operations,
+        /// especially composition and inverse.
         #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $ison {
@@ -86,6 +94,18 @@ macro_rules! isometries {
             }
 
             #[inline]
+            pub fn inverse(&mut self) {
+                self.rotation.reverse();
+                self.translation = self.rotation * (-self.translation);
+            }
+
+            #[inline]
+            pub fn inversed(mut self) -> Self {
+                self.inverse();
+                self
+            }
+
+            #[inline]
             pub fn transform_vec(&self, mut vec: $vt) -> $vt {
                 vec = self.rotation * vec;
                 vec += self.translation;
@@ -142,6 +162,10 @@ macro_rules! similarities {
         $(
         /// A Similarity, also known as a "rigid body transformation", i.e. a uniform scaling
         /// followed by a rotation followed by a translation.
+        /// 
+        /// You may want to us this type over the corresponding type of
+        /// homogeneous transformation matrix because it will be faster in most operations,
+        /// especially composition and inverse.
         #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $sn {
@@ -240,6 +264,19 @@ macro_rules! similarities {
             #[inline]
             pub fn append_similarity(&mut self, other: Self) {
                 *self = other * *self;
+            }
+
+            #[inline]
+            pub fn inverse(&mut self) {
+                self.rotation.reverse();
+                self.translation = self.rotation * (-self.translation);
+                self.scale = $t::from(1.0) / self.scale;
+            }
+
+            #[inline]
+            pub fn inversed(mut self) -> Self {
+                self.inverse();
+                self
             }
 
             #[inline]
