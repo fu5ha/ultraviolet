@@ -1,11 +1,28 @@
+[![crates.io](http://meritbadge.herokuapp.com/ultraviolet)](https://crates.io/crates/ultraviolet)
+[![docs.rs](https://docs.rs/ultraviolet/badge.svg)](https://docs.rs/ultraviolet)
+
 ## `ultraviolet`
 
-This is a crate to do basic, computer-graphics-related, linear algebra, but *fast*, by
-taking full advantage of SIMD. To do this, it uses an "SoA" (Structure of Arrays) architecture
-such that each `Wec` (wide-vec) actually contains the data for 4 `Vec`s and will do any operation
-on all 4 of the vector 'lanes' at the same time. Doing this is potentially *much* (factor of 10)
+This is a crate to computer-graphics and games-related linear algebra, but *fast*, both in terms
+of productivity and in terms of runtime performance.
+
+In terms of productivity, ultraviolet uses no generics and is designed to be as straightforward
+of an interface as possible, resulting in fast compilation times and clear code. In addition, the
+lack of generics and Rust type-system "hacks" result in clear and concise errors that are easy to
+parse and fix for the user.
+
+In terms of runtime performance, ultraviolet was designed from the start with performance in mind.
+To do so, we provide two separate kinds of each type, each with nearly identical functionality,
+one with usual scalar f32 values, and the other a 'wide' type which uses SIMD f32x4 vectors for
+each value. This design is clearn and explicit in intent, and it also allows code to
+take full advantage of SIMD.
+
+The 'wide' types use an "SoA" (Structure of Arrays) architecture
+such that each `Wec` (wide-Vec) actually contains the data for 4 `Vec`s and will do any operation
+on all 4 of the vector 'lanes' at the same time (the same concept applies to a `Wat`, or 'wide-Mat').
+Doing this is potentially *much* (factor of 10)
 faster than an "AoS" (Array of Structs) layout, as all current Rust linear algebra libraries do,
-depending on your work load. However, algorithms must be carefully architected to take full advantage
+though it does depend on your workload. Algorithms must be carefully architected to take full advantage
 of this, and doing so can be easier said than done, especially if your algorithm involves significant
 branching.
 
@@ -31,5 +48,25 @@ one for all of the other libraries, since `ultraviolet` is computing that operat
 ### Features
 
 This crate is currently being dogfooded in my ray tracer [`rayn`](https://github.com/termhn/rayn),
-and it does what I need it to do. If it's missing something you need it to do, bug me on the GitHub
-issue tracker and/or Rust community discord server (I'm Fusha there) and I'll try to add it for you :)
+and is being used by some Amethyst developers in experimental projects while it is considered for adoption
+into Amethyst. It does what those users have currently needed it to do.
+
+There are a couple relatively unique/novel features in this lib, the most important being the use of the Geometric Algebra
+concepts of Bivectors and Rotors to represent 2d and 3d rotations, rather than implementing complex number algebra
+and Quaternion algebra.
+
+What this means for the programmer is that you will be using the `Rotor3` type in place of
+a Quaternion, though you can expect it to do basically all the same things that a Quaternion does. In fact, Quaternions
+are essentially just a special case of Rotors. The reason this decision was made was twofold: first, the derivation of
+the math is actually quite simple to understand. All the derivations for the code implemented in the Rotor structs in this
+library are written out in the `docs` folder of the GitHub repo; I derived them manually as part of the implementation.
+On the other hand, Quaternions are often basically just seen as black boxes that we programmers use to do rotations because
+they have some nice properties, but that we don't really understand. You can use Rotors this same way, but you can also easily
+understand them. Second is that in some sense they can be seen as 'more correct' than Quaternions, and especially they
+facilitate a more proper understanding of rotation as being something that occurs *within a plane* rather than something
+that occurs *around an axis*, as it is generally thought. Finally, Rotors also generalize do 4 and even higher dimensions,
+and if someone wants to they could implement a Rotor4 which retains all the properties of a Rotor3/Quaternion but does rotation
+in 4 dimensions instead, something which simply is not possible to do with Quaternions.
+
+If it's missing something you need it to do, bug me on the GitHub issue tracker and/or Rust community discord server
+(I'm Fusha there) and I'll try to add it for you, if I believe it fits with the vision of the lib :)
