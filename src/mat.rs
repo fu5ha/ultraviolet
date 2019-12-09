@@ -6,7 +6,7 @@ use crate::*;
 use wide::f32x4;
 
 macro_rules! mat2s {
-    ($($n:ident, $vt:ident => $t:ident),+) => {
+    ($($n:ident => $m3t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
         /// A 2x2 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
@@ -31,6 +31,16 @@ macro_rules! mat2s {
                 Self::new(
                     $vt::new($t::from(1.0), $t::from(0.0)),
                     $vt::new($t::from(0.0), $t::from(1.0)),
+                )
+            }
+
+            /// Turn this into a homogeneous 2d transformation matrix.
+            #[inline]
+            pub fn into_homogeneous(self) -> $m3t {
+                $m3t::new(
+                    self.cols[0].into(),
+                    self.cols[1].into(),
+                    $v3t::new($t::from(0.0), $t::from(0.0), $t::from(1.0))
                 )
             }
 
@@ -162,10 +172,10 @@ macro_rules! mat2s {
     }
 }
 
-mat2s!(Mat2, Vec2 => f32 , Wat2, Wec2 => f32x4);
+mat2s!(Mat2 => Mat3, Vec3, Vec2, f32, Wat2 => Wat3, Wec3, Wec2, f32x4);
 
 macro_rules! mat3s {
-    ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $vt:ident, $t:ident),+) => {
+    ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
         /// A 3x3 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
@@ -185,6 +195,49 @@ macro_rules! mat3s {
                 $n {
                     cols: [col1, col2, col3],
                 }
+            }
+
+            /// Assumes homogeneous 2d coordinates.
+            #[inline]
+            pub fn from_translation(trans: $v2t) -> Self {
+                Self::new(
+                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0)),
+                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0)),
+                    $vt::new(trans.x, trans.y, $t::from(1.0)))
+            }
+
+            /// Assumes homogeneous 2d coordinates.
+            #[inline]
+            pub fn from_scale_homogeneous(scale: $t) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale, zero, zero),
+                    $vt::new(zero, scale, zero),
+                    $vt::new(zero, zero, $t::from(1.0)),
+                )
+            }
+
+            /// Assumes homogeneous 2d coordinates.
+            #[inline]
+            pub fn from_nonuniform_scale_homogeneous(scale: $vt) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale.x, zero, zero),
+                    $vt::new(zero, scale.y, zero),
+                    $vt::new(zero, zero, $t::from(1.0)),
+                )
+            }
+
+            /// Builds a homogeneous 2d rotation matrix (in the xy plane) from a given angle in radians.
+            #[inline]
+            pub fn from_rotation_homogeneous(angle: $t) -> Self {
+                let (s, c) = angle.sin_cos();
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(c, s, zero),
+                    $vt::new(s, -c, zero),
+                    $vt::new(zero, zero, $t::from(1.0)),
+                )
             }
 
             #[inline]
@@ -513,7 +566,7 @@ macro_rules! mat3s {
     }
 }
 
-mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec3, f32x4);
+mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec2, Wec3, f32x4);
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {

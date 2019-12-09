@@ -8,7 +8,7 @@ use crate::*;
 use std::ops::*;
 
 macro_rules! isometries {
-    ($($ison:ident => ($rt:ident, $vt:ident, $t:ident)),+) => {
+    ($($ison:ident => ($mt:ident, $rt:ident, $vt:ident, $t:ident)),+) => {
         $(
         /// An Isometry, also known as a "rigid body transformation", i.e. a rotation followed
         /// by a translation.
@@ -111,6 +111,12 @@ macro_rules! isometries {
                 vec += self.translation;
                 vec
             }
+
+            #[inline]
+            pub fn into_homogeneous_matrix(self) -> $mt {
+                $mt::from_translation(self.translation)
+                    * self.rotation.into_matrix().into_homogeneous()
+            }
         }
 
         impl Mul<$ison> for $rt {
@@ -153,12 +159,12 @@ macro_rules! isometries {
 }
 
 isometries!(
-    Isometry2 => (Rotor2, Vec2, f32), WIsometry2 => (WRotor2, Wec2, f32x4),
-    Isometry3 => (Rotor3, Vec3, f32), WIsometry3 => (WRotor3, Wec3, f32x4)
+    Isometry2 => (Mat3, Rotor2, Vec2, f32), WIsometry2 => (Wat3, WRotor2, Wec2, f32x4),
+    Isometry3 => (Mat4, Rotor3, Vec3, f32), WIsometry3 => (Wat4, WRotor3, Wec3, f32x4)
 );
 
 macro_rules! similarities {
-    ($($sn:ident => ($rt:ident, $vt:ident, $t:ident)),+) => {
+    ($($sn:ident => ($mt:ident, $rt:ident, $vt:ident, $t:ident)),+) => {
         $(
         /// A Similarity, also known as a "rigid body transformation", i.e. a uniform scaling
         /// followed by a rotation followed by a translation.
@@ -286,6 +292,12 @@ macro_rules! similarities {
                 vec += self.translation;
                 vec
             }
+
+            #[inline]
+            pub fn into_homogeneous_matrix(self) -> $mt {
+                $mt::from_translation(self.translation)
+                    * self.rotation.into_matrix().into_homogeneous()
+            }
         }
 
         impl Mul<$sn> for $rt {
@@ -329,6 +341,6 @@ macro_rules! similarities {
 }
 
 similarities!(
-    Similarity2 => (Rotor2, Vec2, f32), WSimilarity2 => (WRotor2, Wec2, f32x4),
-    Similarity3 => (Rotor3, Vec3, f32), WSimilarity3 => (WRotor3, Wec3, f32x4)
+    Similarity2 => (Mat3, Rotor2, Vec2, f32), WSimilarity2 => (Wat3, WRotor2, Wec2, f32x4),
+    Similarity3 => (Mat4, Rotor3, Vec3, f32), WSimilarity3 => (Wat4, WRotor3, Wec3, f32x4)
 );
