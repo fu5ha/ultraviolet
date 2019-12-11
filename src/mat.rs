@@ -1004,7 +1004,7 @@ macro_rules! mat4s {
                     a.x * rhs.x + b.x * rhs.y + c.x * rhs.z + d.x * rhs.w,
                     a.y * rhs.x + b.y * rhs.y + c.y * rhs.z + d.y * rhs.w,
                     a.z * rhs.x + b.z * rhs.y + c.z * rhs.z + d.z * rhs.w,
-                    a.w * rhs.x + b.w * rhs.y + c.w * rhs.z + d.z * rhs.w,
+                    a.w * rhs.x + b.w * rhs.y + c.w * rhs.z + d.w * rhs.w,
                 )
             }
         }
