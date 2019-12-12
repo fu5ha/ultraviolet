@@ -10,8 +10,9 @@ use std::ops::*;
 macro_rules! isometries {
     ($($ison:ident => ($mt:ident, $rt:ident, $vt:ident, $t:ident)),+) => {
         $(
-        /// An Isometry, also known as a "rigid body transformation", i.e. a rotation followed
-        /// by a translation.
+        /// An Isometry, aka a "rigid body transformation".
+        ///
+        /// Defined as the combination of a rotation *and then* a translation.
         /// 
         /// You may want to us this type over the corresponding type of
         /// homogeneous transformation matrix because it will be faster in most operations,
@@ -166,8 +167,9 @@ isometries!(
 macro_rules! similarities {
     ($($sn:ident => ($mt:ident, $rt:ident, $vt:ident, $t:ident)),+) => {
         $(
-        /// A Similarity, also known as a "rigid body transformation", i.e. a uniform scaling
-        /// followed by a rotation followed by a translation.
+        /// A Similarity, i.e. an Isometry but with an added uniform scaling.
+        ///
+        /// Defined as a uniform scaling followed by a rotation followed by a translation.
         /// 
         /// You may want to us this type over the corresponding type of
         /// homogeneous transformation matrix because it will be faster in most operations,
