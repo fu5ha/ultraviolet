@@ -1058,6 +1058,7 @@ macro_rules! mat4s {
 
 mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, Wec3, f32x4);
 
+// Utility functions for mat4 specific code
 impl Mat4 {
     pub fn translate(&mut self, translation: &Vec3) {
         self[0][3] += self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];

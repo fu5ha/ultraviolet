@@ -297,6 +297,13 @@ macro_rules! vec2s {
             }
         }
 
+        impl Into<[$t; 2]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 2] {
+                [self.x, self.y]
+            }
+        }
+
         impl From<[$t; 2]> for $n {
             #[inline]
             fn from(comps: [$t; 2]) -> Self {
@@ -896,6 +903,13 @@ macro_rules! vec3s {
             }
         }
 
+        impl Into<[$t; 3]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 3] {
+                [self.x, self.y, self.z]
+            }
+        }
+
         impl From<[$t; 3]> for $n {
             #[inline]
             fn from(comps: [$t; 3]) -> Self {
@@ -1475,6 +1489,13 @@ macro_rules! vec4s {
         impl EqualsEps for $n {
             fn eq_eps(self, other: Self) -> bool {
                 self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
+            }
+        }
+
+        impl Into<[$t; 4]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 4] {
+                [self.x, self.y, self.z, self.w]
             }
         }
 
