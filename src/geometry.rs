@@ -5,53 +5,69 @@ use crate::{Vec3, Vec3u};
 /// A plane which can be intersected by a ray.
 #[derive(Debug, Copy, Clone)]
 pub struct Plane {
-    /// f32he plane described as x,y,z normal
-    normal: Vec3,
+    /// plane described as x,y,z normal
+    pub normal: Vec3,
+
     /// dot product of the point and normal, representing the plane position
-    bias: f32,
+    pub bias: f32,
 }
 impl Plane {
     /// Create a new `Plane`.
+    #[inline]
     pub fn new(normal: Vec3, bias: f32) -> Self {
         Plane { normal, bias }
     }
 
-    /// Create a new `Plane` from a point normal representation
-    pub fn from_point_normal(point: &Vec3, normal: &Vec3) -> Self {
-        let normalized = normal.normalized();
+    /// Create a new `Plane` from a point normal representation. The normal parameter must already be normalized.
+    #[inline]
+    pub fn from_point_normal(point: Vec3, normal: Vec3) -> Self {
         Self {
-            normal: Vec3::new(normalized.x, normalized.y, normalized.z),
-            bias: point.dot(normalized),
+            normal,
+            bias: point.dot(normal),
         }
     }
 
     /// Create a new `Plane` from a point normal representation
-    pub fn from_point_vectors(point: &Vec3, v1: &Vec3, v2: &Vec3) -> Self {
-        Self::from_point_normal(point, &v1.cross(*v2))
+    #[inline]
+    pub fn from_point_vectors(point: Vec3, v1: Vec3, v2: Vec3) -> Self {
+        Self::from_point_normal(point, v1.cross(v2))
     }
 
     /// Create a `Plane` which is facing along the X-Axis at the provided coordinate.
+    #[inline]
     pub fn with_x(x: f32) -> Self {
-        Self::from_point_normal(&Vec3::new(x, 0.0, 0.0), &Vec3::new(1.0, 0.0, 0.0))
+        Self::from_point_normal(Vec3::new(x, 0.0, 0.0), Vec3::new(1.0, 0.0, 0.0))
     }
 
     /// Create a `Plane` which is facing along the Y-Axis at the provided coordinate.
+    #[inline]
     pub fn with_y(y: f32) -> Self {
-        Self::from_point_normal(&Vec3::new(0.0, y, 0.0), &Vec3::new(0.0, 1.0, 0.0))
+        Self::from_point_normal(Vec3::new(0.0, y, 0.0), Vec3::new(0.0, 1.0, 0.0))
     }
 
     /// Create a `Plane` which is facing along the Z-Axis at the provided coordinate.
+    #[inline]
     pub fn with_z(z: f32) -> Self {
-        Self::from_point_normal(&Vec3::new(0.0, 0.0, z), &Vec3::new(0.0, 0.0, 1.0))
+        Self::from_point_normal(Vec3::new(0.0, 0.0, z), Vec3::new(0.0, 0.0, 1.0))
     }
 
     /// f32his `Plane` normal
-    pub fn normal(&self) -> &Vec3 {
-        &self.normal
+    #[inline]
+    pub fn normal(&self) -> Vec3 {
+        self.normal
     }
 
     /// Normalized representation of this `Plane`
-    pub fn normalize(&self) -> Self {
+    #[inline]
+    pub fn normalize(&mut self)  {
+        let distance = self.normal.mag();
+        self.normal = self.normal / distance;
+        self.bias = self.bias / distance;
+    }
+
+    /// Normalized representation of this `Plane`
+    #[inline]
+    pub fn normalized(&self) -> Self {
         let distance = self.normal.mag();
         Self {
             normal: self.normal / distance,
@@ -60,16 +76,19 @@ impl Plane {
     }
 
     /// Returns the dot product of this `Plane` and a provided `Vec3`
-    pub fn dot_point(&self, point: &Vec3) -> f32 {
+    #[inline]
+    pub fn dot_point(&self, point: Vec3) -> f32 {
         self.normal.x * point.x + self.normal.y * point.y + self.normal.z * point.z + self.bias
     }
 
     /// Returns the dot product of this `Plane` and a provided `Vec3`
-    pub fn dot(&self, point: &Vec3) -> f32 {
+    #[inline]
+    pub fn dot(&self, point: Vec3) -> f32 {
         self.normal.x * point.x + self.normal.y * point.y + self.normal.z * point.z
     }
 
     /// Returns the dot product of this `Plane` with another `Plane`
+    #[inline]
     pub fn dot_plane(&self, plane: &Plane) -> f32 {
         self.normal.x * plane.normal.x
             + self.normal.y * plane.normal.y
@@ -78,7 +97,8 @@ impl Plane {
     }
 
     /// Returns the intersection distance of the provided line given a point and direction, or `None` if none occurs.
-    pub fn intersect_line(&self, point: &Vec3, direction: &Vec3) -> Option<f32> {
+    #[inline]
+    pub fn intersect_line(&self, point: Vec3, direction: Vec3) -> Option<f32> {
         let fv = self.dot(direction);
         let distance = self.dot_point(point) / fv;
         if fv.abs() > std::f32::MIN {
@@ -89,17 +109,19 @@ impl Plane {
     }
 
     /// Returns the intersection distance of the provided `Ray`, or `None` if none occurs.
+    #[inline]
     pub fn intersect_ray(&self, ray: &Ray) -> Option<f32> {
-        self.intersect_line(&ray.origin, &ray.direction)
+        self.intersect_line(ray.origin, ray.direction)
     }
 }
 
-/// A Ray represents and infinite half-line starting at `origin` and going in specified unit length `direction`.
+/// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
-    /// f32he origin point of the ray
+    /// origin point of the ray
     pub origin: Vec3,
-    /// f32he normalized direction vector of the ray
+
+    /// normalized direction vector of the ray
     pub direction: Vec3,
 }
 impl Ray {
@@ -127,7 +149,7 @@ impl Aabb {
 
     #[inline]
     #[must_use]
-    pub fn contains(&self, target: &Vec3) -> bool {
+    pub fn contains(&self, target: Vec3) -> bool {
         target.x >= self.min.x
             && target.x <= self.max.x
             && target.y >= self.min.y
@@ -164,7 +186,7 @@ impl Aabbu {
 
     #[inline]
     #[must_use]
-    pub fn contains(&self, target: &Vec3u) -> bool {
+    pub fn contains(&self, target: Vec3u) -> bool {
         target.x >= self.min.x
             && target.x <= self.max.x
             && target.y >= self.min.y

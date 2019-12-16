@@ -31,6 +31,7 @@ macro_rules! vec2i {
             pub y: $t,
         }
 
+
         impl $n {
             #[inline]
             pub fn new(x: $t, y: $t) -> Self {
@@ -92,6 +93,10 @@ macro_rules! vec2i {
                 *self - (2 * self.dot(normal) * normal)
             }
 
+            #[inline]
+            pub fn mag(&self) -> $t {
+                (self.mag_sq() as f64).sqrt() as $t
+            }
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
@@ -522,6 +527,11 @@ macro_rules! vec3i {
             }
 
             #[inline]
+            pub fn mag(&self) -> $t {
+                (self.mag_sq() as f64).sqrt() as $t
+            }
+
+            #[inline]
             pub fn mag_sq(&self) -> $t {
                 self.x.mul_add(self.x, self.y.mul_add(self.y, self.z * self.z))
             }
@@ -937,6 +947,11 @@ macro_rules! vec4i {
                 let mut a = *self;
                 a.reflect(normal);
                 a
+            }
+
+            #[inline]
+            pub fn mag(&self) -> $t {
+                (self.mag_sq() as f64).sqrt() as $t
             }
 
             #[inline]
