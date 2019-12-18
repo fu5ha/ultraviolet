@@ -1,25 +1,45 @@
-//! Vectors and points, i.e. directed line segments and locations.
-use crate::bivec::*;
-use crate::rotor::*;
-use crate::util::*;
 use std::ops::*;
 
-use wide::f32x4;
+pub trait MulAdd<A = Self, B = Self> {
+    /// The resulting type after applying the fused multiply-add.
+    type Output;
 
-macro_rules! vec2s {
-    ($(($n:ident, $bn:ident, $rn:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
+    /// Performs the fused multiply-add operation.
+    fn mul_add(self, a: A, b: B) -> Self::Output;
+}
+
+impl MulAdd<u32, u32> for u32 {
+    type Output = u32;
+
+    fn mul_add(self, a: u32, b: u32) -> Self::Output {
+        (self * a) + b
+    }
+}
+
+
+impl MulAdd<i32, i32> for i32 {
+    type Output = i32;
+
+    fn mul_add(self, a: i32, b: i32) -> Self::Output {
+        (self * a) + b
+    }
+}
+
+macro_rules! vec2i {
+    ($(($n:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
         $(
         /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
             pub y: $t,
         }
+
 
         impl $n {
             #[inline]
@@ -34,26 +54,26 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0) }
+                $n{ x: 1, y: 0 }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0) }
+                $n{ x: 0, y: 1 }
             }
 
             /// Create a homogeneous 2d *point* from this vector interpreted as a point,
-            /// meaning the homogeneous component will start with a value of 1.0.
+            /// meaning the homogeneous component will start with a value of 1.
             #[inline]
             pub fn into_homogeneous_point(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: $t::from(1.0) }
+                $v3t { x: self.x, y: self.y, z: 1 }
             }
 
             /// Create a homogeneous 2d *vector* from this vector,
-            /// meaning the homogeneous component will always have a value of 0.0.
+            /// meaning the homogeneous component will always have a value of 0.
             #[inline]
             pub fn into_homogeneous_vector(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: $t::from(0.0) }
+                $v3t { x: self.x, y: self.y, z: 0 }
             }
 
             /// Create a 2d point from a homogeneous 2d *point*, performing
@@ -77,70 +97,19 @@ macro_rules! vec2s {
                 self.x.mul_add(other.x, self.y * other.y)
             }
 
-            /// The wedge (aka exterior) product of two vectors.
-            ///
-            /// This operation results in a bivector, which represents
-            /// the plane parallel to the two vectors, and which has a
-            /// 'oriented area' equal to the parallelogram created by extending
-            /// the two vectors, oriented such that the positive direction is the
-            /// one which would move `self` closer to `other`.
-            #[inline]
-            pub fn wedge(&self, other: $n) -> $bn {
-                $bn::new(self.x.mul_add(other.y, -(other.x * self.y)))
-            }
-
-            /// The geometric product of this and another vector, which
-            /// is defined as the sum of the dot product and the wedge product.
-            ///
-            /// This operation results in a 'rotor', named as such as it may define
-            /// a rotation. The rotor which results from the geometric product
-            /// will rotate in the plane parallel to the two vectors, by twice the angle between
-            /// them and in the opposite direction (i.e. it will rotate in the direction that would
-            /// bring `other` towards `self`, and rotate in that direction by twice the angle between them).
-            #[inline]
-            pub fn geom(&self, other: $n) -> $rn {
-                $rn::new(self.dot(other), self.wedge(other))
-            }
-
-            #[inline]
-            pub fn rotate_by(&mut self, rotor: $rn) {
-                rotor.rotate_vec(self);
-            }
-
-            #[inline]
-            pub fn rotated_by(mut self, rotor: $rn) -> Self {
-                rotor.rotate_vec(&mut self);
-                self
-            }
-
             #[inline]
             pub fn reflected(&self, normal: $n) -> Self {
-                *self - ($t::from(2.0) * self.dot(normal) * normal)
-            }
-
-
-            #[inline]
-            pub fn mag_sq(&self) -> $t {
-                self.x.mul_add(self.x, self.y * self.y)
+                *self - (2 * self.dot(normal) * normal)
             }
 
             #[inline]
             pub fn mag(&self) -> $t {
-                self.mag_sq().sqrt()
+                (self.mag_sq() as f64).sqrt() as $t
             }
 
             #[inline]
-            pub fn normalize(&mut self) {
-                let mag = self.mag();
-                self.x /= mag;
-                self.y /= mag;
-            }
-
-            #[inline]
-            pub fn normalized(&self) -> Self {
-                let mut r = self.clone();
-                r.normalize();
-                r
+            pub fn mag_sq(&self) -> $t {
+                self.x.mul_add(self.x, self.y * self.y)
             }
 
             #[inline]
@@ -153,7 +122,7 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x.abs(), self.y.abs())
+                Self::new(self.x, self.y)
             }
 
             #[inline]
@@ -212,22 +181,22 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast(0)
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast(1)
             }
 
             #[inline]
             pub fn xyz(&self) -> $v3t {
-                $v3t::new(self.x, self.y, $t::from(0.0))
+                $v3t::new(self.x, self.y, 0)
             }
 
             #[inline]
             pub fn xyzw(&self) -> $v4t {
-                $v4t::new(self.x, self.y, $t::from(0.0), $t::from(0.0))
+                $v4t::new(self.x, self.y, 0, 0)
             }
 
             #[inline]
@@ -297,17 +266,16 @@ macro_rules! vec2s {
             }
         }
 
-        impl Into<[$t; 2]> for $n {
-            #[inline]
-            fn into(self) -> [$t; 2] {
-                [self.x, self.y]
-            }
-        }
-
         impl From<[$t; 2]> for $n {
             #[inline]
             fn from(comps: [$t; 2]) -> Self {
                 Self::new(comps[0], comps[1])
+            }
+        }
+        impl Into<[$t; 2]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 2] {
+                [self.x, self.y]
             }
         }
 
@@ -343,12 +311,6 @@ macro_rules! vec2s {
             #[inline]
             fn from(v: $n) -> Self {
                 (v.x, v.y)
-            }
-        }
-
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y)
             }
         }
 
@@ -456,14 +418,6 @@ macro_rules! vec2s {
             }
         }
 
-        impl Neg for $n {
-            type Output = $n;
-            #[inline]
-            fn neg(self) -> $n {
-                self * $t::from(-1.0)
-            }
-        }
-
         impl Index<usize> for $n {
             type Output = $t;
 
@@ -489,99 +443,18 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!((Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32, (Wec2, WBivec2, WRotor2, Wec3, Wec4) => f32x4);
+vec2i!((Vec2u, Vec3u, Vec4u) => u32);
+vec2i!((Vec2i, Vec3i, Vec4i) => i32);
 
-impl From<[Vec2; 4]> for Wec2 {
-    #[inline]
-    fn from(vecs: [Vec2; 4]) -> Self {
-        Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-        }
-    }
-}
-
-impl From<Vec3> for Vec2 {
-    #[inline]
-    fn from(vec: Vec3) -> Self {
-        Self { x: vec.x, y: vec.y }
-    }
-}
-
-impl From<Wec3> for Wec2 {
-    #[inline]
-    fn from(vec: Wec3) -> Self {
-        Self { x: vec.x, y: vec.y }
-    }
-}
-
-impl Vec2 {
-    #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
-        let n = normal;
-        let i = *self;
-        let ndi = n.dot(i);
-        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
-        if k < 0.0 {
-            Self::zero()
-        } else {
-            i * eta - n * (eta * ndi * k.sqrt())
-        }
-    }
-}
-
-impl Wec2 {
-    #[inline]
-    pub fn new_splat(x: f32, y: f32) -> Self {
-        Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec2) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Merge two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise merge operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
-        }
-    }
-
-    #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32x4) -> Self {
-        let n = normal;
-        let i = *self;
-        let one = f32x4::from(1.0);
-        let ndi = n.dot(i);
-
-        let k = one - eta * eta * (one - ndi * ndi);
-        let mask = k.cmp_lt(f32x4::from(0.0));
-
-        let out = i * eta - n * (eta * ndi * k.sqrt());
-
-        Self::merge(mask, Self::zero(), out)
-    }
-}
-
-macro_rules! vec3s {
-    ($(($v2t:ident, $n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
+macro_rules! vec3i {
+    ($(($v2t:ident, $n:ident, $v4t:ident) => $t:ident),+) => {
         /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
         /// or as a homogeneous 2d vector or point.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -602,31 +475,40 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0), z: $t::from(0.0) }
+                $n{ x: 1, y: 0, z: 0 }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0), z: $t::from(0.0) }
+                $n{ x: 0, y: 1, z: 0 }
             }
 
             #[inline]
             pub fn unit_z() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0) }
+                $n{ x: 0, y: 0, z: 1 }
+            }
+
+            #[inline]
+            pub fn cross(&self, other: $n) -> Self {
+                $n::new(
+                    self.y.mul_add(other.z, -(self.z as i32) as $t * other.y),
+                    self.z.mul_add(other.x, -(self.x as i32) as $t * other.z),
+                    self.x.mul_add(other.y, -(self.y as i32) as $t * other.x),
+                )
             }
 
             /// Create a homogeneous 3d *point* from this vector interpreted as a point,
-            /// meaning the homogeneous component will start with a value of 1.0.
+            /// meaning the homogeneous component will start with a value of 1.
             #[inline]
             pub fn into_homogeneous_point(self) -> $v4t {
-                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(1.0) }
+                $v4t { x: self.x, y: self.y, z: self.z, w: 1 }
             }
 
             /// Create a homogeneous 3d *vector* from this vector,
-            /// meaning the homogeneous component will always have a value of 0.0.
+            /// meaning the homogeneous component will always have a value of 0.
             #[inline]
             pub fn into_homogeneous_vector(self) -> $v4t {
-                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(0.0) }
+                $v4t { x: self.x, y: self.y, z: self.z, w: 0 }
             }
 
             /// Create a 3d point from a homogeneous 3d *point*, performing
@@ -651,58 +533,9 @@ macro_rules! vec3s {
                 self.x.mul_add(other.x, self.y.mul_add(other.y, self.z * other.z))
             }
 
-            /// The wedge (aka exterior) product of two vectors.
-            ///
-            /// This operation results in a bivector, which represents
-            /// the plane parallel to the two vectors, and which has a
-            /// 'oriented area' equal to the parallelogram created by extending
-            /// the two vectors, oriented such that the positive direction is the
-            /// one which would move `self` closer to `other`.
-            #[inline]
-            pub fn wedge(&self, other: $n) -> $bn {
-                $bn::new(
-                    self.x.mul_add(other.y, -(self.y * other.x)),
-                    self.x.mul_add(other.z, -(self.z * other.x)),
-                    self.y.mul_add(other.z, -(self.z * other.y)),
-                )
-            }
-
-            /// The geometric product of this and another vector, which
-            /// is defined as the sum of the dot product and the wedge product.
-            ///
-            /// This operation results in a 'rotor', named as such as it may define
-            /// a rotation. The rotor which results from the geometric product
-            /// will rotate in the plane parallel to the two vectors, by twice the angle between
-            /// them and in the opposite direction (i.e. it will rotate in the direction that would
-            /// bring `other` towards `self`, and rotate in that direction by twice the angle between them).
-            #[inline]
-            pub fn geom(&self, other: $n) -> $rn {
-                $rn::new(self.dot(other), self.wedge(other))
-            }
-
-            #[inline]
-            pub fn rotate_by(&mut self, rotor: $rn) {
-                rotor.rotate_vec(self);
-            }
-
-            #[inline]
-            pub fn rotated_by(mut self, rotor: $rn) -> Self {
-                rotor.rotate_vec(&mut self);
-                self
-            }
-
-            #[inline]
-            pub fn cross(&self, other: $n) -> Self {
-                $n::new(
-                    self.y.mul_add(other.z, -self.z * other.y),
-                    self.z.mul_add(other.x, -self.x * other.z),
-                    self.x.mul_add(other.y, -self.y * other.x),
-                )
-            }
-
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self -= $t::from(2.0) * self.dot(normal) * normal;
+                *self -= 2 * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -713,28 +546,13 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn mag(&self) -> $t {
+                (self.mag_sq() as f64).sqrt() as $t
+            }
+
+            #[inline]
             pub fn mag_sq(&self) -> $t {
                 self.x.mul_add(self.x, self.y.mul_add(self.y, self.z * self.z))
-            }
-
-            #[inline]
-            pub fn mag(&self) -> $t {
-                self.mag_sq().sqrt()
-            }
-
-            #[inline]
-            pub fn normalize(&mut self) {
-                let mag = self.mag();
-                self.x /= mag;
-                self.y /= mag;
-                self.z /= mag;
-            }
-
-            #[inline]
-            pub fn normalized(&self) -> Self {
-                let mut r = self.clone();
-                r.normalize();
-                r
             }
 
             #[inline]
@@ -748,7 +566,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x.abs(), self.y.abs(), self.z.abs())
+                Self::new(self.x, self.y, self.z)
             }
 
             #[inline]
@@ -812,12 +630,12 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast(0)
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast(1)
             }
 
 
@@ -828,7 +646,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn xyzw(&self) -> $v4t {
-                $v4t::new(self.x, self.y, self.z, $t::from(0.0))
+                $v4t::new(self.x, self.y, self.z, 0)
             }
 
             #[inline]
@@ -897,23 +715,16 @@ macro_rules! vec3s {
             }
         }
 
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z)
-            }
-        }
-
-        impl Into<[$t; 3]> for $n {
-            #[inline]
-            fn into(self) -> [$t; 3] {
-                [self.x, self.y, self.z]
-            }
-        }
-
         impl From<[$t; 3]> for $n {
             #[inline]
             fn from(comps: [$t; 3]) -> Self {
                 Self::new(comps[0], comps[1], comps[2])
+            }
+        }
+        impl Into<[$t; 3]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 3] {
+                [self.x, self.y, self.z]
             }
         }
 
@@ -1062,14 +873,6 @@ macro_rules! vec3s {
             }
         }
 
-        impl Neg for $n {
-            type Output = $n;
-            #[inline]
-            fn neg(self) -> $n {
-                self * $t::from(-1.0)
-            }
-        }
-
         impl Index<usize> for $n {
             type Output = $t;
 
@@ -1097,139 +900,10 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!((Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32, (Wec2, Wec3, WBivec3, WRotor3, Wec4) => f32x4);
+vec3i!((Vec2u, Vec3u, Vec4u) => u32);
+vec3i!((Vec2i, Vec3i, Vec4i) => i32);
 
-impl From<Vec2> for Vec3 {
-    #[inline]
-    fn from(vec: Vec2) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: 0.0,
-        }
-    }
-}
-
-impl From<Wec2> for Wec3 {
-    #[inline]
-    fn from(vec: Wec2) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: f32x4::from(0.0),
-        }
-    }
-}
-
-impl From<Vec4> for Vec3 {
-    #[inline]
-    fn from(vec: Vec4) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-        }
-    }
-}
-
-impl From<Wec4> for Wec3 {
-    #[inline]
-    fn from(vec: Wec4) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-        }
-    }
-}
-
-impl Vec3 {
-    #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
-        let n = normal;
-        let i = *self;
-        let ndi = n.dot(i);
-        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
-        if k < 0.0 {
-            Self::zero()
-        } else {
-            i * eta - n * (eta * ndi * k.sqrt())
-        }
-    }
-}
-
-impl Wec3 {
-    #[inline]
-    pub fn new_splat(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-            z: f32x4::from(z),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec3) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Merge two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise merge operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
-            z: mask.merge(tru.z, fals.z),
-        }
-    }
-
-    #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32x4) -> Self {
-        let n = normal;
-        let i = *self;
-        let one = f32x4::from(1.0);
-        let ndi = n.dot(i);
-
-        let k = one - eta * eta * (one - ndi * ndi);
-        let mask = k.cmp_lt(f32x4::from(0.0));
-
-        let out = i.mul_add(Wec3::broadcast(eta), -n * (eta * ndi * k.sqrt()));
-
-        Self::merge(mask, Self::zero(), out)
-    }
-}
-
-impl Into<[Vec3; 4]> for Wec3 {
-    #[inline]
-    fn into(self) -> [Vec3; 4] {
-        let xs = self.x.as_ref();
-        let ys = self.y.as_ref();
-        let zs = self.z.as_ref();
-        [
-            Vec3::new(xs[0], ys[0], zs[0]),
-            Vec3::new(xs[1], ys[1], zs[1]),
-            Vec3::new(xs[2], ys[2], zs[2]),
-            Vec3::new(xs[3], ys[3], zs[3]),
-        ]
-    }
-}
-
-impl From<[Vec3; 4]> for Wec3 {
-    #[inline]
-    fn from(vecs: [Vec3; 4]) -> Self {
-        Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-        }
-    }
-}
-
-macro_rules! vec4s {
+macro_rules! vec4i {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
         /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
         /// or as a homogeneous 3d vector or point.
@@ -1237,7 +911,7 @@ macro_rules! vec4s {
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -1259,22 +933,22 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0), z: $t::from(0.0), w: $t::from(0.0) }
+                $n{ x: 1, y: 0, z: 0, w: 0 }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0), z: $t::from(0.0), w: $t::from(0.0) }
+                $n{ x: 0, y: 1, z: 0, w: 0 }
             }
 
             #[inline]
             pub fn unit_z() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0), w: $t::from(0.0) }
+                $n{ x: 0, y: 0, z: 1, w: 0 }
             }
 
             #[inline]
             pub fn unit_w() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(0.0), w: $t::from(1.0) }
+                $n{ x: 0, y: 0, z: 0, w: 1 }
             }
 
             #[inline]
@@ -1284,7 +958,7 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self -= $t::from(2.0) * self.dot(normal) * normal;
+                *self -= 2 * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -1295,29 +969,13 @@ macro_rules! vec4s {
             }
 
             #[inline]
+            pub fn mag(&self) -> $t {
+                (self.mag_sq() as f64).sqrt() as $t
+            }
+
+            #[inline]
             pub fn mag_sq(&self) -> $t {
                 self.x.mul_add(self.x, self.y.mul_add(self.y, self.z.mul_add(self.z, self.w * self.w)))
-            }
-
-            #[inline]
-            pub fn mag(&self) -> $t {
-                self.mag_sq().sqrt()
-            }
-
-            #[inline]
-            pub fn normalize(&mut self) {
-                let mag = self.mag();
-                self.x /= mag;
-                self.y /= mag;
-                self.z /= mag;
-                self.w /= mag;
-            }
-
-            #[inline]
-            pub fn normalized(&self) -> Self {
-                let mut r = self.clone();
-                r.normalize();
-                r
             }
 
             #[inline]
@@ -1328,11 +986,6 @@ macro_rules! vec4s {
                     self.z.mul_add(mul.z, add.z),
                     self.w.mul_add(mul.w, add.w),
                 )
-            }
-
-            #[inline]
-            pub fn abs(&self) -> Self {
-                Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
             }
 
             #[inline]
@@ -1401,12 +1054,12 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast(0 as $t)
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast(1 as $t)
             }
 
             #[inline]
@@ -1486,23 +1139,16 @@ macro_rules! vec4s {
             }
         }
 
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
-            }
-        }
-
-        impl Into<[$t; 4]> for $n {
-            #[inline]
-            fn into(self) -> [$t; 4] {
-                [self.x, self.y, self.z, self.w]
-            }
-        }
-
         impl From<[$t; 4]> for $n {
             #[inline]
             fn from(comps: [$t; 4]) -> Self {
                 Self::new(comps[0], comps[1], comps[2], comps[3])
+            }
+        }
+        impl Into<[$t; 4]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 4] {
+                [self.x, self.y, self.z, self.w]
             }
         }
 
@@ -1657,14 +1303,6 @@ macro_rules! vec4s {
             }
         }
 
-        impl Neg for $n {
-            type Output = $n;
-            #[inline]
-            fn neg(self) -> $n {
-                self * $t::from(-1.0)
-            }
-        }
-
         impl Index<usize> for $n {
             type Output = $t;
 
@@ -1694,103 +1332,73 @@ macro_rules! vec4s {
     }
 }
 
-vec4s!(Vec4, Vec2, Vec3 => f32, Wec4, Wec2, Wec3 => f32x4);
+vec4i!(Vec4u, Vec2u, Vec3u => u32);
+vec4i!(Vec4i, Vec2i, Vec3i => i32);
 
-impl From<Vec3> for Vec4 {
+impl From<Vec3u> for Vec2u {
     #[inline]
-    fn from(vec: Vec3) -> Self {
+    fn from(vec: Vec3u) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+        }
+    }
+}
+
+
+impl From<Vec3u> for Vec4u {
+    #[inline]
+    fn from(vec: Vec3u) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
             z: vec.z,
-            w: 0.0,
+            w: 0,
         }
     }
 }
 
-impl From<Wec3> for Wec4 {
+impl From<Vec4u> for Vec3u {
     #[inline]
-    fn from(vec: Wec3) -> Self {
+    fn from(vec: Vec4u) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
             z: vec.z,
-            w: f32x4::from(0.0),
         }
     }
 }
 
-impl Vec4 {
+impl From<Vec3i> for Vec2i {
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
-        let n = normal;
-        let i = *self;
-        let ndi = n.dot(i);
-        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
-        if k < 0.0 {
-            Self::zero()
-        } else {
-            i * eta - n * (eta * ndi * k.sqrt())
-        }
-    }
-}
-
-impl Wec4 {
-    #[inline]
-    pub fn new_splat(x: f32, y: f32, z: f32, w: f32) -> Self {
+    fn from(vec: Vec3i) -> Self {
         Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-            z: f32x4::from(z),
-            w: f32x4::from(w),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec4) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Merge two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise merge operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
-            z: mask.merge(tru.z, fals.z),
-            w: mask.merge(tru.w, fals.w),
+            x: vec.x,
+            y: vec.y,
         }
     }
 }
 
-impl Into<[Vec4; 4]> for Wec4 {
+
+impl From<Vec3i> for Vec4i {
     #[inline]
-    fn into(self) -> [Vec4; 4] {
-        let xs = self.x.as_ref();
-        let ys = self.y.as_ref();
-        let zs = self.z.as_ref();
-        let ws = self.w.as_ref();
-        [
-            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
-            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
-            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
-            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
-        ]
+    fn from(vec: Vec3i) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+            w: 0,
+        }
     }
 }
 
-impl From<[Vec4; 4]> for Wec4 {
+impl From<Vec4i> for Vec3i {
     #[inline]
-    fn from(vecs: [Vec4; 4]) -> Self {
+    fn from(vec: Vec4i) -> Self {
         Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
         }
     }
 }

@@ -79,6 +79,8 @@ pub mod projection;
 pub mod rotor;
 pub mod transform;
 pub mod vec;
+pub mod int;
+pub mod geometry;
 
 pub use bivec::*;
 pub use lerp::*;
@@ -86,6 +88,7 @@ pub use mat::*;
 pub use rotor::*;
 pub use transform::*;
 pub use vec::*;
+pub use int::*;
 
 pub use wide;
 pub use wide::f32x4;
