@@ -1063,4 +1063,12 @@ impl Mat4 {
     pub fn translate(&mut self, translation: &Vec3) {
         self[0][3] += self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
     }
+
+    pub fn translated(&self, translation: &Vec3) -> Mat4 {
+        let mut res = *self;
+        res.translate(translation);
+
+        res
+    }
 }
+

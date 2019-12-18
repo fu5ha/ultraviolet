@@ -16,6 +16,15 @@ impl MulAdd<u32, u32> for u32 {
     }
 }
 
+
+impl MulAdd<i32, i32> for i32 {
+    type Output = i32;
+
+    fn mul_add(self, a: i32, b: i32) -> Self::Output {
+        (self * a) + b
+    }
+}
+
 macro_rules! vec2i {
     ($(($n:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
         $(
@@ -435,6 +444,7 @@ macro_rules! vec2i {
 }
 
 vec2i!((Vec2u, Vec3u, Vec4u) => u32);
+vec2i!((Vec2i, Vec3i, Vec4i) => i32);
 
 macro_rules! vec3i {
     ($(($v2t:ident, $n:ident, $v4t:ident) => $t:ident),+) => {
@@ -476,6 +486,15 @@ macro_rules! vec3i {
             #[inline]
             pub fn unit_z() -> Self {
                 $n{ x: 0, y: 0, z: 1 }
+            }
+
+            #[inline]
+            pub fn cross(&self, other: $n) -> Self {
+                $n::new(
+                    self.y.mul_add(other.z, -(self.z as i32) as $t * other.y),
+                    self.z.mul_add(other.x, -(self.x as i32) as $t * other.z),
+                    self.x.mul_add(other.y, -(self.y as i32) as $t * other.x),
+                )
             }
 
             /// Create a homogeneous 3d *point* from this vector interpreted as a point,
@@ -882,7 +901,7 @@ macro_rules! vec3i {
 }
 
 vec3i!((Vec2u, Vec3u, Vec4u) => u32);
-
+vec3i!((Vec2i, Vec3i, Vec4i) => i32);
 
 macro_rules! vec4i {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
@@ -1035,12 +1054,12 @@ macro_rules! vec4i {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast(0 as u32)
+                Self::broadcast(0 as $t)
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast(1 as u32)
+                Self::broadcast(1 as $t)
             }
 
             #[inline]
@@ -1314,7 +1333,7 @@ macro_rules! vec4i {
 }
 
 vec4i!(Vec4u, Vec2u, Vec3u => u32);
-
+vec4i!(Vec4i, Vec2i, Vec3i => i32);
 
 impl From<Vec3u> for Vec2u {
     #[inline]
@@ -1342,6 +1361,40 @@ impl From<Vec3u> for Vec4u {
 impl From<Vec4u> for Vec3u {
     #[inline]
     fn from(vec: Vec4u) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+        }
+    }
+}
+
+impl From<Vec3i> for Vec2i {
+    #[inline]
+    fn from(vec: Vec3i) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+        }
+    }
+}
+
+
+impl From<Vec3i> for Vec4i {
+    #[inline]
+    fn from(vec: Vec3i) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+            w: 0,
+        }
+    }
+}
+
+impl From<Vec4i> for Vec3i {
+    #[inline]
+    fn from(vec: Vec4i) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
