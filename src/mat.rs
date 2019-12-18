@@ -1072,3 +1072,18 @@ impl Mat4 {
     }
 }
 
+// Utility functions for mat4 specific code
+impl Wat4 {
+    pub fn translate(&mut self, translation: &Wec3) {
+        let res = self[0][3] + self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
+        self[0][3] = res;
+
+    }
+
+    pub fn translated(&self, translation: &Wec3) -> Wat4 {
+        let mut res = *self;
+        res.translate(translation);
+
+        res
+    }
+}
