@@ -50,7 +50,7 @@ macro_rules! mat2s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> &[$t; 4] {
+            pub fn as_array(&self) -> [$t; 4] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
@@ -420,7 +420,7 @@ macro_rules! mat3s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> &[$t; 9] {
+            pub fn as_array(&self) -> [$t; 9] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
@@ -897,7 +897,7 @@ macro_rules! mat4s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> &[$t; 16] {
+            pub fn as_array(&self) -> [$t; 16] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
