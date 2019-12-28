@@ -11,7 +11,7 @@
 //! In terms of runtime performance, ultraviolet was designed from the start with performance in mind.
 //! To do so, we provide two separate kinds of each type, each with nearly identical functionality,
 //! one with usual scalar f32 values, and the other a 'wide' type which uses SIMD f32x4 vectors for
-//! each value. This design is clearn and explicit in intent, and it also allows code to
+//! each value. This design is clear and explicit in intent, and it also allows code to
 //! take full advantage of SIMD.
 //! 
 //! The 'wide' types use an "SoA" (Structure of Arrays) architecture
