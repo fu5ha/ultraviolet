@@ -50,6 +50,18 @@ macro_rules! mat2s {
             }
 
             #[inline]
+            pub fn as_array(&self) -> &[$t; 4] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
+            pub fn as_component_array(&self) -> &[$vt; 2] {
+                use std::convert::TryInto;
+                self.as_component_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -405,6 +417,18 @@ macro_rules! mat3s {
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
+
+            #[inline]
+            pub fn as_array(&self) -> &[$t; 9] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
+            pub fn as_component_array(&self) -> &[$vt; 3] {
+                use std::convert::TryInto;
+                self.as_component_slice().try_into().unwrap()
             }
 
             #[inline]
@@ -873,6 +897,18 @@ macro_rules! mat4s {
             }
 
             #[inline]
+            pub fn as_array(&self) -> &[$t; 16] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
+            pub fn as_component_array(&self) -> &[$vt; 4] {
+                use std::convert::TryInto;
+                self.as_component_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -1061,7 +1097,8 @@ mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, 
 // Utility functions for mat4 specific code
 impl Mat4 {
     pub fn translate(&mut self, translation: &Vec3) {
-        self[0][3] += self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
+        self[0][3] +=
+            self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
     }
 
     pub fn translated(&self, translation: &Vec3) -> Mat4 {
@@ -1075,9 +1112,11 @@ impl Mat4 {
 // Utility functions for mat4 specific code
 impl Wat4 {
     pub fn translate(&mut self, translation: &Wec3) {
-        let res = self[0][3] + self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
+        let res = self[0][3]
+            + self[0][0] * translation[0]
+            + self[0][1] * translation[1]
+            + self[0][2] * translation[2];
         self[0][3] = res;
-
     }
 
     pub fn translated(&self, translation: &Wec3) -> Wat4 {
