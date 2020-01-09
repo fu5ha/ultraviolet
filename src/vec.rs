@@ -236,6 +236,12 @@ macro_rules! vec2s {
             }
 
             #[inline]
+            pub fn as_array(&self) -> &[$t; 2] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -837,6 +843,12 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn as_array(&self) -> &[$t; 3] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -1423,6 +1435,12 @@ macro_rules! vec4s {
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
+            }
+
+#           [inline]
+            pub fn as_array(&self) -> &[$t; 4] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
             }
 
             #[inline]
