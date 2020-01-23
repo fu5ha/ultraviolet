@@ -523,7 +523,12 @@ impl From<Wec3> for Wec2 {
 
 impl Vec2 {
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
+    pub fn refract(&mut self, normal: Self, eta: f32) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f32) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
@@ -564,7 +569,12 @@ impl Wec2 {
     }
 
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32x4) -> Self {
+    pub fn refract(&mut self, normal: Self, eta: f32x4) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f32x4) -> Self {
         let n = normal;
         let i = *self;
         let one = f32x4::from(1.0);
@@ -1157,7 +1167,12 @@ impl From<Wec4> for Wec3 {
 
 impl Vec3 {
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
+    pub fn refract(&mut self, normal: Self, eta: f32) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f32) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
@@ -1200,7 +1215,12 @@ impl Wec3 {
     }
 
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32x4) -> Self {
+    pub fn refract(&mut self, normal: Self, eta: f32x4) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f32x4) -> Self {
         let n = normal;
         let i = *self;
         let one = f32x4::from(1.0);
@@ -1740,7 +1760,12 @@ impl From<Wec3> for Wec4 {
 
 impl Vec4 {
     #[inline]
-    pub fn refracted(&mut self, normal: Self, eta: f32) -> Self {
+    pub fn refract(&mut self, normal: Self, eta: f32) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f32) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
