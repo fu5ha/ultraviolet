@@ -236,7 +236,7 @@ macro_rules! vec2s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> [$t; 2] {
+            pub fn as_array(&self) -> &[$t; 2] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
@@ -843,7 +843,7 @@ macro_rules! vec3s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> [$t; 3] {
+            pub fn as_array(&self) -> &[$t; 3] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
@@ -1437,8 +1437,8 @@ macro_rules! vec4s {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
-#           [inline]
-            pub fn as_array(&self) -> [$t; 4] {
+            #[inline]
+            pub fn as_array(&self) -> &[$t; 4] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
