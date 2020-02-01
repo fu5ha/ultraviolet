@@ -1,6 +1,6 @@
 //!
 //! Geometry helper functionality.
-use crate::{Vec3, Vec3u, Vec3i};
+use crate::{Vec3, Vec3i, Vec3u};
 
 /// A plane which can be intersected by a ray.
 #[derive(Debug, Copy, Clone)]
@@ -12,7 +12,6 @@ pub struct Plane {
     /// dot product of the point and normal, representing the plane position
     pub bias: f32,
 }
-
 
 /// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone)]
@@ -36,7 +35,6 @@ pub struct Planeu {
     pub bias: u32,
 }
 
-
 /// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
@@ -59,7 +57,6 @@ pub struct Planei {
     pub bias: i32,
 }
 
-
 /// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
@@ -70,7 +67,6 @@ pub struct Rayi {
     /// normalized direction vector of the ray
     pub direction: Vec3i,
 }
-
 
 macro_rules! impl_plane_ray {
     ($($pn:ident, $rn:ident, $v3t:ident => $t:ident),+) => {
@@ -202,7 +198,7 @@ impl_plane_ray!(Planeu, Rayu, Vec3u => u32);
 impl_plane_ray!(Planei, Rayi, Vec3i => i32);
 
 /// An axis-aligned bounding box
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 #[repr(C)]
 pub struct Aabb {
     pub min: Vec3,
@@ -210,7 +206,7 @@ pub struct Aabb {
 }
 
 /// An axis-aligned bounding box
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub struct Aabbu {
     pub min: Vec3u,
@@ -218,7 +214,7 @@ pub struct Aabbu {
 }
 
 /// An axis-aligned bounding box
-#[derive(Default, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
 pub struct Aabbi {
     pub min: Vec3i,
@@ -226,7 +222,7 @@ pub struct Aabbi {
 }
 
 macro_rules! impl_aabb {
-    ($($n:ident, $v3t:ident => $t:ident),+) => {
+    ($($n:ident, $iter:ident, $v3t:ident => $t:ident),+) => {
         $(
         impl $n {
             /// Creates a new axis-aligned bounding box.
@@ -259,11 +255,105 @@ macro_rules! impl_aabb {
 
             #[inline]
             #[must_use]
-            pub fn volume(&self) -> $t {
-                (self.max.x - self.min.x) * (self.max.y - self.min.y) * ((self.max.z - self.min.z) + 1 as $t)
+            pub fn size(&self) -> $v3t {
+                self.max - self.min
             }
-        })+
+
+            #[inline]
+            #[must_use]
+            pub fn volume(&self) -> $t {
+                self.size().x * self.size().y * self.size().z
+            }
+
+            #[inline]
+            #[must_use]
+            pub fn iter_stride(&self, stride: $t) -> $iter {
+                $iter::new(*self, stride)
+            }
+        }
+
+        /// Linear iterator across a 3D coordinate space with the provided stride.
+        /// This iterator is inclusive of minimum coordinates, and exclusive of maximum.
+        pub struct $iter {
+            stride: $t,
+            track: $v3t,
+            region: $n,
+        }
+        impl $iter {
+            /// Create a new iterator.
+            #[must_use]
+            pub fn new(region: $n, stride: $t) -> Self {
+                Self {
+                    track: region.min,
+                    region,
+                    stride,
+                }
+            }
+        }
+        impl Iterator for $iter {
+            type Item = $v3t;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let ret = self.track;
+
+                if self.track.z >= self.region.max.z {
+                    return None;
+                }
+
+                if self.track.x >= self.region.max.x - (1 as $t) {
+                    self.track.y += self.stride;
+                    self.track.x = self.region.min.x;
+                } else {
+                    self.track.x += self.stride;
+                    return Some(ret);
+                }
+
+                if self.track.y >= self.region.max.y {
+                    self.track.z += self.stride;
+
+                    self.track.y = self.region.min.y;
+                }
+
+                Some(ret)
+            }
+
+            #[inline]
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                let cur_volume = ($n::new(self.track, self.region.max).volume() / self.stride / self.stride / self.stride) as usize;
+                let volume = (self.region.volume() / self.stride / self.stride / self.stride) as usize;
+                (volume - cur_volume, Some(volume))
+            }
+        }
+        impl ExactSizeIterator for $iter {}
+        )+
     }
 }
 
-impl_aabb!(Aabb, Vec3 => f32, Aabbu, Vec3u => u32, Aabbi, Vec3i => i32);
+impl Aabb {
+    /// Same as iter_stride, but calls it with a stride of 1.0
+    #[inline]
+    #[must_use]
+    pub fn iter(&self) -> AabbLinearIterator {
+        self.iter_stride(1.0)
+    }
+}
+
+impl Aabbu {
+    /// Same as iter_stride, but calls it with a stride of 1.0
+    #[inline]
+    #[must_use]
+    pub fn iter(&self) -> AabbuLinearIterator {
+        self.iter_stride(1)
+    }
+}
+
+impl Aabbi {
+    /// Same as iter_stride, but calls it with a stride of 1.0
+    #[inline]
+    #[must_use]
+    pub fn iter(&self) -> AabbiLinearIterator {
+        self.iter_stride(1)
+    }
+}
+
+impl_aabb!(Aabb, AabbLinearIterator, Vec3 => f32, Aabbu, AabbuLinearIterator, Vec3u => u32, Aabbi, AabbiLinearIterator, Vec3i => i32);

@@ -1,3 +1,4 @@
+use std::convert::{TryFrom, TryInto};
 use std::ops::*;
 
 pub trait MulAdd<A = Self, B = Self> {
@@ -15,7 +16,6 @@ impl MulAdd<u32, u32> for u32 {
         (self * a) + b
     }
 }
-
 
 impl MulAdd<i32, i32> for i32 {
     type Output = i32;
@@ -213,6 +213,11 @@ macro_rules! vec2i {
                 }
             }
 
+            #[inline]
+            pub fn as_array(&self) -> [$t; 2] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
 
             #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
@@ -664,6 +669,12 @@ macro_rules! vec3i {
             }
 
             #[inline]
+            pub fn as_array(&self) -> [$t; 3] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -1088,6 +1099,12 @@ macro_rules! vec4i {
             }
 
             #[inline]
+            pub fn as_array(&self) -> [$t; 4] {
+                use std::convert::TryInto;
+                self.as_slice().try_into().unwrap()
+            }
+
+            #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -1338,13 +1355,9 @@ vec4i!(Vec4i, Vec2i, Vec3i => i32);
 impl From<Vec3u> for Vec2u {
     #[inline]
     fn from(vec: Vec3u) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-        }
+        Self { x: vec.x, y: vec.y }
     }
 }
-
 
 impl From<Vec3u> for Vec4u {
     #[inline]
@@ -1372,13 +1385,9 @@ impl From<Vec4u> for Vec3u {
 impl From<Vec3i> for Vec2i {
     #[inline]
     fn from(vec: Vec3i) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-        }
+        Self { x: vec.x, y: vec.y }
     }
 }
-
 
 impl From<Vec3i> for Vec4i {
     #[inline]
@@ -1400,5 +1409,29 @@ impl From<Vec4i> for Vec3i {
             y: vec.y,
             z: vec.z,
         }
+    }
+}
+
+impl TryFrom<Vec3u> for Vec3i {
+    type Error = <i32 as TryFrom<u32>>::Error;
+
+    fn try_from(rhv: Vec3u) -> Result<Self, Self::Error> {
+        Ok(Self {
+            x: rhv.x.try_into()?,
+            y: rhv.y.try_into()?,
+            z: rhv.z.try_into()?,
+        })
+    }
+}
+
+impl TryFrom<Vec3i> for Vec3u {
+    type Error = <u32 as TryFrom<i32>>::Error;
+
+    fn try_from(rhv: Vec3i) -> Result<Self, Self::Error> {
+        Ok(Self {
+            x: rhv.x.try_into()?,
+            y: rhv.y.try_into()?,
+            z: rhv.z.try_into()?,
+        })
     }
 }

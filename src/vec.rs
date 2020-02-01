@@ -1437,7 +1437,7 @@ macro_rules! vec4s {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
-#           [inline]
+            #[inline]
             pub fn as_array(&self) -> &[$t; 4] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
