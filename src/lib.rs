@@ -69,6 +69,10 @@
 //! (I'm Fusha there) and I'll try to add it for you, if I believe it fits with the vision of the lib :)
 
 extern crate alloc;
+#[cfg(all(test, feature = "serde"))]
+extern crate serde_test;
+#[cfg(feature = "serde")]
+extern crate serde;
 
 mod util;
 
