@@ -5,6 +5,9 @@ use crate::*;
 
 use wide::f32x4;
 
+#[cfg(feature = "serde")]
+use serde::{de::SeqAccess, Deserialize, Deserializer, Serialize, Serializer};
+
 macro_rules! mat2s {
     ($($n:ident => $m3t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
         /// A 2x2 square matrix.
@@ -185,6 +188,97 @@ macro_rules! mat2s {
 }
 
 mat2s!(Mat2 => Mat3, Vec3, Vec2, f32, Wat2 => Wat3, Wec3, Wec2, f32x4);
+
+#[cfg(feature = "serde")]
+impl Serialize for Mat2 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        use serde::ser::SerializeSeq;
+
+        let mut seq = serializer.serialize_seq(Some(4))?;
+
+        seq.serialize_element(&self.cols[0].x)?;
+        seq.serialize_element(&self.cols[0].y)?;
+        seq.serialize_element(&self.cols[1].x)?;
+        seq.serialize_element(&self.cols[1].y)?;
+        seq.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+struct Mat2Visitor {}
+
+#[cfg(feature = "serde")]
+impl Mat2Visitor {
+    pub fn new() -> Self {
+        Mat2Visitor {}
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Visitor<'de> for Mat2Visitor {
+    type Value = Mat2;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("array of 4 floats")
+    }
+
+    #[inline]
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        use serde::de::Error;
+
+        Ok(Self::Value {
+            cols: [
+                Vec2::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(0, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(1, &self)),
+                    },
+                ),
+                Vec2::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(2, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(3, &self)),
+                    },
+                ),
+            ],
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Mat2 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_tuple(4, Mat2Visitor::new())
+    }
+
+    //    @TODO I understand how to implement it in the context of arrays but not matrices
+    //    fn deserialize_in_place<D>(
+    //        deserializer: D,
+    //        place: &mut Self,
+    //    ) -> Result<(), <D as Deserializer<'de>>::Error>
+    //    where
+    //        D: Deserializer<'de>,
+    //    {
+    //        unimplemented!()
+    //    }
+}
 
 macro_rules! mat3s {
     ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
@@ -591,6 +685,124 @@ macro_rules! mat3s {
 }
 
 mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec2, Wec3, f32x4);
+
+#[cfg(feature = "serde")]
+impl Serialize for Mat3 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        use serde::ser::SerializeSeq;
+
+        let mut seq = serializer.serialize_seq(Some(9))?;
+
+        seq.serialize_element(&self.cols[0].x)?;
+        seq.serialize_element(&self.cols[0].y)?;
+        seq.serialize_element(&self.cols[0].z)?;
+        seq.serialize_element(&self.cols[1].x)?;
+        seq.serialize_element(&self.cols[1].y)?;
+        seq.serialize_element(&self.cols[1].z)?;
+        seq.serialize_element(&self.cols[2].x)?;
+        seq.serialize_element(&self.cols[2].y)?;
+        seq.serialize_element(&self.cols[2].z)?;
+        seq.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+struct Mat3Visitor {}
+
+#[cfg(feature = "serde")]
+impl Mat3Visitor {
+    pub fn new() -> Self {
+        Mat3Visitor {}
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Visitor<'de> for Mat3Visitor {
+    type Value = Mat3;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("array of 9 floats")
+    }
+
+    #[inline]
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        use serde::de::Error;
+
+        Ok(Self::Value {
+            cols: [
+                Vec3::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(0, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(1, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(2, &self)),
+                    },
+                ),
+                Vec3::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(3, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(4, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(5, &self)),
+                    },
+                ),
+                Vec3::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(6, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(7, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(8, &self)),
+                    },
+                ),
+            ],
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Mat3 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_tuple(9, Mat3Visitor::new())
+    }
+
+    //    @TODO I understand how to implement it in the context of arrays but not matrices
+    //    fn deserialize_in_place<D>(
+    //        deserializer: D,
+    //        place: &mut Self,
+    //    ) -> Result<(), <D as Deserializer<'de>>::Error>
+    //    where
+    //        D: Deserializer<'de>,
+    //    {
+    //        unimplemented!()
+    //    }
+}
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
@@ -1094,6 +1306,161 @@ macro_rules! mat4s {
 
 mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, Wec3, f32x4);
 
+#[cfg(feature = "serde")]
+impl Serialize for Mat4 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        use serde::ser::SerializeSeq;
+
+        let mut seq = serializer.serialize_seq(Some(16))?;
+
+        seq.serialize_element(&self.cols[0].x)?;
+        seq.serialize_element(&self.cols[0].y)?;
+        seq.serialize_element(&self.cols[0].z)?;
+        seq.serialize_element(&self.cols[0].w)?;
+        seq.serialize_element(&self.cols[1].x)?;
+        seq.serialize_element(&self.cols[1].y)?;
+        seq.serialize_element(&self.cols[1].z)?;
+        seq.serialize_element(&self.cols[1].w)?;
+        seq.serialize_element(&self.cols[2].x)?;
+        seq.serialize_element(&self.cols[2].y)?;
+        seq.serialize_element(&self.cols[2].z)?;
+        seq.serialize_element(&self.cols[2].w)?;
+        seq.serialize_element(&self.cols[3].x)?;
+        seq.serialize_element(&self.cols[3].y)?;
+        seq.serialize_element(&self.cols[3].z)?;
+        seq.serialize_element(&self.cols[3].w)?;
+        seq.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+struct Mat4Visitor {}
+
+#[cfg(feature = "serde")]
+impl Mat4Visitor {
+    pub fn new() -> Self {
+        Mat4Visitor {}
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Visitor<'de> for Mat4Visitor {
+    type Value = Mat4;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("array of 16 floats")
+    }
+
+    #[inline]
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        use serde::de::Error;
+
+        Ok(Self::Value {
+            cols: [
+                Vec4::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(0, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(1, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(2, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(3, &self)),
+                    },
+                ),
+                Vec4::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(4, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(5, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(6, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(7, &self)),
+                    },
+                ),
+                Vec4::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(8, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(9, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(10, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(11, &self)),
+                    },
+                ),
+                Vec4::new(
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(12, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(13, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(14, &self)),
+                    },
+                    match seq.next_element::<f32>()? {
+                        Some(val) => val,
+                        None => return Err(Error::invalid_length(15, &self)),
+                    },
+                ),
+            ],
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Mat4 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_tuple(16, Mat4Visitor::new())
+    }
+
+    //    @TODO I understand how to implement it in the context of arrays but not matrices
+    //    fn deserialize_in_place<D>(
+    //        deserializer: D,
+    //        place: &mut Self,
+    //    ) -> Result<(), <D as Deserializer<'de>>::Error>
+    //    where
+    //        D: Deserializer<'de>,
+    //    {
+    //        unimplemented!()
+    //    }
+}
+
 // Utility functions for mat4 specific code
 impl Mat4 {
     pub fn translate(&mut self, translation: &Vec3) {
@@ -1124,5 +1491,77 @@ impl Wat4 {
         res.translate(translation);
 
         res
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use crate::mat::{Mat2, Mat3, Mat4};
+    use crate::vec::{Vec2, Vec3, Vec4};
+    use serde_test::{assert_tokens, Token};
+
+    #[test]
+    fn mat2() {
+        let mat2 = Mat2::new(Vec2::new(1.0, 2.0), Vec2::new(3.0, 4.0));
+
+        //        @TODO we need PartialEq for this...
+        //        assert_tokens(&mat2, &[
+        //            Token::F32(1.0),
+        //            Token::F32(2.0),
+        //            Token::F32(3.0),
+        //            Token::F32(4.0),
+        //        ]);
+    }
+
+    #[test]
+    fn mat3() {
+        let mat3 = Mat3::new(
+            Vec3::new(1.0, 2.0, 3.0),
+            Vec3::new(4.0, 5.0, 6.0),
+            Vec3::new(7.0, 8.0, 9.0),
+        );
+
+        //        @TODO we need PartialEq for this...
+        //        assert_tokens(&mat3, &[
+        //            Token::F32(1.0),
+        //            Token::F32(2.0),
+        //            Token::F32(3.0),
+        //            Token::F32(4.0),
+        //            Token::F32(5.0),
+        //            Token::F32(6.0),
+        //            Token::F32(7.0),
+        //            Token::F32(8.0),
+        //            Token::F32(9.0),
+        //        ]);
+    }
+
+    #[test]
+    fn mat4() {
+        let mat4 = Mat4::new(
+            Vec4::new(1.0, 2.0, 3.0, 4.0),
+            Vec4::new(5.0, 6.0, 7.0, 8.0),
+            Vec4::new(9.0, 10.0, 11.0, 12.0),
+            Vec4::new(13.0, 14.0, 15.0, 16.0),
+        );
+
+        //        @TODO we need PartialEq for this...
+        //        assert_tokens(&mat3, &[
+        //            Token::F32(1.0),
+        //            Token::F32(2.0),
+        //            Token::F32(3.0),
+        //            Token::F32(4.0),
+        //            Token::F32(5.0),
+        //            Token::F32(6.0),
+        //            Token::F32(7.0),
+        //            Token::F32(8.0),
+        //            Token::F32(9.0),
+        //            Token::F32(10.0),
+        //            Token::F32(11.0),
+        //            Token::F32(12.0),
+        //            Token::F32(13.0),
+        //            Token::F32(14.0),
+        //            Token::F32(15.0),
+        //            Token::F32(16.0),
+        //        ]);
     }
 }
