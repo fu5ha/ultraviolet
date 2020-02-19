@@ -589,6 +589,16 @@ impl Wec2 {
     }
 }
 
+impl PartialEq for Vec2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y
+    }
+}
+
 macro_rules! vec3s {
     ($(($v2t:ident, $n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
         /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
@@ -1261,6 +1271,16 @@ impl From<[Vec3; 4]> for Wec3 {
     }
 }
 
+impl PartialEq for Vec3 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y || self.z != other.z
+    }
+}
+
 macro_rules! vec4s {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
         /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
@@ -1835,5 +1855,15 @@ impl From<[Vec4; 4]> for Wec4 {
             z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
             w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
         }
+    }
+}
+
+impl PartialEq for Vec4 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y || self.z != other.z || self.w != other.w
     }
 }
