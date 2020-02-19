@@ -186,6 +186,16 @@ macro_rules! mat2s {
 
 mat2s!(Mat2 => Mat3, Vec3, Vec2, f32, Wat2 => Wat3, Wec3, Wec2, f32x4);
 
+impl PartialEq for Mat2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.cols[0] == other.cols[0] && self.cols[1] == other.cols[1]
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.cols[0] != other.cols[0] || self.cols[1] != other.cols[1]
+    }
+}
+
 macro_rules! mat3s {
     ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
         /// A 3x3 square matrix.
@@ -591,6 +601,20 @@ macro_rules! mat3s {
 }
 
 mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec2, Wec3, f32x4);
+
+impl PartialEq for Mat3 {
+    fn eq(&self, other: &Self) -> bool {
+        self.cols[0] == other.cols[0]
+            && self.cols[1] == other.cols[1]
+            && self.cols[2] == other.cols[2]
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.cols[0] != other.cols[0]
+            || self.cols[1] != other.cols[1]
+            || self.cols[2] != other.cols[2]
+    }
+}
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
@@ -1093,6 +1117,22 @@ macro_rules! mat4s {
 }
 
 mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, Wec3, f32x4);
+
+impl PartialEq for Mat4 {
+    fn eq(&self, other: &Self) -> bool {
+        self.cols[0] == other.cols[0]
+            && self.cols[1] == other.cols[1]
+            && self.cols[2] == other.cols[2]
+            && self.cols[3] == other.cols[3]
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.cols[0] != other.cols[0]
+            || self.cols[1] != other.cols[1]
+            || self.cols[2] != other.cols[2]
+            || self.cols[3] != other.cols[3]
+    }
+}
 
 // Utility functions for mat4 specific code
 impl Mat4 {
