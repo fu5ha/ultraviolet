@@ -160,6 +160,26 @@ macro_rules! mat2s {
             }
         }
 
+        impl From<[[$t; 2]; 2]> for $n {
+            #[inline]
+            fn from(comps: [[$t; 2]; 2]) -> Self {
+                Self::new(
+                    $vt::new(comps[0][0], comps[0][0]),
+                    $vt::new(comps[1][1], comps[1][1])
+                )
+            }
+        }
+
+        impl From<$n> for [[$t; 2]; 2] {
+            #[inline]
+            fn from(mat2: $n) -> Self {
+                [
+                    [mat2.cols[0].x, mat2.cols[0].y],
+                    [mat2.cols[1].x, mat2.cols[1].y],
+                ]
+            }
+        }
+
         impl From<&[$t; 4]> for $n {
             #[inline]
             fn from(comps: &[$t; 4]) -> Self {
@@ -563,6 +583,28 @@ macro_rules! mat3s {
                     $vt::new(comps[3], comps[4], comps[5]),
                     $vt::new(comps[6], comps[7], comps[8])
                 )
+            }
+        }
+
+        impl From<[[$t; 3]; 3]> for $n {
+            #[inline]
+            fn from(comps: [[$t; 3]; 3]) -> Self {
+                Self::new(
+                    $vt::new(comps[0][0], comps[0][1], comps[0][2]),
+                    $vt::new(comps[1][0], comps[1][1], comps[1][2]),
+                    $vt::new(comps[2][0], comps[2][1], comps[2][2])
+                )
+            }
+        }
+
+        impl From<$n> for [[$t; 3]; 3] {
+            #[inline]
+            fn from(mat3: $n) -> Self {
+                [
+                    [mat3.cols[0].x, mat3.cols[0].y, mat3.cols[0].z],
+                    [mat3.cols[1].x, mat3.cols[1].y, mat3.cols[1].z],
+                    [mat3.cols[2].x, mat3.cols[2].y, mat3.cols[2].z]
+                ]
             }
         }
 
@@ -1063,6 +1105,30 @@ macro_rules! mat4s {
                     $vt::new(comps[8], comps[9], comps[10], comps[11]),
                     $vt::new(comps[12], comps[13], comps[14], comps[15]),
                 )
+            }
+        }
+
+        impl From<[[$t; 4]; 4]> for $n {
+            #[inline]
+            fn from(comps: [[$t; 4]; 4]) -> Self {
+                Self::new(
+                    $vt::new(comps[0][0], comps[0][1], comps[0][2], comps[0][3]),
+                    $vt::new(comps[1][0], comps[1][1], comps[1][2], comps[1][3]),
+                    $vt::new(comps[2][0], comps[2][1], comps[2][2], comps[2][3]),
+                    $vt::new(comps[3][0], comps[3][1], comps[3][2], comps[3][3])
+                )
+            }
+        }
+
+        impl From<$n> for [[$t; 4]; 4] {
+            #[inline]
+            fn from(mat4: $n) -> Self {
+                [
+                    [mat4.cols[0].x, mat4.cols[0].y, mat4.cols[0].z, mat4.cols[0].w],
+                    [mat4.cols[1].x, mat4.cols[1].y, mat4.cols[1].z, mat4.cols[1].w],
+                    [mat4.cols[2].x, mat4.cols[2].y, mat4.cols[2].z, mat4.cols[2].w],
+                    [mat4.cols[3].x, mat4.cols[3].y, mat4.cols[3].z, mat4.cols[3].w]
+                ]
             }
         }
 
