@@ -4,6 +4,7 @@ version = "0.4.5"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
 description = "A crate to do linear algebra, fast."
+documentation = "https://docs.rs/ultraviolet/"
 repository = "https://github.com/termhn/ultraviolet"
 readme = "README.md"
 keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]

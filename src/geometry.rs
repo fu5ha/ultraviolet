@@ -265,6 +265,33 @@ macro_rules! impl_aabb {
                 self.size().x * self.size().y * self.size().z
             }
 
+            /// Returns the smallest bounding box that contains both this Aabb and other.
+            #[inline]
+            #[must_use]
+            pub fn join(&self, other: &Self) -> Self {
+                Self::new(
+                    $v3t::new(self.min.x.min(other.min.x),
+                        self.min.y.min(other.min.y),
+                        self.min.z.min(other.min.z)),
+                    $v3t::new(self.max.x.max(other.max.x),
+                        self.max.y.max(other.max.y),
+                        self.max.z.max(other.max.z)
+                    )
+                )
+            }
+
+            #[inline]
+            #[must_use]
+            pub fn largest_axis(&self) -> usize {
+                if self.size().x > self.size().y && self.size().x > self.size().z {
+                    0
+                } else if self.size().y > self.size().z {
+                    1
+                } else {
+                    2
+                }
+            }
+
             #[inline]
             #[must_use]
             pub fn iter_stride(&self, stride: $t) -> $iter {
@@ -336,6 +363,12 @@ impl Aabb {
     pub fn iter(&self) -> AabbLinearIterator {
         self.iter_stride(1.0)
     }
+
+    #[inline]
+    #[must_use]
+    pub fn surface_area(&self) -> f32 {
+        2.0 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
+    }
 }
 
 impl Aabbu {
@@ -345,6 +378,12 @@ impl Aabbu {
     pub fn iter(&self) -> AabbuLinearIterator {
         self.iter_stride(1)
     }
+
+    #[inline]
+    #[must_use]
+    pub fn surface_area(&self) -> u32 {
+        2 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
+    }
 }
 
 impl Aabbi {
@@ -353,6 +392,12 @@ impl Aabbi {
     #[must_use]
     pub fn iter(&self) -> AabbiLinearIterator {
         self.iter_stride(1)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn surface_area(&self) -> i32 {
+        2 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
     }
 }
 
