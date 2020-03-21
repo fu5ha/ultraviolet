@@ -369,6 +369,12 @@ impl Aabb {
     pub fn surface_area(&self) -> f32 {
         2.0 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
     }
+
+    #[inline]
+    #[must_use]
+    pub fn center(&self) -> Vec3 {
+        self.min + (self.size() / 2.0)
+    }
 }
 
 impl Aabbu {
@@ -384,6 +390,12 @@ impl Aabbu {
     pub fn surface_area(&self) -> u32 {
         2 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
     }
+
+    #[inline]
+    #[must_use]
+    pub fn center(&self) -> Vec3u {
+        self.min + (self.size() / 2)
+    }
 }
 
 impl Aabbi {
@@ -398,6 +410,12 @@ impl Aabbi {
     #[must_use]
     pub fn surface_area(&self) -> i32 {
         2 * (self.size().x * self.size().y + self.size().x * self.size().z + self.size().y * self.size().z)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn center(&self) -> Vec3i {
+        self.min + (self.size() / 2)
     }
 }
 
