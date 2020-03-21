@@ -265,7 +265,7 @@ macro_rules! impl_aabb {
                 self.size().x * self.size().y * self.size().z
             }
 
-            /// Returns the smallest bounding box that contains both this Aabb and other.
+            /// Returns the smallest bounding box that contains both this bounding box and the other bounding box.
             #[inline]
             #[must_use]
             pub fn join(&self, other: &Self) -> Self {
@@ -277,6 +277,24 @@ macro_rules! impl_aabb {
                         self.max.y.max(other.max.y),
                         self.max.z.max(other.max.z)
                     )
+                )
+            }
+
+            /// Returns the smallest bounding box that contains both this bounding box and a point.
+            #[inline]
+            #[must_use]
+            pub fn grow(&self, other: &$v3t) -> Self {
+                Self::new(
+                    $v3t::new(
+                        self.min.x.min(other.x),
+                        self.min.y.min(other.y),
+                        self.min.z.min(other.z),
+                    ),
+                    $v3t::new(
+                        self.max.x.max(other.x),
+                        self.max.y.max(other.y),
+                        self.max.z.max(other.z),
+                    ),
                 )
             }
 
