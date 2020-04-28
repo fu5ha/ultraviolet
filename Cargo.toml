@@ -1,6 +1,6 @@
 [package]
 name = "ultraviolet"
-version = "0.4.5"
+version = "0.4.6"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
 description = "A crate to do linear algebra, fast."
@@ -11,4 +11,4 @@ license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
 # wide = { path = "../wide" }
-wide = "0.4"
+wide = { version = "~0.4.5", features = ["extern_crate_std"] }
