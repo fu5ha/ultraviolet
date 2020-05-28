@@ -536,7 +536,7 @@ impl Vec2 {
         if k < 0.0 {
             Self::zero()
         } else {
-            i * eta - n * (eta * ndi * k.sqrt())
+            i * eta - (eta * ndi + k.sqrt()) * n
         }
     }
 }
@@ -583,7 +583,7 @@ impl Wec2 {
         let k = one - eta * eta * (one - ndi * ndi);
         let mask = k.cmp_lt(f32x4::from(0.0));
 
-        let out = i * eta - n * (eta * ndi * k.sqrt());
+        let out = i * eta - (eta * ndi + k.sqrt()) * n;
 
         Self::merge(mask, Self::zero(), out)
     }
@@ -1180,7 +1180,7 @@ impl Vec3 {
         if k < 0.0 {
             Self::zero()
         } else {
-            i * eta - n * (eta * ndi * k.sqrt())
+            i * eta - (eta * ndi + k.sqrt()) * n
         }
     }
 }
@@ -1229,7 +1229,7 @@ impl Wec3 {
         let k = one - eta * eta * (one - ndi * ndi);
         let mask = k.cmp_lt(f32x4::from(0.0));
 
-        let out = i.mul_add(Wec3::broadcast(eta), -n * (eta * ndi * k.sqrt()));
+        let out = i.mul_add(Wec3::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
 
         Self::merge(mask, Self::zero(), out)
     }
@@ -1773,7 +1773,7 @@ impl Vec4 {
         if k < 0.0 {
             Self::zero()
         } else {
-            i * eta - n * (eta * ndi * k.sqrt())
+            i * eta - (eta * ndi + k.sqrt()) * n
         }
     }
 }
