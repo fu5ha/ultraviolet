@@ -1308,7 +1308,18 @@ macro_rules! mat4s {
                 Self::from(*comps)
             }
         }
-
+            
+        impl From<[[$t; 4]; 4]> for $n {
+            #[inline]
+            fn from(comps: [[$t; 4]; 4]) -> Self {
+                Self::new(
+                    $vt::new(comps[0][0], comps[0][1], comps[0][2], comps[0][3]),
+                    $vt::new(comps[1][0], comps[1][1], comps[1][2], comps[1][3]),
+                    $vt::new(comps[2][0], comps[2][1], comps[2][2], comps[2][3]),
+                    $vt::new(comps[3][0], comps[3][1], comps[3][2], comps[3][3]),
+                )
+            }
+        }
 
         impl Index<usize> for $n {
             type Output = $vt;
