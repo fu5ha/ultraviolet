@@ -1057,6 +1057,21 @@ macro_rules! mat4s {
                 $rt::from_angle_plane(angle, plane).into_matrix().into_homogeneous()
             }
 
+            /// Assumes homogeneous 3d coordinates.
+            pub fn translate(&mut self, translation: &$v3t) {
+                self[3].x += translation.x;
+                self[3].y += translation.y;
+                self[3].z += translation.z;
+            }
+
+            /// Assumes homogeneous 3d coordinates.
+            pub fn translated(&self, translation: &$v3t) -> Self {
+                let mut res = *self;
+                res.translate(translation);
+
+                res
+            }
+
             /// Constructs a 'look-at' matrix from an eye position, a focus position to look towards,
             /// and a vector that defines the 'up' direction.
             ///
@@ -1588,39 +1603,6 @@ impl<'de> Deserialize<'de> for Mat4 {
     //    {
     //        unimplemented!()
     //    }
-}
-
-// Utility functions for mat4 specific code
-impl Mat4 {
-    pub fn translate(&mut self, translation: &Vec3) {
-        self[0][3] +=
-            self[0][0] * translation[0] + self[0][1] * translation[1] + self[0][2] * translation[2];
-    }
-
-    pub fn translated(&self, translation: &Vec3) -> Mat4 {
-        let mut res = *self;
-        res.translate(translation);
-
-        res
-    }
-}
-
-// Utility functions for mat4 specific code
-impl Wat4 {
-    pub fn translate(&mut self, translation: &Wec3) {
-        let res = self[0][3]
-            + self[0][0] * translation[0]
-            + self[0][1] * translation[1]
-            + self[0][2] * translation[2];
-        self[0][3] = res;
-    }
-
-    pub fn translated(&self, translation: &Wec3) -> Wat4 {
-        let mut res = *self;
-        res.translate(translation);
-
-        res
-    }
 }
 
 #[cfg(all(test, feature = "serde"))]
