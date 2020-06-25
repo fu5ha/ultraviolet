@@ -299,6 +299,7 @@ macro_rules! similarities {
             pub fn into_homogeneous_matrix(self) -> $mt {
                 $mt::from_translation(self.translation)
                     * self.rotation.into_matrix().into_homogeneous()
+                    * $mt::from_scale(self.scale)
             }
         }
 
