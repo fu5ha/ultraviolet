@@ -929,13 +929,37 @@ macro_rules! mat4s {
 
             /// Assumes homogeneous 3d coordinates.
             #[inline]
-            pub fn from_nonuniform_scale(scale: $vt) -> Self {
+            pub fn from_nonuniform_scale(scale: $v3t) -> Self {
                 let zero = $t::from(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero, zero),
                     $vt::new(zero, scale.y, zero, zero),
                     $vt::new(zero, zero, scale.z, zero),
                     $vt::new(zero, zero, zero, $t::from(1.0)),
+                )
+            }
+
+            /// Full 4d diagonal matrix.
+            #[inline]
+            pub fn from_scale_4d(scale: $t) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale, zero, zero, zero),
+                    $vt::new(zero, scale, zero, zero),
+                    $vt::new(zero, zero, scale, zero),
+                    $vt::new(zero, zero, zero, scale),
+                )
+            }
+
+            /// Full 4d nonuniform scaling matrix.
+            #[inline]
+            pub fn from_nonuniform_scale_4d(scale: $vt) -> Self {
+                let zero = $t::from(0.0);
+                Self::new(
+                    $vt::new(scale.x, zero, zero, zero),
+                    $vt::new(zero, scale.y, zero, zero),
+                    $vt::new(zero, zero, scale.z, zero),
+                    $vt::new(zero, zero, zero, scale.w),
                 )
             }
 
