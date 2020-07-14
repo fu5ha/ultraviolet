@@ -64,7 +64,7 @@ On the other hand, Quaternions are often basically just seen as black boxes that
 they have some nice properties, but that we don't really understand. You can use Rotors this same way, but you can also easily
 understand them. Second is that in some sense they can be seen as 'more correct' than Quaternions, and especially they
 facilitate a more proper understanding of rotation as being something that occurs *within a plane* rather than something
-that occurs *around an axis*, as it is generally thought. Finally, Rotors also generalize do 4 and even higher dimensions,
+that occurs *around an axis*, as it is generally thought. Finally, Rotors also generalize to 4 and even higher dimensions,
 and if someone wants to they could implement a Rotor4 which retains all the properties of a Rotor3/Quaternion but does rotation
 in 4 dimensions instead, something which simply is not possible to do with Quaternions.
 
