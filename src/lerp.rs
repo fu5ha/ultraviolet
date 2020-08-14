@@ -22,4 +22,5 @@ macro_rules! impl_lerp {
 
 impl_lerp!(
     f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2, Rotor3),
+    f64 => (Vec2d, Vec3d, Vec4d, Bivec2d, Bivec3d, Rotor2d, Rotor3d),
     f32x4 => (Wec2, Wec3, Wec4, WBivec2, WBivec3, WRotor2, WRotor3));
