@@ -503,6 +503,7 @@ macro_rules! vec2s {
 }
 
 vec2s!((Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32, (Wec2, WBivec2, WRotor2, Wec3, Wec4) => f32x4);
+vec2s!((Vec2d, Bivec2d, Rotor2d, Vec3d, Vec4d) => f64);
 
 impl From<[Vec2; 4]> for Wec2 {
     #[inline]
@@ -517,6 +518,13 @@ impl From<[Vec2; 4]> for Wec2 {
 impl From<Vec3> for Vec2 {
     #[inline]
     fn from(vec: Vec3) -> Self {
+        Self { x: vec.x, y: vec.y }
+    }
+}
+
+impl From<Vec3d> for Vec2d {
+    #[inline]
+    fn from(vec: Vec3d) -> Self {
         Self { x: vec.x, y: vec.y }
     }
 }
@@ -536,6 +544,26 @@ impl Vec2 {
 
     #[inline]
     pub fn refracted(&self, normal: Self, eta: f32) -> Self {
+        let n = normal;
+        let i = *self;
+        let ndi = n.dot(i);
+        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
+        if k < 0.0 {
+            Self::zero()
+        } else {
+            i * eta - (eta * ndi + k.sqrt()) * n
+        }
+    }
+}
+
+impl Vec2d {
+    #[inline]
+    pub fn refract(&mut self, normal: Self, eta: f64) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f64) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
@@ -597,6 +625,16 @@ impl Wec2 {
 }
 
 impl PartialEq for Vec2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y
+    }
+}
+
+impl PartialEq for Vec2d {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y
     }
@@ -1252,10 +1290,22 @@ macro_rules! vec3s {
 }
 
 vec3s!((Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32, (Wec2, Wec3, WBivec3, WRotor3, Wec4) => f32x4);
+vec3s!((Vec2d, Vec3d, Bivec3d, Rotor3d, Vec4d) => f64);
 
 impl From<Vec2> for Vec3 {
     #[inline]
     fn from(vec: Vec2) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: 0.0,
+        }
+    }
+}
+
+impl From<Vec2d> for Vec3d {
+    #[inline]
+    fn from(vec: Vec2d) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1286,6 +1336,17 @@ impl From<Vec4> for Vec3 {
     }
 }
 
+impl From<Vec4d> for Vec3d {
+    #[inline]
+    fn from(vec: Vec4d) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+        }
+    }
+}
+
 impl From<Wec4> for Wec3 {
     #[inline]
     fn from(vec: Wec4) -> Self {
@@ -1305,6 +1366,26 @@ impl Vec3 {
 
     #[inline]
     pub fn refracted(&self, normal: Self, eta: f32) -> Self {
+        let n = normal;
+        let i = *self;
+        let ndi = n.dot(i);
+        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
+        if k < 0.0 {
+            Self::zero()
+        } else {
+            i * eta - (eta * ndi + k.sqrt()) * n
+        }
+    }
+}
+
+impl Vec3d {
+    #[inline]
+    pub fn refract(&mut self, normal: Self, eta: f64) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f64) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
@@ -1394,6 +1475,16 @@ impl From<[Vec3; 4]> for Wec3 {
 }
 
 impl PartialEq for Vec3 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y || self.z != other.z
+    }
+}
+
+impl PartialEq for Vec3d {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
     }
@@ -1999,10 +2090,23 @@ macro_rules! vec4s {
 }
 
 vec4s!(Vec4, Vec2, Vec3 => f32, Wec4, Wec2, Wec3 => f32x4);
+vec4s!(Vec4d, Vec2d, Vec3d => f64);
 
 impl From<Vec3> for Vec4 {
     #[inline]
     fn from(vec: Vec3) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+            w: 0.0,
+        }
+    }
+}
+
+impl From<Vec3d> for Vec4d {
+    #[inline]
+    fn from(vec: Vec3d) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -2032,6 +2136,26 @@ impl Vec4 {
 
     #[inline]
     pub fn refracted(&self, normal: Self, eta: f32) -> Self {
+        let n = normal;
+        let i = *self;
+        let ndi = n.dot(i);
+        let k = 1.0 - eta * eta * (1.0 - ndi * ndi);
+        if k < 0.0 {
+            Self::zero()
+        } else {
+            i * eta - (eta * ndi + k.sqrt()) * n
+        }
+    }
+}
+
+impl Vec4d {
+    #[inline]
+    pub fn refract(&mut self, normal: Self, eta: f64) {
+        *self = self.refracted(normal, eta);
+    }
+
+    #[inline]
+    pub fn refracted(&self, normal: Self, eta: f64) -> Self {
         let n = normal;
         let i = *self;
         let ndi = n.dot(i);
@@ -2105,6 +2229,16 @@ impl From<[Vec4; 4]> for Wec4 {
 }
 
 impl PartialEq for Vec4 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.x != other.x || self.y != other.y || self.z != other.z || self.w != other.w
+    }
+}
+
+impl PartialEq for Vec4d {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
     }

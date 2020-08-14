@@ -317,6 +317,7 @@ macro_rules! rotor2s {
 }
 
 rotor2s!(Rotor2 => (Mat2, Vec2, Bivec2, f32), WRotor2 => (Wat2, Wec2, WBivec2, f32x4));
+rotor2s!(Rotor2d => (Mat2d, Vec2d, Bivec2d, f64));
 
 macro_rules! rotor3s {
     ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
@@ -675,6 +676,7 @@ macro_rules! rotor3s {
 }
 
 rotor3s!(Rotor3 => (Mat3, Vec3, Bivec3, f32), WRotor3 => (Wat3, Wec3, WBivec3, f32x4));
+rotor3s!(Rotor3d => (Mat3d, Vec3d, Bivec3d, f64));
 
 #[cfg(test)]
 mod test {

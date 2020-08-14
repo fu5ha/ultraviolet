@@ -161,7 +161,8 @@ macro_rules! isometries {
 
 isometries!(
     Isometry2 => (Mat3, Rotor2, Vec2, f32), WIsometry2 => (Wat3, WRotor2, Wec2, f32x4),
-    Isometry3 => (Mat4, Rotor3, Vec3, f32), WIsometry3 => (Wat4, WRotor3, Wec3, f32x4)
+    Isometry3 => (Mat4, Rotor3, Vec3, f32), WIsometry3 => (Wat4, WRotor3, Wec3, f32x4),
+    Isometry2d => (Mat3d, Rotor2d, Vec2d, f64), Isometry3d => (Mat4d, Rotor3d, Vec3d, f64)
 );
 
 macro_rules! similarities {
@@ -345,5 +346,6 @@ macro_rules! similarities {
 
 similarities!(
     Similarity2 => (Mat3, Rotor2, Vec2, f32), WSimilarity2 => (Wat3, WRotor2, Wec2, f32x4),
-    Similarity3 => (Mat4, Rotor3, Vec3, f32), WSimilarity3 => (Wat4, WRotor3, Wec3, f32x4)
+    Similarity3 => (Mat4, Rotor3, Vec3, f32), WSimilarity3 => (Wat4, WRotor3, Wec3, f32x4),
+    Similarity2d => (Mat3d, Rotor2d, Vec2d, f64), Similarity3d => (Mat4d, Rotor3d, Vec3d, f64)
 );

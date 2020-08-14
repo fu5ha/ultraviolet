@@ -22,6 +22,12 @@ impl EqualsEps for f32 {
     }
 }
 
+impl EqualsEps for f64 {
+    fn eq_eps(self, other: Self) -> bool {
+        (self - other).abs() <= 0.01
+    }
+}
+
 #[macro_export]
 macro_rules! derive_default_identity {
     ($t:ident) => {
