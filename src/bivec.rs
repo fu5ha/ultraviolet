@@ -293,7 +293,7 @@ macro_rules! bivec3s {
         /// A bivector in 3d space.
         ///
         /// In 3d, a bivector has 3 components, each one representing the signed *projected area* of the bivector
-        /// onto one of the 3 *basis bivectors*, which can be thought of as corresponding to each of hte
+        /// onto one of the 3 *basis bivectors*, which can be thought of as corresponding to each of the
         /// three basis planes. This is analogous to the components of a 3d vector, which correspond to the
         /// *projected length* of the vector onto the three basis *vectors. Since in 3d, there are three
         /// components for both vectors and bivectors, 3d bivectors have been historically confused with
