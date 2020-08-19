@@ -48,13 +48,20 @@ pub fn orthographic_vk(left: f32, right: f32, bottom: f32, top: f32, near: f32, 
     )
 }
 
-/// Orthographic projection matrix for use with DirectX.
+/// Orthographic projection matrix for use with WebGPU or DirectX.
 ///
 /// This matrix is meant to be used when the source coordinate space is right-handed and y-up
 /// (the standard computer graphics coordinate space)and the destination space is left-handed
 /// and y-up, with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
-pub fn orthographic_dx(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Mat4 {
+pub fn orthographic_wgpu_dx(
+    left: f32,
+    right: f32,
+    bottom: f32,
+    top: f32,
+    near: f32,
+    far: f32,
+) -> Mat4 {
     let rml = right - left;
     let rpl = right + left;
     let tmb = top - bottom;
@@ -91,7 +98,7 @@ pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
     )
 }
 
-/// Perspective projection matrix meant to be used with DirectX.
+/// Perspective projection matrix meant to be used with WebGPU or DirectX.
 ///
 /// * `vertical_fov` should be provided in radians.
 /// * `aspect_ratio` should be the quotient `width / height`.
@@ -100,7 +107,7 @@ pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
 /// (the standard computer graphics coordinate space) and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
-pub fn perspective_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
+pub fn perspective_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
     let t = (vertical_fov / 2.0).tan();
     let sy = 1.0 / t;
     let sx = sy / aspect_ratio;
@@ -189,7 +196,7 @@ pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f
     )
 }
 
-/// Perspective projection matrix with infinite z-far plane meant to be used with DirectX.
+/// Perspective projection matrix with infinite z-far plane meant to be used with WebGPU or DirectX.
 ///
 /// This is useful for extremely large scenes where having a far clip plane is extraneous anyway,
 /// as allowing it to approach infinity it eliminates several approximate numerical computations
@@ -202,7 +209,7 @@ pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f
 /// (the standard computer graphics coordinate space) and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
-pub fn perspective_infinite_z_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
+pub fn perspective_infinite_z_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
     let t = (vertical_fov / 2.0).tan();
     let sy = 1.0 / t;
     let sx = sy / aspect_ratio;
@@ -215,7 +222,7 @@ pub fn perspective_infinite_z_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f
     )
 }
 
-/// Perspective projection matrix with reversed z-axis meant to be used with DirectX or OpenGL.
+/// Perspective projection matrix with reversed z-axis meant to be used with WebGPU, DirectX, or OpenGL.
 ///
 /// Reversed-Z provides significantly better precision and therefore reduced z-fighting
 /// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
@@ -231,7 +238,7 @@ pub fn perspective_infinite_z_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f
 /// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
 /// and set the z clip from 0.0 to 1.0 rather than the default -1.0 to 1.0**
 #[inline]
-pub fn perspective_reversed_z_dx_gl(
+pub fn perspective_reversed_z_wgpu_dx_gl(
     vertical_fov: f32,
     aspect_ratio: f32,
     z_near: f32,
@@ -282,7 +289,7 @@ pub fn perspective_reversed_z_vk(
     )
 }
 
-/// Perspective projection matrix with reversed and infinite z-axis meant to be used with OpenGL or DirectX.
+/// Perspective projection matrix with reversed and infinite z-axis meant to be used with WebGPU, OpenGL, or DirectX.
 ///
 /// Reversed-Z provides significantly better precision and therefore reduced z-fighting
 /// for most depth situations, especially when a floating-point depth buffer is used. You'll want to use
@@ -304,7 +311,7 @@ pub fn perspective_reversed_z_vk(
 /// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
 /// and set the z clip from 0.0 to 1.0 rather than the default -1.0 to 1.0**
 #[inline]
-pub fn perspective_reversed_infinite_z_dx_gl(
+pub fn perspective_reversed_infinite_z_wgpu_dx_gl(
     vertical_fov: f32,
     aspect_ratio: f32,
     z_near: f32,

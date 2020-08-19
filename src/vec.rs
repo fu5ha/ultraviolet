@@ -6,6 +6,8 @@ use std::ops::*;
 
 use wide::f32x4;
 
+use bytemuck::cast;
+
 #[cfg(feature = "serde")]
 use serde::{
     de::{MapAccess, SeqAccess, Visitor},
@@ -562,16 +564,16 @@ impl Wec2 {
         Self::from([vec, vec, vec, vec])
     }
 
-    /// Merge two vectors together lanewise using `mask` as a mask.
+    /// Blend two vectors together lanewise using `mask` as a mask.
     ///
-    /// This is essentially a bitwise merge operation, such that any point where
+    /// This is essentially a bitwise blend operation, such that any point where
     /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
     /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
+    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
+            x: mask.blend(tru.x, fals.x),
+            y: mask.blend(tru.y, fals.y),
         }
     }
 
@@ -592,7 +594,7 @@ impl Wec2 {
 
         let out = i * eta - (eta * ndi + k.sqrt()) * n;
 
-        Self::merge(mask, Self::zero(), out)
+        Self::blend(mask, Self::zero(), out)
     }
 }
 
@@ -1332,17 +1334,17 @@ impl Wec3 {
         Self::from([vec, vec, vec, vec])
     }
 
-    /// Merge two vectors together lanewise using `mask` as a mask.
+    /// Blend two vectors together lanewise using `mask` as a mask.
     ///
-    /// This is essentially a bitwise merge operation, such that any point where
+    /// This is essentially a bitwise blend operation, such that any point where
     /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
     /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
+    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
-            z: mask.merge(tru.z, fals.z),
+            x: mask.blend(tru.x, fals.x),
+            y: mask.blend(tru.y, fals.y),
+            z: mask.blend(tru.z, fals.z),
         }
     }
 
@@ -1363,16 +1365,16 @@ impl Wec3 {
 
         let out = i.mul_add(Wec3::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
 
-        Self::merge(mask, Self::zero(), out)
+        Self::blend(mask, Self::zero(), out)
     }
 }
 
 impl Into<[Vec3; 4]> for Wec3 {
     #[inline]
     fn into(self) -> [Vec3; 4] {
-        let xs = self.x.as_ref();
-        let ys = self.y.as_ref();
-        let zs = self.z.as_ref();
+        let xs: [f32; 4] = cast(self.x);
+        let ys: [f32; 4] = cast(self.y);
+        let zs: [f32; 4] = cast(self.z);
         [
             Vec3::new(xs[0], ys[0], zs[0]),
             Vec3::new(xs[1], ys[1], zs[1]),
@@ -2060,18 +2062,18 @@ impl Wec4 {
         Self::from([vec, vec, vec, vec])
     }
 
-    /// Merge two vectors together lanewise using `mask` as a mask.
+    /// Blend two vectors together lanewise using `mask` as a mask.
     ///
-    /// This is essentially a bitwise merge operation, such that any point where
+    /// This is essentially a bitwise blend operation, such that any point where
     /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
     /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
     #[inline]
-    pub fn merge(mask: f32x4, tru: Self, fals: Self) -> Self {
+    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
         Self {
-            x: mask.merge(tru.x, fals.x),
-            y: mask.merge(tru.y, fals.y),
-            z: mask.merge(tru.z, fals.z),
-            w: mask.merge(tru.w, fals.w),
+            x: mask.blend(tru.x, fals.x),
+            y: mask.blend(tru.y, fals.y),
+            z: mask.blend(tru.z, fals.z),
+            w: mask.blend(tru.w, fals.w),
         }
     }
 }
@@ -2079,10 +2081,10 @@ impl Wec4 {
 impl Into<[Vec4; 4]> for Wec4 {
     #[inline]
     fn into(self) -> [Vec4; 4] {
-        let xs = self.x.as_ref();
-        let ys = self.y.as_ref();
-        let zs = self.z.as_ref();
-        let ws = self.w.as_ref();
+        let xs: [f32; 4] = cast(self.x);
+        let ys: [f32; 4] = cast(self.y);
+        let zs: [f32; 4] = cast(self.z);
+        let ws: [f32; 4] = cast(self.w);
         [
             Vec4::new(xs[0], ys[0], zs[0], ws[0]),
             Vec4::new(xs[1], ys[1], zs[1], ws[1]),

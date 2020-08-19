@@ -7,12 +7,11 @@ pub trait EqualsEps {
 impl EqualsEps for f32x4 {
     fn eq_eps(self, other: Self) -> bool {
         let r = (self - other).abs();
-        for eps in r.as_ref().iter() {
-            if *eps > 0.01 {
-                return false;
-            }
-        }
-        true
+        let eps = f32x4::from(0.01);
+
+        let mask = r.cmp_ge(eps).move_mask();
+
+        mask == 0b0000
     }
 }
 
@@ -31,5 +30,5 @@ macro_rules! derive_default_identity {
                 Self::identity()
             }
         }
-    }
+    };
 }
