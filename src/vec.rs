@@ -4,16 +4,7 @@ use crate::rotor::*;
 use crate::util::*;
 use std::ops::*;
 
-use wide::f32x4;
-
-use bytemuck::cast;
-
-#[cfg(feature = "serde")]
-use serde::{
-    de::{MapAccess, SeqAccess, Visitor},
-    ser::SerializeStruct,
-    Deserialize, Deserializer, Serialize, Serializer,
-};
+use crate::*;
 
 macro_rules! vec2s {
     ($(($n:ident, $bn:ident, $rn:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
@@ -43,26 +34,26 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0) }
+                $n{ x: $t::splat(1.0), y: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(1.0) }
             }
 
             /// Create a homogeneous 2d *point* from this vector interpreted as a point,
             /// meaning the homogeneous component will start with a value of 1.0.
             #[inline]
             pub fn into_homogeneous_point(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: $t::from(1.0) }
+                $v3t { x: self.x, y: self.y, z: $t::splat(1.0) }
             }
 
             /// Create a homogeneous 2d *vector* from this vector,
             /// meaning the homogeneous component will always have a value of 0.0.
             #[inline]
             pub fn into_homogeneous_vector(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: $t::from(0.0) }
+                $v3t { x: self.x, y: self.y, z: $t::splat(0.0) }
             }
 
             /// Create a 2d point from a homogeneous 2d *point*, performing
@@ -124,7 +115,7 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn reflected(&self, normal: $n) -> Self {
-                *self - ($t::from(2.0) * self.dot(normal) * normal)
+                *self - ($t::splat(2.0) * self.dot(normal) * normal)
             }
 
 
@@ -221,22 +212,22 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast($t::splat(0.0))
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast($t::splat(1.0))
             }
 
             #[inline]
             pub fn xyz(&self) -> $v3t {
-                $v3t::new(self.x, self.y, $t::from(0.0))
+                $v3t::new(self.x, self.y, $t::splat(0.0))
             }
 
             #[inline]
             pub fn xyzw(&self) -> $v4t {
-                $v4t::new(self.x, self.y, $t::from(0.0), $t::from(0.0))
+                $v4t::new(self.x, self.y, $t::splat(0.0), $t::splat(0.0))
             }
 
             #[inline]
@@ -475,7 +466,7 @@ macro_rules! vec2s {
             type Output = $n;
             #[inline]
             fn neg(self) -> $n {
-                self * $t::from(-1.0)
+                self * $t::splat(-1.0)
             }
         }
 
@@ -504,31 +495,12 @@ macro_rules! vec2s {
     };
 }
 
-vec2s!((Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32, (Wec2, WBivec2, WRotor2, Wec3, Wec4) => f32x4);
+vec2s!(
+    (Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32,
+    (Vec2x4, Bivec2x4, Rotor2x4, Vec3x4, Vec4x4) => f32x4,
+    (Vec2x8, Bivec2x8, Rotor2x8, Vec3x8, Vec4x8) => f32x8);
 
-impl From<[Vec2; 4]> for Wec2 {
-    #[inline]
-    fn from(vecs: [Vec2; 4]) -> Self {
-        Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-        }
-    }
-}
-
-impl From<Vec3> for Vec2 {
-    #[inline]
-    fn from(vec: Vec3) -> Self {
-        Self { x: vec.x, y: vec.y }
-    }
-}
-
-impl From<Wec3> for Wec2 {
-    #[inline]
-    fn from(vec: Wec3) -> Self {
-        Self { x: vec.x, y: vec.y }
-    }
-}
+// SCALAR VEC2 IMPLS
 
 impl Vec2 {
     #[inline]
@@ -550,51 +522,10 @@ impl Vec2 {
     }
 }
 
-impl Wec2 {
+impl From<Vec3> for Vec2 {
     #[inline]
-    pub fn new_splat(x: f32, y: f32) -> Self {
-        Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec2) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Blend two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise blend operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.blend(tru.x, fals.x),
-            y: mask.blend(tru.y, fals.y),
-        }
-    }
-
-    #[inline]
-    pub fn refract(&mut self, normal: Self, eta: f32x4) {
-        *self = self.refracted(normal, eta);
-    }
-
-    #[inline]
-    pub fn refracted(&self, normal: Self, eta: f32x4) -> Self {
-        let n = normal;
-        let i = *self;
-        let one = f32x4::from(1.0);
-        let ndi = n.dot(i);
-
-        let k = one - eta * eta * (one - ndi * ndi);
-        let mask = k.cmp_lt(f32x4::from(0.0));
-
-        let out = i * eta - (eta * ndi + k.sqrt()) * n;
-
-        Self::blend(mask, Self::zero(), out)
+    fn from(vec: Vec3) -> Self {
+        Self { x: vec.x, y: vec.y }
     }
 }
 
@@ -608,118 +539,104 @@ impl PartialEq for Vec2 {
     }
 }
 
-#[cfg(feature = "serde")]
-impl Serialize for Vec2 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec2", 2)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.end()
+// WIDE VEC2 IMPLS
+
+macro_rules! impl_wide_vec2s {
+    ($($vt:ident => $tt:ident, $t:ident, $maskt:ident, $nonwidet:ident, $v3t:ident),+) => {
+        $(impl $vt {
+            #[inline]
+            pub fn new_splat(x: $tt, y: $tt) -> Self {
+                Self {
+                    x: $t::splat(x),
+                    y: $t::splat(y),
+                }
+            }
+
+            #[inline]
+            pub fn splat(vec: $nonwidet) -> Self {
+                Self {
+                    x: $t::splat(vec.x),
+                    y: $t::splat(vec.y),
+                }
+            }
+
+            /// Blend two vectors together lanewise using `mask` as a mask.
+            ///
+            /// This is essentially a bitwise blend operation, such that any point where
+            /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+            /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
+            #[inline]
+            pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
+                Self {
+                    x: mask.blend(tru.x, fals.x),
+                    y: mask.blend(tru.y, fals.y),
+                }
+            }
+
+            #[inline]
+            pub fn refract(&mut self, normal: Self, eta: $t) {
+                *self = self.refracted(normal, eta);
+            }
+
+            #[inline]
+            pub fn refracted(&self, normal: Self, eta: $t) -> Self {
+                let n = normal;
+                let i = *self;
+                let one = $t::splat(1.0);
+                let ndi = n.dot(i);
+
+                let k = one - eta * eta * (one - ndi * ndi);
+                let mask = k.cmp_lt($t::splat(0.0));
+
+                let out = i * eta - (eta * ndi + k.sqrt()) * n;
+
+                Self::blend(mask, Self::zero(), out)
+            }
+        }
+
+        impl From<$nonwidet> for $vt {
+            #[inline]
+            fn from(vec: $nonwidet) -> Self {
+                Self::splat(vec)
+            }
+        }
+
+        impl From<$v3t> for $vt {
+            #[inline]
+            fn from(vec: $v3t) -> Self {
+                Self { x: vec.x, y: vec.y }
+            }
+        })+
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de> Deserialize<'de> for Vec2 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-        };
+impl_wide_vec2s!(
+    Vec2x4 => f32, f32x4, m32x4, Vec2, Vec3x4,
+    Vec2x8 => f32, f32x8, m32x8, Vec2, Vec3x8);
 
-        // This part could also be generated independently by:
-        //
-        //    #[derive(Deserialize)]
-        //    #[serde(field_identifier, rename_all = "lowercase")]
-        //    enum Field { Secs, Nanos }
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                struct FieldVisitor;
-
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y`")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                        }
-                    }
-                }
-
-                deserializer.deserialize_identifier(FieldVisitor)
-            }
+impl From<[Vec2; 4]> for Vec2x4 {
+    #[inline]
+    fn from(vecs: [Vec2; 4]) -> Self {
+        Self {
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
         }
+    }
+}
 
-        struct Vec2Visitor;
-
-        impl<'de> Visitor<'de> for Vec2Visitor {
-            type Value = Vec2;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec2")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec2, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                Ok(Vec2::new(x, y))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec2, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                    }
-                }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                Ok(Vec2::new(x, y))
-            }
+impl From<[Vec2; 8]> for Vec2x8 {
+    #[inline]
+    fn from(vecs: [Vec2; 8]) -> Self {
+        Self {
+            x: f32x8::from([
+                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
+                vecs[7].x,
+            ]),
+            y: f32x8::from([
+                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
+                vecs[7].y,
+            ]),
         }
-
-        const FIELDS: &'static [&'static str] = &["x", "y"];
-
-        deserializer.deserialize_struct("Vec2", FIELDS, Vec2Visitor)
     }
 }
 
@@ -752,31 +669,31 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0), z: $t::from(0.0) }
+                $n{ x: $t::splat(1.0), y: $t::splat(0.0), z: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0), z: $t::from(0.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(1.0), z: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_z() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(0.0), z: $t::splat(1.0) }
             }
 
             /// Create a homogeneous 3d *point* from this vector interpreted as a point,
             /// meaning the homogeneous component will start with a value of 1.0.
             #[inline]
             pub fn into_homogeneous_point(self) -> $v4t {
-                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(1.0) }
+                $v4t { x: self.x, y: self.y, z: self.z, w: $t::splat(1.0) }
             }
 
             /// Create a homogeneous 3d *vector* from this vector,
             /// meaning the homogeneous component will always have a value of 0.0.
             #[inline]
             pub fn into_homogeneous_vector(self) -> $v4t {
-                $v4t { x: self.x, y: self.y, z: self.z, w: $t::from(0.0) }
+                $v4t { x: self.x, y: self.y, z: self.z, w: $t::splat(0.0) }
             }
 
             /// Create a 3d point from a homogeneous 3d *point*, performing
@@ -852,7 +769,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self -= $t::from(2.0) * self.dot(normal) * normal;
+                *self -= $t::splat(2.0) * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -962,12 +879,12 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast($t::splat(0.0))
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast($t::splat(1.0))
             }
 
 
@@ -978,7 +895,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn xyzw(&self) -> $v4t {
-                $v4t::new(self.x, self.y, self.z, $t::from(0.0))
+                $v4t::new(self.x, self.y, self.z, $t::splat(0.0))
             }
 
             #[inline]
@@ -1222,7 +1139,7 @@ macro_rules! vec3s {
             type Output = $n;
             #[inline]
             fn neg(self) -> $n {
-                self * $t::from(-1.0)
+                self * $t::splat(-1.0)
             }
         }
 
@@ -1253,51 +1170,12 @@ macro_rules! vec3s {
     }
 }
 
-vec3s!((Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32, (Wec2, Wec3, WBivec3, WRotor3, Wec4) => f32x4);
+vec3s!(
+    (Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32,
+    (Vec2x4, Vec3x4, Bivec3x4, Rotor3x4, Vec4x4) => f32x4,
+    (Vec2x8, Vec3x8, Bivec3x8, Rotor3x8, Vec4x8) => f32x8);
 
-impl From<Vec2> for Vec3 {
-    #[inline]
-    fn from(vec: Vec2) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: 0.0,
-        }
-    }
-}
-
-impl From<Wec2> for Wec3 {
-    #[inline]
-    fn from(vec: Wec2) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: f32x4::from(0.0),
-        }
-    }
-}
-
-impl From<Vec4> for Vec3 {
-    #[inline]
-    fn from(vec: Vec4) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-        }
-    }
-}
-
-impl From<Wec4> for Wec3 {
-    #[inline]
-    fn from(vec: Wec4) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-        }
-    }
-}
+// SCALAR VEC3 IMPLS
 
 impl Vec3 {
     #[inline]
@@ -1319,82 +1197,6 @@ impl Vec3 {
     }
 }
 
-impl Wec3 {
-    #[inline]
-    pub fn new_splat(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-            z: f32x4::from(z),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec3) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Blend two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise blend operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.blend(tru.x, fals.x),
-            y: mask.blend(tru.y, fals.y),
-            z: mask.blend(tru.z, fals.z),
-        }
-    }
-
-    #[inline]
-    pub fn refract(&mut self, normal: Self, eta: f32x4) {
-        *self = self.refracted(normal, eta);
-    }
-
-    #[inline]
-    pub fn refracted(&self, normal: Self, eta: f32x4) -> Self {
-        let n = normal;
-        let i = *self;
-        let one = f32x4::from(1.0);
-        let ndi = n.dot(i);
-
-        let k = one - eta * eta * (one - ndi * ndi);
-        let mask = k.cmp_lt(f32x4::from(0.0));
-
-        let out = i.mul_add(Wec3::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
-
-        Self::blend(mask, Self::zero(), out)
-    }
-}
-
-impl Into<[Vec3; 4]> for Wec3 {
-    #[inline]
-    fn into(self) -> [Vec3; 4] {
-        let xs: [f32; 4] = cast(self.x);
-        let ys: [f32; 4] = cast(self.y);
-        let zs: [f32; 4] = cast(self.z);
-        [
-            Vec3::new(xs[0], ys[0], zs[0]),
-            Vec3::new(xs[1], ys[1], zs[1]),
-            Vec3::new(xs[2], ys[2], zs[2]),
-            Vec3::new(xs[3], ys[3], zs[3]),
-        ]
-    }
-}
-
-impl From<[Vec3; 4]> for Wec3 {
-    #[inline]
-    fn from(vecs: [Vec3; 4]) -> Self {
-        Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-        }
-    }
-}
-
 impl PartialEq for Vec3 {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
@@ -1405,127 +1207,176 @@ impl PartialEq for Vec3 {
     }
 }
 
-#[cfg(feature = "serde")]
-impl Serialize for Vec3 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec3", 3)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.serialize_field("z", &self.z)?;
-        state.end()
+impl From<Vec2> for Vec3 {
+    #[inline]
+    fn from(vec: Vec2) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: 0.0,
+        }
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de> Deserialize<'de> for Vec3 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-            Z,
-        };
+impl From<Vec4> for Vec3 {
+    #[inline]
+    fn from(vec: Vec4) -> Self {
+        Self {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+        }
+    }
+}
 
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                struct FieldVisitor;
+// WIDE VEC3 IMPLS
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y` or `z`")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            "z" => Ok(Field::Z),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                        }
-                    }
+macro_rules! impl_wide_vec3s {
+    ($($vt:ident => $tt:ident, $t:ident, $maskt:ident, $nonwidet:ident, $v2t:ident, $v4t:ident),+) => {
+        $(impl $vt {
+            #[inline]
+            pub fn new_splat(x: $tt, y: $tt, z: $tt) -> Self {
+                Self {
+                    x: $t::splat(x),
+                    y: $t::splat(y),
+                    z: $t::splat(z),
                 }
+            }
 
-                deserializer.deserialize_identifier(FieldVisitor)
+            #[inline]
+            pub fn splat(vec: $nonwidet) -> Self {
+                Self {
+                    x: $t::splat(vec.x),
+                    y: $t::splat(vec.y),
+                    z: $t::splat(vec.z),
+                }
+            }
+
+            /// Blend two vectors together lanewise using `mask` as a mask.
+            ///
+            /// This is essentially a bitwise blend operation, such that any point where
+            /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+            /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
+            #[inline]
+            pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
+                Self {
+                    x: mask.blend(tru.x, fals.x),
+                    y: mask.blend(tru.y, fals.y),
+                    z: mask.blend(tru.z, fals.z),
+                }
+            }
+
+            #[inline]
+            pub fn refract(&mut self, normal: Self, eta: $t) {
+                *self = self.refracted(normal, eta);
+            }
+
+            #[inline]
+            pub fn refracted(&self, normal: Self, eta: $t) -> Self {
+                let n = normal;
+                let i = *self;
+                let one = $t::splat(1.0);
+                let ndi = n.dot(i);
+
+                let k = one - eta * eta * (one - ndi * ndi);
+                let mask = k.cmp_lt($t::splat(0.0));
+
+                let out = i.mul_add(Self::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
+
+                Self::blend(mask, Self::zero(), out)
             }
         }
 
-        struct Vec3Visitor;
-
-        impl<'de> Visitor<'de> for Vec3Visitor {
-            type Value = Vec3;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec3")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec3, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                let z = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                Ok(Vec3::new(x, y, z))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec3, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                let mut z = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                        Field::Z => {
-                            if z.is_some() {
-                                return Err(serde::de::Error::duplicate_field("z"));
-                            }
-                            z = Some(map.next_value()?);
-                        }
-                    }
+        impl From<$v2t> for $vt {
+            #[inline]
+            fn from(vec: $v2t) -> Self {
+                Self {
+                    x: vec.x,
+                    y: vec.y,
+                    z: $t::splat(0.0),
                 }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
-                Ok(Vec3::new(x, y, z))
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["x", "y", "z"];
+        impl From<$v4t> for $vt {
+            #[inline]
+            fn from(vec: $v4t) -> Self {
+                Self {
+                    x: vec.x,
+                    y: vec.y,
+                    z: vec.z,
+                }
+            }
+        })+
+    }
+}
 
-        deserializer.deserialize_struct("Vec3", FIELDS, Vec3Visitor)
+impl_wide_vec3s!(
+    Vec3x4 => f32, f32x4, m32x4, Vec3, Vec2x4, Vec4x4,
+    Vec3x8 => f32, f32x8, m32x8, Vec3, Vec2x8, Vec4x8);
+
+impl Into<[Vec3; 4]> for Vec3x4 {
+    #[inline]
+    fn into(self) -> [Vec3; 4] {
+        let xs: [f32; 4] = self.x.into();
+        let ys: [f32; 4] = self.y.into();
+        let zs: [f32; 4] = self.z.into();
+        [
+            Vec3::new(xs[0], ys[0], zs[0]),
+            Vec3::new(xs[1], ys[1], zs[1]),
+            Vec3::new(xs[2], ys[2], zs[2]),
+            Vec3::new(xs[3], ys[3], zs[3]),
+        ]
+    }
+}
+
+impl From<[Vec3; 4]> for Vec3x4 {
+    #[inline]
+    fn from(vecs: [Vec3; 4]) -> Self {
+        Self {
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
+            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
+        }
+    }
+}
+
+impl Into<[Vec3; 8]> for Vec3x8 {
+    #[inline]
+    fn into(self) -> [Vec3; 8] {
+        let xs: [f32; 8] = self.x.into();
+        let ys: [f32; 8] = self.y.into();
+        let zs: [f32; 8] = self.z.into();
+        [
+            Vec3::new(xs[0], ys[0], zs[0]),
+            Vec3::new(xs[1], ys[1], zs[1]),
+            Vec3::new(xs[2], ys[2], zs[2]),
+            Vec3::new(xs[3], ys[3], zs[3]),
+            Vec3::new(xs[4], ys[4], zs[4]),
+            Vec3::new(xs[5], ys[5], zs[5]),
+            Vec3::new(xs[6], ys[6], zs[6]),
+            Vec3::new(xs[7], ys[7], zs[7]),
+        ]
+    }
+}
+
+impl From<[Vec3; 8]> for Vec3x8 {
+    #[inline]
+    fn from(vecs: [Vec3; 8]) -> Self {
+        Self {
+            x: f32x8::from([
+                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
+                vecs[7].x,
+            ]),
+            y: f32x8::from([
+                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
+                vecs[7].y,
+            ]),
+            z: f32x8::from([
+                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
+                vecs[7].z,
+            ]),
+        }
     }
 }
 
@@ -1559,22 +1410,22 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::from(1.0), y: $t::from(0.0), z: $t::from(0.0), w: $t::from(0.0) }
+                $n{ x: $t::splat(1.0), y: $t::splat(0.0), z: $t::splat(0.0), w: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(1.0), z: $t::from(0.0), w: $t::from(0.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(1.0), z: $t::splat(0.0), w: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_z() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(1.0), w: $t::from(0.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(0.0), z: $t::splat(1.0), w: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_w() -> Self {
-                $n{ x: $t::from(0.0), y: $t::from(0.0), z: $t::from(0.0), w: $t::from(1.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(0.0), z: $t::splat(0.0), w: $t::splat(1.0) }
             }
 
             #[inline]
@@ -1584,7 +1435,7 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self -= $t::from(2.0) * self.dot(normal) * normal;
+                *self -= $t::splat(2.0) * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -1701,12 +1552,12 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::broadcast($t::from(0.0))
+                Self::broadcast($t::splat(0.0))
             }
 
             #[inline]
             pub fn one() -> Self {
-                Self::broadcast($t::from(1.0))
+                Self::broadcast($t::splat(1.0))
             }
 
             #[inline]
@@ -1967,7 +1818,7 @@ macro_rules! vec4s {
             type Output = $n;
             #[inline]
             fn neg(self) -> $n {
-                self * $t::from(-1.0)
+                self * $t::splat(-1.0)
             }
         }
 
@@ -2000,31 +1851,12 @@ macro_rules! vec4s {
     }
 }
 
-vec4s!(Vec4, Vec2, Vec3 => f32, Wec4, Wec2, Wec3 => f32x4);
+vec4s!(
+    Vec4, Vec2, Vec3 => f32,
+    Vec4x4, Vec2x4, Vec3x4 => f32x4,
+    Vec4x8, Vec2x8, Vec3x8 => f32x8);
 
-impl From<Vec3> for Vec4 {
-    #[inline]
-    fn from(vec: Vec3) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-            w: 0.0,
-        }
-    }
-}
-
-impl From<Wec3> for Wec4 {
-    #[inline]
-    fn from(vec: Wec3) -> Self {
-        Self {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-            w: f32x4::from(0.0),
-        }
-    }
-}
+// SCALAR VEC4 IMPLS
 
 impl Vec4 {
     #[inline]
@@ -2046,62 +1878,14 @@ impl Vec4 {
     }
 }
 
-impl Wec4 {
+impl From<Vec3> for Vec4 {
     #[inline]
-    pub fn new_splat(x: f32, y: f32, z: f32, w: f32) -> Self {
+    fn from(vec: Vec3) -> Self {
         Self {
-            x: f32x4::from(x),
-            y: f32x4::from(y),
-            z: f32x4::from(z),
-            w: f32x4::from(w),
-        }
-    }
-
-    #[inline]
-    pub fn splat(vec: Vec4) -> Self {
-        Self::from([vec, vec, vec, vec])
-    }
-
-    /// Blend two vectors together lanewise using `mask` as a mask.
-    ///
-    /// This is essentially a bitwise blend operation, such that any point where
-    /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
-    /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
-    #[inline]
-    pub fn blend(mask: f32x4, tru: Self, fals: Self) -> Self {
-        Self {
-            x: mask.blend(tru.x, fals.x),
-            y: mask.blend(tru.y, fals.y),
-            z: mask.blend(tru.z, fals.z),
-            w: mask.blend(tru.w, fals.w),
-        }
-    }
-}
-
-impl Into<[Vec4; 4]> for Wec4 {
-    #[inline]
-    fn into(self) -> [Vec4; 4] {
-        let xs: [f32; 4] = cast(self.x);
-        let ys: [f32; 4] = cast(self.y);
-        let zs: [f32; 4] = cast(self.z);
-        let ws: [f32; 4] = cast(self.w);
-        [
-            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
-            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
-            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
-            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
-        ]
-    }
-}
-
-impl From<[Vec4; 4]> for Wec4 {
-    #[inline]
-    fn from(vecs: [Vec4; 4]) -> Self {
-        Self {
-            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
-            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+            w: 0.0,
         }
     }
 }
@@ -2116,212 +1900,140 @@ impl PartialEq for Vec4 {
     }
 }
 
-#[cfg(feature = "serde")]
-impl Serialize for Vec4 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec4", 4)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.serialize_field("z", &self.z)?;
-        state.serialize_field("w", &self.w)?;
-        state.end()
-    }
-}
+// WIDE VEC4 IMPLS
 
-#[cfg(feature = "serde")]
-impl<'de> Deserialize<'de> for Vec4 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-            Z,
-            W,
-        };
-
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                struct FieldVisitor;
-
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y` or `z` or `w`")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            "z" => Ok(Field::Z),
-                            "w" => Ok(Field::W),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                        }
-                    }
+macro_rules! impl_wide_vec4s {
+    ($($vt:ident => $tt:ident, $t:ident, $maskt:ident, $nonwidet:ident, $v3t:ident),+) => {
+        $(impl $vt {
+            #[inline]
+            pub fn new_splat(x: $tt, y: $tt, z: $tt, w: $tt) -> Self {
+                Self {
+                    x: $t::splat(x),
+                    y: $t::splat(y),
+                    z: $t::splat(z),
+                    w: $t::splat(w),
                 }
+            }
 
-                deserializer.deserialize_identifier(FieldVisitor)
+            #[inline]
+            pub fn splat(vec: Vec4) -> Self {
+                Self {
+                    x: $t::splat(vec.x),
+                    y: $t::splat(vec.y),
+                    z: $t::splat(vec.z),
+                    w: $t::splat(vec.w),
+                }
+            }
+
+            /// Blend two vectors together lanewise using `mask` as a mask.
+            ///
+            /// This is essentially a bitwise blend operation, such that any point where
+            /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
+            /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
+            #[inline]
+            pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
+                Self {
+                    x: mask.blend(tru.x, fals.x),
+                    y: mask.blend(tru.y, fals.y),
+                    z: mask.blend(tru.z, fals.z),
+                    w: mask.blend(tru.w, fals.w),
+                }
             }
         }
 
-        struct Vec4Visitor;
-
-        impl<'de> Visitor<'de> for Vec4Visitor {
-            type Value = Vec4;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec4")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec4, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                let z = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                let w: f32 = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
-                Ok(Vec4::new(x, y, z, w))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec4, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                let mut z = None;
-                let mut w = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                        Field::Z => {
-                            if z.is_some() {
-                                return Err(serde::de::Error::duplicate_field("z"));
-                            }
-                            z = Some(map.next_value()?);
-                        }
-                        Field::W => {
-                            if w.is_some() {
-                                return Err(serde::de::Error::duplicate_field("w"));
-                            }
-                            w = Some(map.next_value()?);
-                        }
-                    }
-                }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
-                let w: f32 = w.ok_or_else(|| serde::de::Error::missing_field("w"))?;
-                Ok(Vec4::new(x, y, z, w))
+        impl From<$nonwidet> for $vt {
+            #[inline]
+            fn from(vec: $nonwidet) -> Self {
+                Self::splat(vec)
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["x", "y", "z", "w"];
+        impl From<$v3t> for $vt {
+            #[inline]
+            fn from(vec: $v3t) -> Self {
+                Self {
+                    x: vec.x,
+                    y: vec.y,
+                    z: vec.z,
+                    w: $t::splat(0.0),
+                }
+            }
+        })+
+    };
+}
 
-        deserializer.deserialize_struct("Vec4", FIELDS, Vec4Visitor)
+impl_wide_vec4s!(
+    Vec4x4 => f32, f32x4, m32x4, Vec4, Vec3x4,
+    Vec4x8 => f32, f32x8, m32x8, Vec4, Vec3x8);
+
+impl Into<[Vec4; 4]> for Vec4x4 {
+    #[inline]
+    fn into(self) -> [Vec4; 4] {
+        let xs: [f32; 4] = self.x.into();
+        let ys: [f32; 4] = self.y.into();
+        let zs: [f32; 4] = self.z.into();
+        let ws: [f32; 4] = self.w.into();
+        [
+            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
+            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
+            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
+            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
+        ]
     }
 }
 
-#[cfg(all(test, feature = "serde"))]
-mod serde_tests {
-    use crate::vec::{Vec2, Vec3, Vec4};
-    use serde_test::{assert_tokens, Token};
-
-    #[test]
-    fn vec2() {
-        let vec2 = Vec2::new(1.0, 2.0);
-
-        assert_tokens(
-            &vec2,
-            &[
-                Token::Struct {
-                    name: "Vec2",
-                    len: 2,
-                },
-                Token::Str("x"),
-                Token::F32(1.0),
-                Token::Str("y"),
-                Token::F32(2.0),
-                Token::StructEnd,
-            ],
-        );
+impl From<[Vec4; 4]> for Vec4x4 {
+    #[inline]
+    fn from(vecs: [Vec4; 4]) -> Self {
+        Self {
+            x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
+            y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
+            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
+            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
+        }
     }
+}
 
-    #[test]
-    fn vec3() {
-        let vec3 = Vec3::new(1.0, 2.0, 3.0);
-
-        assert_tokens(
-            &vec3,
-            &[
-                Token::Struct {
-                    name: "Vec3",
-                    len: 3,
-                },
-                Token::Str("x"),
-                Token::F32(1.0),
-                Token::Str("y"),
-                Token::F32(2.0),
-                Token::Str("z"),
-                Token::F32(3.0),
-                Token::StructEnd,
-            ],
-        );
+impl Into<[Vec4; 8]> for Vec4x8 {
+    #[inline]
+    fn into(self) -> [Vec4; 8] {
+        let xs: [f32; 8] = self.x.into();
+        let ys: [f32; 8] = self.y.into();
+        let zs: [f32; 8] = self.z.into();
+        let ws: [f32; 8] = self.z.into();
+        [
+            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
+            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
+            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
+            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
+            Vec4::new(xs[4], ys[4], zs[4], ws[4]),
+            Vec4::new(xs[5], ys[5], zs[5], ws[5]),
+            Vec4::new(xs[6], ys[6], zs[6], ws[6]),
+            Vec4::new(xs[7], ys[7], zs[7], ws[7]),
+        ]
     }
+}
 
-    #[test]
-    fn vec4() {
-        let vec4 = Vec4::new(1.0, 2.0, 3.0, 4.0);
-
-        assert_tokens(
-            &vec4,
-            &[
-                Token::Struct {
-                    name: "Vec4",
-                    len: 4,
-                },
-                Token::Str("x"),
-                Token::F32(1.0),
-                Token::Str("y"),
-                Token::F32(2.0),
-                Token::Str("z"),
-                Token::F32(3.0),
-                Token::Str("w"),
-                Token::F32(4.0),
-                Token::StructEnd,
-            ],
-        );
+impl From<[Vec4; 8]> for Vec4x8 {
+    #[inline]
+    fn from(vecs: [Vec4; 8]) -> Self {
+        Self {
+            x: f32x8::from([
+                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
+                vecs[7].x,
+            ]),
+            y: f32x8::from([
+                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
+                vecs[7].y,
+            ]),
+            z: f32x8::from([
+                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
+                vecs[7].z,
+            ]),
+            w: f32x8::from([
+                vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
+                vecs[7].w,
+            ]),
+        }
     }
 }

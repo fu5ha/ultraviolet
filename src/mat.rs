@@ -3,8 +3,6 @@ use std::ops::*;
 
 use crate::*;
 
-use wide::f32x4;
-
 #[cfg(feature = "serde")]
 use serde::{de::SeqAccess, Deserialize, Deserializer, Serialize, Serializer};
 
@@ -32,8 +30,8 @@ macro_rules! mat2s {
             #[inline]
             pub fn identity() -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(1.0)),
+                    $vt::new($t::splat(1.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(1.0)),
                 )
             }
 
@@ -43,7 +41,7 @@ macro_rules! mat2s {
                 $m3t::new(
                     self.cols[0].into(),
                     self.cols[1].into(),
-                    $v3t::new($t::from(0.0), $t::from(0.0), $t::from(1.0))
+                    $v3t::new($t::splat(0.0), $t::splat(0.0), $t::splat(1.0))
                 )
             }
 
@@ -207,7 +205,10 @@ macro_rules! mat2s {
     }
 }
 
-mat2s!(Mat2 => Mat3, Vec3, Vec2, f32, Wat2 => Wat3, Wec3, Wec2, f32x4);
+mat2s!(
+    Mat2 => Mat3, Vec3, Vec2, f32,
+    Mat2x4 => Mat3x4, Vec3x4, Vec2x4, f32x4,
+    Mat2x8 => Mat3x8, Vec3x8, Vec2x8, f32x8);
 
 impl PartialEq for Mat2 {
     fn eq(&self, other: &Self) -> bool {
@@ -217,97 +218,6 @@ impl PartialEq for Mat2 {
     fn ne(&self, other: &Self) -> bool {
         self.cols[0] != other.cols[0] || self.cols[1] != other.cols[1]
     }
-}
-
-#[cfg(feature = "serde")]
-impl Serialize for Mat2 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        use serde::ser::SerializeSeq;
-
-        let mut seq = serializer.serialize_seq(Some(4))?;
-
-        seq.serialize_element(&self.cols[0].x)?;
-        seq.serialize_element(&self.cols[0].y)?;
-        seq.serialize_element(&self.cols[1].x)?;
-        seq.serialize_element(&self.cols[1].y)?;
-        seq.end()
-    }
-}
-
-#[cfg(feature = "serde")]
-struct Mat2Visitor {}
-
-#[cfg(feature = "serde")]
-impl Mat2Visitor {
-    pub fn new() -> Self {
-        Mat2Visitor {}
-    }
-}
-
-#[cfg(feature = "serde")]
-impl<'de> serde::de::Visitor<'de> for Mat2Visitor {
-    type Value = Mat2;
-
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("array of 4 floats")
-    }
-
-    #[inline]
-    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-    where
-        A: SeqAccess<'de>,
-    {
-        use serde::de::Error;
-
-        Ok(Self::Value {
-            cols: [
-                Vec2::new(
-                    match seq.next_element::<f32>()? {
-                        Some(val) => val,
-                        None => return Err(Error::invalid_length(0, &self)),
-                    },
-                    match seq.next_element::<f32>()? {
-                        Some(val) => val,
-                        None => return Err(Error::invalid_length(1, &self)),
-                    },
-                ),
-                Vec2::new(
-                    match seq.next_element::<f32>()? {
-                        Some(val) => val,
-                        None => return Err(Error::invalid_length(2, &self)),
-                    },
-                    match seq.next_element::<f32>()? {
-                        Some(val) => val,
-                        None => return Err(Error::invalid_length(3, &self)),
-                    },
-                ),
-            ],
-        })
-    }
-}
-
-#[cfg(feature = "serde")]
-impl<'de> Deserialize<'de> for Mat2 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_tuple(4, Mat2Visitor::new())
-    }
-
-    //    @TODO I understand how to implement it in the context of arrays but not matrices
-    //    fn deserialize_in_place<D>(
-    //        deserializer: D,
-    //        place: &mut Self,
-    //    ) -> Result<(), <D as Deserializer<'de>>::Error>
-    //    where
-    //        D: Deserializer<'de>,
-    //    {
-    //        unimplemented!()
-    //    }
 }
 
 macro_rules! mat3s {
@@ -337,30 +247,30 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_translation(trans: $v2t) -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0)),
-                    $vt::new(trans.x, trans.y, $t::from(1.0)))
+                    $vt::new($t::splat(1.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0)),
+                    $vt::new(trans.x, trans.y, $t::splat(1.0)))
             }
 
             /// Assumes homogeneous 2d coordinates.
             #[inline]
             pub fn from_scale_homogeneous(scale: $t) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale, zero, zero),
                     $vt::new(zero, scale, zero),
-                    $vt::new(zero, zero, $t::from(1.0)),
+                    $vt::new(zero, zero, $t::splat(1.0)),
                 )
             }
 
             /// Assumes homogeneous 2d coordinates.
             #[inline]
             pub fn from_nonuniform_scale_homogeneous(scale: $vt) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero),
                     $vt::new(zero, scale.y, zero),
-                    $vt::new(zero, zero, $t::from(1.0)),
+                    $vt::new(zero, zero, $t::splat(1.0)),
                 )
             }
 
@@ -368,17 +278,17 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_homogeneous(angle: $t) -> Self {
                 let (s, c) = angle.sin_cos();
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(c, s, zero),
                     $vt::new(s, -c, zero),
-                    $vt::new(zero, zero, $t::from(1.0)),
+                    $vt::new(zero, zero, $t::splat(1.0)),
                 )
             }
 
             #[inline]
             pub fn from_scale(scale: $t) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale, zero, zero),
                     $vt::new(zero, scale, zero),
@@ -388,7 +298,7 @@ macro_rules! mat3s {
 
             #[inline]
             pub fn from_nonuniform_scale(scale: $vt) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero),
                     $vt::new(zero, scale.y, zero),
@@ -399,9 +309,9 @@ macro_rules! mat3s {
             #[inline]
             pub fn identity() -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0)))
+                    $vt::new($t::splat(1.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(0.0), $t::splat(1.0)))
             }
 
             /// Angles are applied in the order roll -> pitch -> yaw.
@@ -439,7 +349,7 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles($t::from(0.0), angle, $t::from(0.0))
+                Self::from_euler_angles($t::splat(0.0), angle, $t::splat(0.0))
             }
 
             /// Create a new rotation matrix from a rotation "about the y axis". This is
@@ -457,7 +367,7 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+                Self::from_euler_angles($t::splat(0.0), $t::splat(0.0), angle)
             }
 
             /// Create a new rotation matrix from a rotation "about the z axis". This is
@@ -475,7 +385,7 @@ macro_rules! mat3s {
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+                Self::from_euler_angles(angle, $t::splat(0.0), $t::splat(0.0))
             }
 
             /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
@@ -491,8 +401,8 @@ macro_rules! mat3s {
 
             #[inline]
             pub fn into_homogeneous(self) -> $m4t {
-                let zero = $t::from(0.0);
-                let one = $t::from(1.0);
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
                 $m4t::new(
                     self.cols[0].into(),
                     self.cols[1].into(),
@@ -516,7 +426,7 @@ macro_rules! mat3s {
                 let y = self.cols[2].cross(self.cols[0]);
                 let z = self.cols[0].cross(self.cols[1]);
                 let det = self.cols[2].dot(y);
-                let inv_det = $t::from(1.0) / det;
+                let inv_det = $t::splat(1.0) / det;
 
                 Self::new(x * inv_det, y * inv_det, z * inv_det).transposed()
             }
@@ -736,7 +646,10 @@ macro_rules! mat3s {
     }
 }
 
-mat3s!(Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32, Wat3 => WRotor3, WBivec3, Wat4, Wec4, Wec2, Wec3, f32x4);
+mat3s!(
+    Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32,
+    Mat3x4 => Rotor3x4, Bivec3x4, Mat4x4, Vec4x4, Vec2x4, Vec3x4, f32x4,
+    Mat3x8 => Rotor3x8, Bivec3x8, Mat4x8, Vec4x8, Vec2x8, Vec3x8, f32x8);
 
 impl PartialEq for Mat3 {
     fn eq(&self, other: &Self) -> bool {
@@ -899,50 +812,50 @@ macro_rules! mat4s {
             #[inline]
             pub fn identity() -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(0.0), $t::from(1.0)))
+                    $vt::new($t::splat(1.0), $t::splat(0.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(0.0), $t::splat(1.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(0.0), $t::splat(0.0), $t::splat(1.0)))
             }
 
             /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_translation(trans: $v3t) -> Self {
                 Self::new(
-                    $vt::new($t::from(1.0), $t::from(0.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(1.0), $t::from(0.0), $t::from(0.0)),
-                    $vt::new($t::from(0.0), $t::from(0.0), $t::from(1.0), $t::from(0.0)),
-                    $vt::new(trans.x, trans.y, trans.z, $t::from(1.0)))
+                    $vt::new($t::splat(1.0), $t::splat(0.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0), $t::splat(0.0)),
+                    $vt::new($t::splat(0.0), $t::splat(0.0), $t::splat(1.0), $t::splat(0.0)),
+                    $vt::new(trans.x, trans.y, trans.z, $t::splat(1.0)))
             }
 
             /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_scale(scale: $t) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale, zero, zero, zero),
                     $vt::new(zero, scale, zero, zero),
                     $vt::new(zero, zero, scale, zero),
-                    $vt::new(zero, zero, zero, $t::from(1.0)),
+                    $vt::new(zero, zero, zero, $t::splat(1.0)),
                 )
             }
 
             /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_nonuniform_scale(scale: $v3t) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero, zero),
                     $vt::new(zero, scale.y, zero, zero),
                     $vt::new(zero, zero, scale.z, zero),
-                    $vt::new(zero, zero, zero, $t::from(1.0)),
+                    $vt::new(zero, zero, zero, $t::splat(1.0)),
                 )
             }
 
             /// Full 4d diagonal matrix.
             #[inline]
             pub fn from_scale_4d(scale: $t) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale, zero, zero, zero),
                     $vt::new(zero, scale, zero, zero),
@@ -954,7 +867,7 @@ macro_rules! mat4s {
             /// Full 4d nonuniform scaling matrix.
             #[inline]
             pub fn from_nonuniform_scale_4d(scale: $vt) -> Self {
-                let zero = $t::from(0.0);
+                let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero, zero),
                     $vt::new(zero, scale.y, zero, zero),
@@ -1002,7 +915,7 @@ macro_rules! mat4s {
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles($t::from(0.0), angle, $t::from(0.0))
+                Self::from_euler_angles($t::splat(0.0), angle, $t::splat(0.0))
             }
 
             /// Create a new rotation matrix from a rotation "about the y axis". This is
@@ -1021,7 +934,7 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
-                Self::from_euler_angles($t::from(0.0), $t::from(0.0), angle)
+                Self::from_euler_angles($t::splat(0.0), $t::splat(0.0), angle)
             }
 
             /// Create a new rotation matrix from a rotation "about the z axis". This is
@@ -1041,7 +954,7 @@ macro_rules! mat4s {
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::from(0.0), $t::from(0.0))
+                Self::from_euler_angles(angle, $t::splat(0.0), $t::splat(0.0))
             }
 
             /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
@@ -1082,10 +995,10 @@ macro_rules! mat4s {
                 let r = f.cross(up).normalized();
                 let u = r.cross(f);
                 Self::new(
-                    $vt::new(r.x, u.x, -f.x, $t::from(0.0)),
-                    $vt::new(r.y, u.y, -f.y, $t::from(0.0)),
-                    $vt::new(r.z, u.z, -f.z, $t::from(0.0)),
-                    $vt::new(-r.dot(eye), -u.dot(eye), f.dot(eye), $t::from(1.0))
+                    $vt::new(r.x, u.x, -f.x, $t::splat(0.0)),
+                    $vt::new(r.y, u.y, -f.y, $t::splat(0.0)),
+                    $vt::new(r.z, u.z, -f.z, $t::splat(0.0)),
+                    $vt::new(-r.dot(eye), -u.dot(eye), f.dot(eye), $t::splat(1.0))
                 )
             }
 
@@ -1099,10 +1012,10 @@ macro_rules! mat4s {
                 let r = f.cross(up).normalized();
                 let u = r.cross(f);
                 Self::new(
-                    $vt::new(r.x, u.x, f.x, $t::from(0.0)),
-                    $vt::new(r.y, u.y, f.y, $t::from(0.0)),
-                    $vt::new(r.z, u.z, f.z, $t::from(0.0)),
-                    $vt::new(-r.dot(eye), -u.dot(eye), -f.dot(eye), $t::from(1.0))
+                    $vt::new(r.x, u.x, f.x, $t::splat(0.0)),
+                    $vt::new(r.y, u.y, f.y, $t::splat(0.0)),
+                    $vt::new(r.z, u.z, f.z, $t::splat(0.0)),
+                    $vt::new(-r.dot(eye), -u.dot(eye), -f.dot(eye), $t::splat(1.0))
                 )
             }
 
@@ -1182,8 +1095,8 @@ macro_rules! mat4s {
                 let inv2 = vec0 * fac1 - vec1 * fac3 + vec3 * fac5;
                 let inv3 = vec0 * fac2 - vec1 * fac4 + vec2 * fac5;
 
-                let sign_a = $vt::new($t::from(1.0), $t::from(-1.0), $t::from(1.0), $t::from(-1.0));
-                let sign_b = $vt::new($t::from(-1.0), $t::from(1.0), $t::from(-1.0), $t::from(1.0));
+                let sign_a = $vt::new($t::splat(1.0), $t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0));
+                let sign_b = $vt::new($t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0), $t::splat(1.0));
 
                 let inverse = Self {
                     cols: [
@@ -1204,7 +1117,7 @@ macro_rules! mat4s {
                 let dot0 = self.cols[0] * row0;
                 let dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
 
-                let rcp_det = $t::from(1.0) / dot1;
+                let rcp_det = $t::splat(1.0) / dot1;
                 inverse * rcp_det
             }
 
@@ -1413,7 +1326,7 @@ macro_rules! mat4s {
                 Self::from(*comps)
             }
         }
-            
+
         impl Index<usize> for $n {
             type Output = $vt;
 
@@ -1432,7 +1345,10 @@ macro_rules! mat4s {
     }
 }
 
-mat4s!(Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32, Wat4 => WRotor3, WBivec3, Wec4, Wec3, f32x4);
+mat4s!(
+    Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32,
+    Mat4x4 => Rotor3x4, Bivec3x4, Vec4x4, Vec3x4, f32x4,
+    Mat4x8 => Rotor3x8, Bivec3x8, Vec4x8, Vec3x8, f32x8);
 
 impl PartialEq for Mat4 {
     fn eq(&self, other: &Self) -> bool {

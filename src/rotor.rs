@@ -51,10 +51,8 @@
 //! rotations, but it may be preferable to convert them into matrices before applying them to
 //! vectors/points, if the same rotation will be applied to many vectors.
 
-use crate::*;
 use crate::util::*;
-
-use wide::f32x4;
+use crate::*;
 
 use std::ops::*;
 
@@ -85,7 +83,7 @@ macro_rules! rotor2s {
             #[inline]
             pub fn identity() -> Self {
                 Self {
-                    s: $t::from(1.0),
+                    s: $t::splat(1.0),
                     bv: $bt::zero(),
                 }
             }
@@ -94,7 +92,7 @@ macro_rules! rotor2s {
             #[inline]
             pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
-                    $t::from(1.0) + to.dot(from),
+                    $t::splat(1.0) + to.dot(from),
                     to.wedge(from)).normalized()
             }
 
@@ -106,7 +104,7 @@ macro_rules! rotor2s {
             pub fn from_angle_plane(planeangle: $bt) -> Self {
                 let angle = planeangle.mag();
                 let plane = planeangle / angle;
-                let half_angle = angle / $t::from(2.0);
+                let half_angle = angle / $t::splat(2.0);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, plane * -sin)
             }
@@ -117,7 +115,7 @@ macro_rules! rotor2s {
             /// the x unit vector towards the y unit vector.
             #[inline]
             pub fn from_angle(angle: $t) -> Self {
-                let half_angle = angle / $t::from(2.0);
+                let half_angle = angle / $t::splat(2.0);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, $bt::new(-sin))
             }
@@ -158,6 +156,11 @@ macro_rules! rotor2s {
                 s
             }
 
+            #[inline]
+            pub fn dot(&self, rhs: Self) -> $t {
+                self.s.mul_add(rhs.s, self.bv.dot(rhs.bv))
+            }
+
             /// Rotates this rotor by another rotor in-place. Note that if you
             /// are looking to *compose* rotations, you should *NOT* use this
             /// operation and rather just use regular left-multiplication like
@@ -189,7 +192,7 @@ macro_rules! rotor2s {
             #[inline]
             pub fn rotate_vec(self, vec: &mut $vt) {
                 let s2_minus_bxy2 = self.s * self.s - self.bv.xy * self.bv.xy;
-                let two_s_bxy = $t::from(2.0) * self.s * self.bv.xy;
+                let two_s_bxy = $t::splat(2.0) * self.s * self.bv.xy;
 
                 let v = *vec;
 
@@ -200,7 +203,7 @@ macro_rules! rotor2s {
             #[inline]
             pub fn into_matrix(self) -> $mt {
                 let s2_minus_bxy2 = self.s * self.s - self.bv.xy * self.bv.xy;
-                let two_s_bxy = $t::from(2.0) * self.s * self.bv.xy;
+                let two_s_bxy = $t::splat(2.0) * self.s * self.bv.xy;
 
                 $mt::new(
                     $vt::new(
@@ -291,8 +294,8 @@ macro_rules! rotor2s {
         impl MulAssign<$t> for $rn {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                self.s /= rhs;
-                self.bv /= rhs;
+                self.s *= rhs;
+                self.bv *= rhs;
             }
         }
 
@@ -312,11 +315,31 @@ macro_rules! rotor2s {
                 rotor * self
             }
         }
+
+        impl DivAssign<$t> for $rn {
+            #[inline]
+            fn div_assign(&mut self, rhs: $t) {
+                self.s /= rhs;
+                self.bv /= rhs;
+            }
+        }
+
+        impl Div<$t> for $rn {
+            type Output = Self;
+            #[inline]
+            fn div(mut self, rhs: $t) -> Self {
+                self /= rhs;
+                self
+            }
+        }
         )+
     }
 }
 
-rotor2s!(Rotor2 => (Mat2, Vec2, Bivec2, f32), WRotor2 => (Wat2, Wec2, WBivec2, f32x4));
+rotor2s!(
+    Rotor2 => (Mat2, Vec2, Bivec2, f32),
+    Rotor2x4 => (Mat2x4, Vec2x4, Bivec2x4, f32x4),
+    Rotor2x8 => (Mat2x8, Vec2x8, Bivec2x8, f32x8));
 
 macro_rules! rotor3s {
     ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
@@ -345,7 +368,7 @@ macro_rules! rotor3s {
             #[inline]
             pub fn identity() -> Self {
                 Self {
-                    s: $t::from(1.0),
+                    s: $t::splat(1.0),
                     bv: $bt::zero(),
                 }
             }
@@ -354,7 +377,7 @@ macro_rules! rotor3s {
             #[inline]
             pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
-                    $t::from(1.0) + to.dot(from),
+                    $t::splat(1.0) + to.dot(from),
                     to.wedge(from)).normalized()
             }
 
@@ -366,7 +389,7 @@ macro_rules! rotor3s {
             /// This is the equivalent of an axis-angle rotation.
             #[inline]
             pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
-                let half_angle = angle / $t::from(2.0);
+                let half_angle = angle / $t::splat(2.0);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, plane * -sin)
             }
@@ -442,15 +465,24 @@ macro_rules! rotor3s {
                 s
             }
 
+            #[inline]
+            pub fn dot(&self, rhs: Self) -> $t {
+                self.s.mul_add(rhs.s, self.bv.dot(rhs.bv))
+            }
+
             /// Rotates this rotor by another rotor in-place. Note that if you
             /// are looking to *compose* rotations (you probably are), you should
             /// *NOT* use this operation. Rather, just use regular left-multiplication
-            /// as in matrix composition.
+            /// as in matrix composition, i.e.
+            ///
+            /// ```rs
+            /// second_rotor * first_rotor
+            /// ```
             #[inline]
             pub fn rotate_by(&mut self, rhs: Self) {
                 let b = *self;
                 let a = rhs;
-                let two = $t::from(2.0);
+                let two = $t::splat(2.0);
                 let sa2 = a.s * a.s;
                 let baxy2 = a.bv.xy * a.bv.xy;
                 let baxz2 = a.bv.xz * a.bv.xz;
@@ -489,7 +521,11 @@ macro_rules! rotor3s {
             /// Rotates this rotor by another rotor and returns the result. Note that if you
             /// are looking to *compose* rotations, you should *NOT* use this
             /// operation and rather just use regular left-multiplication like
-            /// for matrix composition.
+            /// as in matrix composition, i.e.
+            ///
+            /// ```rs
+            /// second_rotor * first_rotor
+            /// ```
             #[inline]
             pub fn rotated_by(mut self, rhs: Self) -> Self {
                 self.rotate_by(rhs);
@@ -505,7 +541,7 @@ macro_rules! rotor3s {
                 let bxy2 = self.bv.xy * self.bv.xy;
                 let bxz2 = self.bv.xz * self.bv.xz;
                 let byz2 = self.bv.yz * self.bv.yz;
-                let two = $t::from(2.0);
+                let two = $t::splat(2.0);
                 let s_bxy = self.s * self.bv.xy;
                 let s_bxz = self.s * self.bv.xz;
                 let s_byz = self.s * self.bv.yz;
@@ -546,7 +582,7 @@ macro_rules! rotor3s {
                 let bxy_byz = self.bv.xy * self.bv.yz;
                 let bxy_bxz = self.bv.xy * self.bv.xz;
 
-                let two = $t::from(2.0);
+                let two = $t::splat(2.0);
 
                 $mt::new(
                     $vt::new(
@@ -649,8 +685,8 @@ macro_rules! rotor3s {
         impl MulAssign<$t> for $rn {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                self.s /= rhs;
-                self.bv /= rhs;
+                self.s *= rhs;
+                self.bv *= rhs;
             }
         }
 
@@ -670,11 +706,31 @@ macro_rules! rotor3s {
                 rotor * self
             }
         }
+
+        impl DivAssign<$t> for $rn {
+            #[inline]
+            fn div_assign(&mut self, rhs: $t) {
+                self.s /= rhs;
+                self.bv /= rhs;
+            }
+        }
+
+        impl Div<$t> for $rn {
+            type Output = Self;
+            #[inline]
+            fn div(mut self, rhs: $t) -> Self {
+                self /= rhs;
+                self
+            }
+        }
         )+
     }
 }
 
-rotor3s!(Rotor3 => (Mat3, Vec3, Bivec3, f32), WRotor3 => (Wat3, Wec3, WBivec3, f32x4));
+rotor3s!(
+    Rotor3 => (Mat3, Vec3, Bivec3, f32),
+    Rotor3x4 => (Mat3x4, Vec3x4, Bivec3x4, f32x4),
+    Rotor3x8 => (Mat3x8, Vec3x8, Bivec3x8, f32x8));
 
 #[cfg(test)]
 mod test {
@@ -721,5 +777,15 @@ mod test {
         let res = rotor_abbc * a;
         println!("{:#?} {:#?}", rotor_abbc, res);
         assert!(c.eq_eps(res));
+    }
+
+    #[test]
+    pub fn rotor_interp_trivial() {
+        let i = Rotor3::identity();
+
+        let interp = i.lerp(i, 0.5);
+
+        println!("{:#?} ::: {:#?}", i, interp);
+        assert!(interp.eq_eps(i))
     }
 }

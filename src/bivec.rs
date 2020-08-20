@@ -32,10 +32,9 @@
 //! three components, each of which represents the *projected area* of that bivector onto one of the three
 //! basis bivectors. This is analogous to how vector components represent the *projected length* of that vector
 //! onto each unit vector.
-use wide::f32x4;
+use crate::*;
 
 use crate::util::*;
-use crate::vec::*;
 
 use std::ops::*;
 
@@ -64,12 +63,12 @@ macro_rules! bivec2s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::new($t::from(0.0))
+                Self::new($t::splat(0.0))
             }
 
             #[inline]
             pub fn unit_xy() -> Self {
-                Self::new($t::from(1.0))
+                Self::new($t::splat(1.0))
             }
 
             #[inline]
@@ -93,6 +92,11 @@ macro_rules! bivec2s {
                 let mut r = self.clone();
                 r.normalize();
                 r
+            }
+
+            #[inline]
+            pub fn dot(&self, rhs: Self) -> $t {
+                self.xy * rhs.xy
             }
 
             #[inline]
@@ -285,7 +289,10 @@ macro_rules! bivec2s {
     }
 }
 
-bivec2s!((Bivec2) => f32, (WBivec2) => f32x4);
+bivec2s!(
+    (Bivec2) => f32,
+    (Bivec2x4) => f32x4,
+    (Bivec2x8) => f32x8);
 
 macro_rules! bivec3s {
     ($($bn:ident => ($vt:ident, $t:ident)),+) => {
@@ -324,7 +331,7 @@ macro_rules! bivec3s {
 
             #[inline]
             pub fn zero() -> Self {
-                Self::new($t::from(0.0), $t::from(0.0), $t::from(0.0))
+                Self::new($t::splat(0.0), $t::splat(0.0), $t::splat(0.0))
             }
 
             /// Create the bivector which represents the same plane of rotation as a given
@@ -336,17 +343,17 @@ macro_rules! bivec3s {
 
             #[inline]
             pub fn unit_xy() -> Self {
-                Self::new($t::from(1.0), $t::from(0.0), $t::from(0.0))
+                Self::new($t::splat(1.0), $t::splat(0.0), $t::splat(0.0))
             }
 
             #[inline]
             pub fn unit_xz() -> Self {
-                Self::new($t::from(0.0), $t::from(1.0), $t::from(0.0))
+                Self::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0))
             }
 
             #[inline]
             pub fn unit_yz() -> Self {
-                Self::new($t::from(0.0), $t::from(0.0), $t::from(1.0))
+                Self::new($t::splat(0.0), $t::splat(0.0), $t::splat(1.0))
             }
 
             #[inline]
@@ -372,6 +379,11 @@ macro_rules! bivec3s {
                 let mut r = self.clone();
                 r.normalize();
                 r
+            }
+
+            #[inline]
+            pub fn dot(&self, rhs: Self) -> $t {
+                self.xy.mul_add(rhs.xy, self.xz.mul_add(rhs.xz, self.yz * rhs.yz))
             }
 
             #[inline]
@@ -572,4 +584,7 @@ macro_rules! bivec3s {
     }
 }
 
-bivec3s!(Bivec3 => (Vec3, f32), WBivec3 => (Wec3, f32x4));
+bivec3s!(
+    Bivec3 => (Vec3, f32),
+    Bivec3x4 => (Vec3x4, f32x4),
+    Bivec3x8 => (Vec3x8, f32x8));

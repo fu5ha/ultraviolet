@@ -1,21 +1,44 @@
-use wide::f32x4;
+use crate::*;
+
+pub(crate) trait Splat<T> {
+    fn splat(val: T) -> Self;
+}
+
+impl Splat<f32> for f32 {
+    fn splat(val: f32) -> Self {
+        val
+    }
+}
 
 pub trait EqualsEps {
     fn eq_eps(self, other: Self) -> bool;
 }
 
-impl EqualsEps for f32x4 {
+macro_rules! impl_eq_eps_wide {
+    ($($t:ident),+) => {
+        $(impl EqualsEps for $t {
+            fn eq_eps(self, other: Self) -> bool {
+                let r = (self - other).abs();
+                let eps = $t::splat(0.01);
+
+                r.cmp_ge(eps).none()
+            }
+        })+
+    };
+}
+
+impl_eq_eps_wide!(f32x4);
+
+#[cfg(feature = "nightly")]
+impl_eq_eps_wide!(f32x8, f32x16, f64x2, f64x4, f64x8);
+
+impl EqualsEps for f32 {
     fn eq_eps(self, other: Self) -> bool {
-        let r = (self - other).abs();
-        let eps = f32x4::from(0.01);
-
-        let mask = r.cmp_ge(eps).move_mask();
-
-        mask == 0b0000
+        (self - other).abs() <= 0.01
     }
 }
 
-impl EqualsEps for f32 {
+impl EqualsEps for f64 {
     fn eq_eps(self, other: Self) -> bool {
         (self - other).abs() <= 0.01
     }
