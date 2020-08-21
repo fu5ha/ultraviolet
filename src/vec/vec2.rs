@@ -686,6 +686,7 @@ impl Into<[Vec2; 8]> for Vec2x8 {
     }
 }
 
+#[cfg(feature = "nightly")]
 impl From<[Vec2; 8]> for Vec2x8 {
     #[inline]
     fn from(vecs: [Vec2; 8]) -> Self {
@@ -785,6 +786,7 @@ impl Into<[DVec2; 4]> for DVec2x4 {
     }
 }
 
+#[cfg(feature = "nightly")]
 impl From<[DVec2; 4]> for DVec2x4 {
     #[inline]
     fn from(vecs: [DVec2; 4]) -> Self {
