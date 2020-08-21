@@ -738,12 +738,12 @@ impl From<[Vec2; 16]> for Vec2x16 {
             x: f32x16::from([
                 vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
                 vecs[7].x, vecs[8].x, vecs[9].x, vecs[10].x, vecs[11].x, vecs[12].x, vecs[13].x,
-                vecs[14].x, vecs[16].x,
+                vecs[14].x, vecs[15].x,
             ]),
             y: f32x16::from([
                 vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
                 vecs[7].y, vecs[8].y, vecs[9].y, vecs[10].y, vecs[11].y, vecs[12].y, vecs[13].y,
-                vecs[14].y, vecs[16].y,
+                vecs[14].y, vecs[15].y,
             ]),
         }
     }

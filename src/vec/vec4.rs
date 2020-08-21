@@ -731,22 +731,22 @@ impl From<[Vec4; 16]> for Vec4x16 {
             x: f32x16::from([
                 vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
                 vecs[7].x, vecs[8].x, vecs[9].x, vecs[10].x, vecs[11].x, vecs[12].x, vecs[13].x,
-                vecs[14].x, vecs[16].x,
+                vecs[14].x, vecs[15].x,
             ]),
             y: f32x16::from([
                 vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
                 vecs[7].y, vecs[8].y, vecs[9].y, vecs[10].y, vecs[11].y, vecs[12].y, vecs[13].y,
-                vecs[14].y, vecs[16].y,
+                vecs[14].y, vecs[15].y,
             ]),
             z: f32x16::from([
                 vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
                 vecs[7].z, vecs[8].z, vecs[9].z, vecs[10].z, vecs[11].z, vecs[12].z, vecs[13].z,
-                vecs[14].z, vecs[16].z,
+                vecs[14].z, vecs[15].z,
             ]),
             w: f32x16::from([
                 vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
                 vecs[7].w, vecs[8].w, vecs[9].w, vecs[10].w, vecs[11].w, vecs[12].w, vecs[13].w,
-                vecs[14].w, vecs[16].w,
+                vecs[14].w, vecs[15].w,
             ]),
         }
     }
