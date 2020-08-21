@@ -495,11 +495,18 @@ macro_rules! vec2s {
 vec2s!(
     (Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32,
     (Vec2x4, Bivec2x4, Rotor2x4, Vec3x4, Vec4x4) => f32x4,
-    (Vec2x8, Bivec2x8, Rotor2x8, Vec3x8, Vec4x8) => f32x8,
 
     (DVec2, DBivec2, DRotor2, DVec3, DVec4) => f64,
-    (DVec2x2, DBivec2x2, DRotor2x2, DVec3x2, DVec4x2) => f64x2,
-    (DVec2x4, DBivec2x4, DRotor2x4, DVec3x4, DVec4x4) => f64x4
+    (DVec2x2, DBivec2x2, DRotor2x2, DVec3x2, DVec4x2) => f64x2
+);
+
+#[cfg(feature = "nightly")]
+vec2s!(
+    (Vec2x8, Bivec2x8, Rotor2x8, Vec3x8, Vec4x8) => f32x8,
+    (Vec2x16, Bivec2x16, Rotor2x16, Vec3x16, Vec4x16) => f32x16,
+
+    (DVec2x4, DBivec2x4, DRotor2x4, DVec3x4, DVec4x4) => f64x4,
+    (DVec2x8, DBivec2x8, DRotor2x8, DVec3x8, DVec4x8) => f64x8
 );
 // (Vec2x8, Bivec2x8, Rotor2x8, Vec3x8, Vec4x8) => f32x8);
 
@@ -624,11 +631,31 @@ macro_rules! impl_wide_vec2s {
 
 impl_wide_vec2s!(
     Vec2x4 => f32, f32x4, m32x4, Vec2, Vec3x4,
-    Vec2x8 => f32, f32x8, m32x8, Vec2, Vec3x8,
-
-    DVec2x2 => f64, f64x2, m64x2, DVec2, DVec3x2,
-    DVec2x4 => f64, f64x4, m64x4, DVec2, DVec3x4
+    DVec2x2 => f64, f64x2, m64x2, DVec2, DVec3x2
 );
+
+#[cfg(feature = "nightly")]
+impl_wide_vec2s!(
+    Vec2x8 => f32, f32x8, m32x8, Vec2, Vec3x8,
+    Vec2x16 => f32, f32x16, m32x16, Vec2, Vec3x16,
+
+    DVec2x4 => f64, f64x4, m64x4, DVec2, DVec3x4,
+    DVec2x8 => f64, f64x8, m64x8, DVec2, DVec3x8
+);
+
+impl Into<[Vec2; 4]> for Vec2x4 {
+    #[inline]
+    fn into(self) -> [Vec2; 4] {
+        let xs: [f32; 4] = self.x.into();
+        let ys: [f32; 4] = self.y.into();
+        [
+            Vec2::new(xs[0], ys[0]),
+            Vec2::new(xs[1], ys[1]),
+            Vec2::new(xs[2], ys[2]),
+            Vec2::new(xs[3], ys[3]),
+        ]
+    }
+}
 
 impl From<[Vec2; 4]> for Vec2x4 {
     #[inline]
@@ -637,6 +664,25 @@ impl From<[Vec2; 4]> for Vec2x4 {
             x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
         }
+    }
+}
+
+#[cfg(feature = "nightly")]
+impl Into<[Vec2; 8]> for Vec2x8 {
+    #[inline]
+    fn into(self) -> [Vec2; 8] {
+        let xs: [f32; 8] = self.x.into();
+        let ys: [f32; 8] = self.y.into();
+        [
+            Vec2::new(xs[0], ys[0]),
+            Vec2::new(xs[1], ys[1]),
+            Vec2::new(xs[2], ys[2]),
+            Vec2::new(xs[3], ys[3]),
+            Vec2::new(xs[4], ys[4]),
+            Vec2::new(xs[5], ys[5]),
+            Vec2::new(xs[6], ys[6]),
+            Vec2::new(xs[7], ys[7]),
+        ]
     }
 }
 
@@ -656,6 +702,64 @@ impl From<[Vec2; 8]> for Vec2x8 {
     }
 }
 
+#[cfg(feature = "nightly")]
+impl Into<[Vec2; 16]> for Vec2x16 {
+    #[inline]
+    fn into(self) -> [Vec2; 16] {
+        let xs: [f32; 16] = self.x.into();
+        let ys: [f32; 16] = self.y.into();
+        [
+            Vec2::new(xs[0], ys[0]),
+            Vec2::new(xs[1], ys[1]),
+            Vec2::new(xs[2], ys[2]),
+            Vec2::new(xs[3], ys[3]),
+            Vec2::new(xs[4], ys[4]),
+            Vec2::new(xs[5], ys[5]),
+            Vec2::new(xs[6], ys[6]),
+            Vec2::new(xs[7], ys[7]),
+            Vec2::new(xs[8], ys[8]),
+            Vec2::new(xs[9], ys[9]),
+            Vec2::new(xs[10], ys[10]),
+            Vec2::new(xs[11], ys[11]),
+            Vec2::new(xs[12], ys[12]),
+            Vec2::new(xs[13], ys[13]),
+            Vec2::new(xs[14], ys[14]),
+            Vec2::new(xs[15], ys[15]),
+        ]
+    }
+}
+
+#[cfg(feature = "nightly")]
+impl From<[Vec2; 16]> for Vec2x16 {
+    #[inline]
+    fn from(vecs: [Vec2; 16]) -> Self {
+        Self {
+            x: f32x16::from([
+                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
+                vecs[7].x, vecs[8].x, vecs[9].x, vecs[10].x, vecs[11].x, vecs[12].x, vecs[13].x,
+                vecs[14].x, vecs[16].x,
+            ]),
+            y: f32x16::from([
+                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
+                vecs[7].y, vecs[8].y, vecs[9].y, vecs[10].y, vecs[11].y, vecs[12].y, vecs[13].y,
+                vecs[14].y, vecs[16].y,
+            ]),
+        }
+    }
+}
+
+impl Into<[DVec2; 2]> for DVec2x2 {
+    #[inline]
+    fn into(self) -> [DVec2; 2] {
+        let xs: [f64; 2] = self.x.into();
+        let ys: [f64; 2] = self.y.into();
+        [
+            DVec2::new(xs[0], ys[0]),
+            DVec2::new(xs[1], ys[1]),
+        ]
+    }
+}
+
 impl From<[DVec2; 2]> for DVec2x2 {
     #[inline]
     fn from(vecs: [DVec2; 2]) -> Self {
@@ -663,6 +767,21 @@ impl From<[DVec2; 2]> for DVec2x2 {
             x: f64x2::from([vecs[0].x, vecs[1].x]),
             y: f64x2::from([vecs[0].y, vecs[1].y]),
         }
+    }
+}
+
+#[cfg(feature = "nightly")]
+impl Into<[DVec2; 4]> for DVec2x4 {
+    #[inline]
+    fn into(self) -> [DVec2; 4] {
+        let xs: [f64; 4] = self.x.into();
+        let ys: [f64; 4] = self.y.into();
+        [
+            DVec2::new(xs[0], ys[0]),
+            DVec2::new(xs[1], ys[1]),
+            DVec2::new(xs[2], ys[2]),
+            DVec2::new(xs[3], ys[3]),
+        ]
     }
 }
 
@@ -675,3 +794,40 @@ impl From<[DVec2; 4]> for DVec2x4 {
         }
     }
 }
+
+#[cfg(feature = "nightly")]
+impl Into<[DVec2; 8]> for DVec2x8 {
+    #[inline]
+    fn into(self) -> [DVec2; 8] {
+        let xs: [f64; 8] = self.x.into();
+        let ys: [f64; 8] = self.y.into();
+        [
+            DVec2::new(xs[0], ys[0]),
+            DVec2::new(xs[1], ys[1]),
+            DVec2::new(xs[2], ys[2]),
+            DVec2::new(xs[3], ys[3]),
+            DVec2::new(xs[4], ys[4]),
+            DVec2::new(xs[5], ys[5]),
+            DVec2::new(xs[6], ys[6]),
+            DVec2::new(xs[7], ys[7]),
+        ]
+    }
+}
+
+#[cfg(feature = "nightly")]
+impl From<[DVec2; 8]> for DVec2x8 {
+    #[inline]
+    fn from(vecs: [DVec2; 8]) -> Self {
+        Self {
+            x: f64x8::from([
+                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
+                vecs[7].x,
+            ]),
+            y: f64x8::from([
+                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
+                vecs[7].y,
+            ]),
+        }
+    }
+}
+
