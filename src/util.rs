@@ -10,6 +10,12 @@ impl Splat<f32> for f32 {
     }
 }
 
+impl Splat<f64> for f64 {
+    fn splat(val: f64) -> Self {
+        val
+    }
+}
+
 pub trait EqualsEps {
     fn eq_eps(self, other: Self) -> bool;
 }

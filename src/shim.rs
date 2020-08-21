@@ -43,26 +43,21 @@ pub(crate) trait BlendShim<T> {
     fn blend(self: Self, tru: T, fals: T) -> T;
 }
 
-impl BlendShim<f32x4> for m32x4 {
-    fn blend(self, tru: f32x4, fals: f32x4) -> f32x4 {
-        self.select(tru, fals)
+macro_rules! impl_blend_shim {
+    ($(($mask_t:ident, $vec_t:ident)),+) => {
+        $(impl BlendShim<$vec_t> for $mask_t {
+            fn blend(self, tru: $vec_t, fals: $vec_t) -> $vec_t {
+                self.select(tru, fals)
+            }
+        })+
     }
 }
 
-impl BlendShim<f32x8> for m32x8 {
-    fn blend(self, tru: f32x8, fals: f32x8) -> f32x8 {
-        self.select(tru, fals)
-    }
-}
-
-impl BlendShim<f64x2> for m64x2 {
-    fn blend(self, tru: f64x2, fals: f64x2) -> f64x2 {
-        self.select(tru, fals)
-    }
-}
-
-impl BlendShim<f64x4> for m64x4 {
-    fn blend(self, tru: f64x4, fals: f64x4) -> f64x4 {
-        self.select(tru, fals)
-    }
-}
+impl_blend_shim!(
+    (m32x4, f32x4),
+    (m32x8, f32x8),
+    (m32x16, f32x16),
+    (m64x2, f64x2),
+    (m64x4, f64x4),
+    (m64x8, f64x8)
+);

@@ -43,7 +43,12 @@ macro_rules! impl_lerp {
 
 impl_lerp!(
     f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2, Rotor3),
-    f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4, Rotor3x4));
+    f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4, Rotor3x4),
+    f32x8 => (Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8, Rotor3x8),
+
+    f64 => (DVec2, DVec3, DVec4, DBivec2, DBivec3, DRotor2, DRotor3),
+    f64x2 => (DVec2x2, DVec3x2, DVec4x2, DBivec2x2, DBivec3x2, DRotor2x2, DRotor3x2)
+);
 
 /// Spherical-linear interpolation.
 ///
@@ -101,7 +106,9 @@ macro_rules! impl_slerp_rotor3 {
 }
 
 impl_slerp_rotor3!(
-    f32 => (Rotor3));
+    f32 => (Rotor3),
+    f64 => (DRotor3)
+);
 
 macro_rules! impl_slerp_rotor3_wide {
     ($($tt:ident => ($($vt:ident),+)),+) => {
@@ -146,7 +153,11 @@ macro_rules! impl_slerp_rotor3_wide {
 }
 
 impl_slerp_rotor3_wide!(
-    f32x4 => (Rotor3x4));
+    f32x4 => (Rotor3x4),
+    f32x8 => (Rotor3x8),
+
+    f64x2 => (DRotor3x2)
+);
 
 macro_rules! impl_slerp_gen {
     ($($tt:ident => ($($vt:ident),+)),+) => {
@@ -185,4 +196,8 @@ macro_rules! impl_slerp_gen {
 
 impl_slerp_gen!(
     f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2),
-    f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4));
+    f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4),
+
+    f64 => (DVec2, DVec3, DVec4, DBivec2, DBivec3, DRotor2),
+    f64x2 => (DVec2x2, DVec3x2, DVec4x2, DBivec2x2, DBivec3x2, DRotor2x2)
+);

@@ -160,8 +160,19 @@ macro_rules! isometries {
 }
 
 isometries!(
-    Isometry2 => (Mat3, Rotor2, Vec2, f32), Isometry2x4 => (Mat3x4, Rotor2x4, Vec2x4, f32x4),
-    Isometry3 => (Mat4, Rotor3, Vec3, f32), Isometry3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4)
+    Isometry2 => (Mat3, Rotor2, Vec2, f32),
+    Isometry2x4 => (Mat3x4, Rotor2x4, Vec2x4, f32x4),
+    Isometry2x8 => (Mat3x8, Rotor2x8, Vec2x8, f32x8),
+    Isometry3 => (Mat4, Rotor3, Vec3, f32),
+    Isometry3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4),
+    Isometry3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8),
+
+    DIsometry2 => (DMat3, DRotor2, DVec2, f64),
+    DIsometry2x2 => (DMat3x2, DRotor2x2, DVec2x2, f64x2),
+    DIsometry2x4 => (DMat3x4, DRotor2x4, DVec2x4, f64x4),
+    DIsometry3 => (DMat4, DRotor3, DVec3, f64),
+    DIsometry3x2 => (DMat4x2, DRotor3x2, DVec3x2, f64x2),
+    DIsometry3x4 => (DMat4x4, DRotor3x4, DVec3x4, f64x4)
 );
 
 macro_rules! similarities {
@@ -344,6 +355,20 @@ macro_rules! similarities {
 }
 
 similarities!(
-    Similarity2 => (Mat3, Rotor2, Vec2, f32), Similarity2x4 => (Mat3x4, Rotor2x4, Vec2x4, f32x4),
-    Similarity3 => (Mat4, Rotor3, Vec3, f32), Similarity3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4)
+    Similarity2 => (Mat3, Rotor2, Vec2, f32),
+    Similarity2x4 => (Mat3x4, Rotor2x4, Vec2x4, f32x4),
+    Similarity2x8 => (Mat3x8, Rotor2x8, Vec2x8, f32x8),
+
+    Similarity3 => (Mat4, Rotor3, Vec3, f32),
+    Similarity3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4),
+    Similarity3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8),
+
+
+    DSimilarity2 => (DMat3, DRotor2, DVec2, f64),
+    DSimilarity2x2 => (DMat3x2, DRotor2x2, DVec2x2, f64x2),
+    DSimilarity2x4 => (DMat3x4, DRotor2x4, DVec2x4, f64x4),
+
+    DSimilarity3 => (DMat4, DRotor3, DVec3, f64),
+    DSimilarity3x2 => (DMat4x2, DRotor3x2, DVec3x2, f64x2),
+    DSimilarity3x4 => (DMat4x4, DRotor3x4, DVec3x4, f64x4)
 );

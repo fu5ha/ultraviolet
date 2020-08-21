@@ -292,7 +292,12 @@ macro_rules! bivec2s {
 bivec2s!(
     (Bivec2) => f32,
     (Bivec2x4) => f32x4,
-    (Bivec2x8) => f32x8);
+    (Bivec2x8) => f32x8,
+
+    (DBivec2) => f64,
+    (DBivec2x2) => f64x2,
+    (DBivec2x4) => f64x4
+);
 
 macro_rules! bivec3s {
     ($($bn:ident => ($vt:ident, $t:ident)),+) => {
@@ -587,4 +592,9 @@ macro_rules! bivec3s {
 bivec3s!(
     Bivec3 => (Vec3, f32),
     Bivec3x4 => (Vec3x4, f32x4),
-    Bivec3x8 => (Vec3x8, f32x8));
+    Bivec3x8 => (Vec3x8, f32x8),
+
+    DBivec3 => (DVec3, f64),
+    DBivec3x2 => (DVec3x2, f64x2),
+    DBivec3x4 => (DVec3x4, f64x4)
+);
