@@ -5,6 +5,7 @@ use crate::bivec::*;
 use crate::rotor::*;
 use crate::vec::*;
 
+/// Pure linear interpolation. When using this to interpolate Rotors, be sure to normalize the result!
 pub trait Lerp<T> {
     fn lerp(&self, end: Self, t: T) -> Self;
 }
@@ -12,6 +13,8 @@ pub trait Lerp<T> {
 macro_rules! impl_lerp {
     ($($tt:ident => ($($vt:ident),+)),+) => {
         $($(impl Lerp<$tt> for $vt {
+            /// Pure linear interpolation from `self` to `end` by factor `t`.
+            /// When using this to interpolate Rotors, be sure to normalize the result!
             #[inline]
             fn lerp(&self, end: Self, t: $tt) -> Self {
                 *self * ($tt::from(1.0) - t) + end * t

@@ -291,8 +291,8 @@ macro_rules! rotor2s {
         impl MulAssign<$t> for $rn {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                self.s /= rhs;
-                self.bv /= rhs;
+                self.s *= rhs;
+                self.bv *= rhs;
             }
         }
 
@@ -649,8 +649,8 @@ macro_rules! rotor3s {
         impl MulAssign<$t> for $rn {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
-                self.s /= rhs;
-                self.bv /= rhs;
+                self.s *= rhs;
+                self.bv *= rhs;
             }
         }
 
