@@ -576,10 +576,6 @@ macro_rules! impl_scalar_vec3s {
             fn eq(&self, other: &Self) -> bool {
                 self.x == other.x && self.y == other.y && self.z == other.z
             }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.x != other.x || self.y != other.y || self.z != other.z
-            }
         }
 
         impl From<$v2t> for $vt {

@@ -530,10 +530,6 @@ macro_rules! impl_scalar_vec4s {
             fn eq(&self, other: &Self) -> bool {
                 self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
             }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.x != other.x || self.y != other.y || self.z != other.z || self.w != other.w
-            }
         })+
     }
 }
