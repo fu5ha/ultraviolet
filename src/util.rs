@@ -5,12 +5,14 @@ pub(crate) trait Splat<T> {
 }
 
 impl Splat<f32> for f32 {
+    #[inline(always)]
     fn splat(val: f32) -> Self {
         val
     }
 }
 
 impl Splat<f64> for f64 {
+    #[inline(always)]
     fn splat(val: f64) -> Self {
         val
     }
