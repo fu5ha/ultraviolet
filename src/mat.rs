@@ -225,10 +225,6 @@ macro_rules! impl_partialeq_mat2 {
             fn eq(&self, other: &Self) -> bool {
                 self.cols[0] == other.cols[0] && self.cols[1] == other.cols[1]
             }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.cols[0] != other.cols[0] || self.cols[1] != other.cols[1]
-            }
         })+
     }
 }
@@ -685,12 +681,6 @@ macro_rules! impl_partialeq_mat3 {
                 self.cols[0] == other.cols[0]
                     && self.cols[1] == other.cols[1]
                     && self.cols[2] == other.cols[2]
-            }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.cols[0] != other.cols[0]
-                    || self.cols[1] != other.cols[1]
-                    || self.cols[2] != other.cols[2]
             }
         })+
     }
@@ -1285,13 +1275,6 @@ macro_rules! impl_partialeq_mat4 {
                     && self.cols[1] == other.cols[1]
                     && self.cols[2] == other.cols[2]
                     && self.cols[3] == other.cols[3]
-            }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.cols[0] != other.cols[0]
-                    || self.cols[1] != other.cols[1]
-                    || self.cols[2] != other.cols[2]
-                    || self.cols[3] != other.cols[3]
             }
         })+
     };

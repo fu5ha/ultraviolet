@@ -545,10 +545,6 @@ macro_rules! impl_scalar_vec2s {
             fn eq(&self, other: &Self) -> bool {
                 self.x == other.x && self.y == other.y
             }
-
-            fn ne(&self, other: &Self) -> bool {
-                self.x != other.x || self.y != other.y
-            }
         })+
     };
 }
@@ -753,10 +749,7 @@ impl Into<[DVec2; 2]> for DVec2x2 {
     fn into(self) -> [DVec2; 2] {
         let xs: [f64; 2] = self.x.into();
         let ys: [f64; 2] = self.y.into();
-        [
-            DVec2::new(xs[0], ys[0]),
-            DVec2::new(xs[1], ys[1]),
-        ]
+        [DVec2::new(xs[0], ys[0]), DVec2::new(xs[1], ys[1])]
     }
 }
 
@@ -829,4 +822,3 @@ impl From<[DVec2; 8]> for DVec2x8 {
         }
     }
 }
-
