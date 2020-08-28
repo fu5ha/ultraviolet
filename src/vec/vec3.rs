@@ -21,12 +21,12 @@ macro_rules! vec3s {
 
         impl $n {
             #[inline]
-            pub fn new(x: $t, y: $t, z: $t) -> Self {
+            pub const fn new(x: $t, y: $t, z: $t) -> Self {
                 $n { x, y, z }
             }
 
             #[inline]
-            pub fn broadcast(val: $t) -> Self {
+            pub const fn broadcast(val: $t) -> Self {
                 Self::new(val, val, val)
             }
 
@@ -74,7 +74,6 @@ macro_rules! vec3s {
             pub fn from_homogeneous_vector(v: $v4t) -> Self {
                 v.into()
             }
-
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
@@ -250,9 +249,8 @@ macro_rules! vec3s {
                 Self::broadcast($t::splat(1.0))
             }
 
-
             #[inline]
-            pub fn xy(&self) -> $v2t {
+            pub const fn xy(&self) -> $v2t {
                 $v2t::new(self.x, self.y)
             }
 
@@ -316,7 +314,7 @@ macro_rules! vec3s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $n as *const $t
             }
 

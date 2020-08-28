@@ -184,15 +184,14 @@ macro_rules! vec4s {
             }
 
             #[inline]
-            pub fn xy(&self) -> $v2t {
+            pub const fn xy(&self) -> $v2t {
                 $v2t::new(self.x, self.y)
             }
 
-             #[inline]
-            pub fn xyz(&self) -> $v3t {
+            #[inline]
+            pub const fn xyz(&self) -> $v3t {
                 $v3t::new(self.x, self.y, self.z)
             }
-
 
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
@@ -249,7 +248,7 @@ macro_rules! vec4s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                  self as *const $n as *const $t
             }
 

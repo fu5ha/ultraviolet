@@ -20,12 +20,12 @@ macro_rules! vec2s {
 
         impl $n {
             #[inline]
-            pub fn new(x: $t, y: $t) -> Self {
+            pub const fn new(x: $t, y: $t) -> Self {
                 $n { x, y }
             }
 
             #[inline]
-            pub fn broadcast(val: $t) -> Self {
+            pub const fn broadcast(val: $t) -> Self {
                 Self::new(val, val)
             }
 
@@ -114,7 +114,6 @@ macro_rules! vec2s {
             pub fn reflected(&self, normal: $n) -> Self {
                 *self - ($t::splat(2.0) * self.dot(normal) * normal)
             }
-
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
@@ -247,7 +246,6 @@ macro_rules! vec2s {
                 }
             }
 
-
             #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -283,7 +281,7 @@ macro_rules! vec2s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $n as *const $t
             }
 
@@ -829,4 +827,3 @@ impl From<[DVec2; 8]> for DVec2x8 {
         }
     }
 }
-
