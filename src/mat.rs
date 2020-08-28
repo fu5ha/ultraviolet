@@ -8,10 +8,10 @@ use serde::{de::SeqAccess, Deserialize, Deserializer, Serialize, Serializer};
 
 macro_rules! mat2s {
     ($($n:ident => $m3t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
-        /// A 2x2 square matrix.
+        $(/// A 2x2 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
-        $(#[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 2],
@@ -240,12 +240,12 @@ impl_partialeq_mat2!(Mat2, DMat2);
 
 macro_rules! mat3s {
     ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
-        /// A 3x3 square matrix.
+        $(/// A 3x3 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
         /// or for performing arbitrary transformations (linear +   translation, projection, etc)
         /// on homogeneous 2d vectors
-        $(#[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 3],
@@ -703,7 +703,7 @@ impl_partialeq_mat3!(Mat3, DMat3);
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
-        /// A 4x4 square matrix.
+        $(/// A 4x4 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 4d vectors,
         /// or for performing arbitrary transformations (linear + translation, projection, etc)
@@ -711,7 +711,7 @@ macro_rules! mat4s {
         ///
         /// Note that most constructors assume that the matrix will be used as a homogeneous 3d
         /// transformation matrix.
-        $(#[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 4],

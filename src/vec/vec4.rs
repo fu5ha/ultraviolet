@@ -5,13 +5,13 @@ use crate::*;
 
 macro_rules! vec4s {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
-        /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
+        $(/// A set of four coordinates which may be interpreted as a point or vector in 4d space,
         /// or as a homogeneous 3d vector or point.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,

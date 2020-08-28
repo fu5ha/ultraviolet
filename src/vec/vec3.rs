@@ -5,13 +5,13 @@ use crate::*;
 
 macro_rules! vec3s {
     ($(($v2t:ident, $n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
-        /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
+        $(/// A set of three coordinates which may be interpreted as a point or vector in 3d space,
         /// or as a homogeneous 2d vector or point.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
