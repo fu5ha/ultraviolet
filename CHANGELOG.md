@@ -10,3 +10,4 @@
 - Add spherical linear interpolation and better docs around interpolation
 - Add `Into<Vec2; N> for Vec2xN` implementations
 - Fix some doc comments not appearing properly on Vec and Mat types.
+- Make most initializers `const`
