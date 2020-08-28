@@ -112,6 +112,30 @@ macro_rules! mat2s {
                     std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 4 * std::mem::size_of::<$t>())
                 }
             }
+
+            /// Returns a constant unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub const fn as_ptr(&self) -> *const $t {
+                self as *const $n as *const $t
+            }
+
+            /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
+            /// This function is safe because all types here are repr(C) and can be represented
+            /// as their underlying type.
+            ///
+            /// # Safety
+            ///
+            /// It is up to the caller to correctly use this pointer and its bounds.
+            #[inline]
+            pub fn as_mut_ptr(&mut self) -> *mut $t {
+                self as *mut $n as *mut $t
+            }
         }
 
         impl Mul for $n {
