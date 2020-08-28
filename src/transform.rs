@@ -28,7 +28,7 @@ macro_rules! isometries {
 
         impl $ison {
             #[inline]
-            pub fn new(translation: $vt, rotation: $rt) -> Self {
+            pub const fn new(translation: $vt, rotation: $rt) -> Self {
                 Self { translation, rotation }
             }
 
@@ -210,7 +210,7 @@ macro_rules! similarities {
 
         impl $sn {
             #[inline]
-            pub fn new(translation: $vt, rotation: $rt, scale: $t) -> Self {
+            pub const fn new(translation: $vt, rotation: $rt, scale: $t) -> Self {
                 Self { translation, rotation, scale }
             }
 
