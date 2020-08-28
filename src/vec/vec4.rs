@@ -22,12 +22,12 @@ macro_rules! vec4s {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T, z: T, w: T) -> Self {
-                $n { x: x.into(), y: y.into(), z: z.into(), w: w.into() }
+            pub const fn new(x: $t, y: $t, z: $t, w: $t) -> Self {
+                $n { x, y, z, w }
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub const fn broadcast(val: $t) -> Self {
                 Self::new(val, val, val, val)
             }
 
