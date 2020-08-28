@@ -18,7 +18,7 @@ macro_rules! mat2s {
 
         impl $n {
             #[inline]
-            pub fn new(col1: $vt, col2: $vt) -> Self {
+            pub const fn new(col1: $vt, col2: $vt) -> Self {
                 $n {
                     cols: [col1, col2],
                 }
@@ -252,7 +252,7 @@ macro_rules! mat3s {
 
         impl $n {
             #[inline]
-            pub fn new(col1: $vt, col2: $vt, col3: $vt) -> Self {
+            pub const fn new(col1: $vt, col2: $vt, col3: $vt) -> Self {
                 $n {
                     cols: [col1, col2, col3],
                 }
@@ -542,7 +542,7 @@ macro_rules! mat3s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $n as *const $t
             }
 
@@ -718,7 +718,7 @@ macro_rules! mat4s {
 
         impl $n {
             #[inline]
-            pub fn new(col1: $vt, col2: $vt, col3: $vt, col4: $vt) -> Self {
+            pub const fn new(col1: $vt, col2: $vt, col3: $vt, col4: $vt) -> Self {
                 $n {
                     cols: [col1, col2, col3, col4],
                 }
@@ -1115,7 +1115,7 @@ macro_rules! mat4s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $n as *const $t
             }
 
