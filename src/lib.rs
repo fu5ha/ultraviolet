@@ -95,9 +95,9 @@ pub mod transform;
 pub mod vec;
 
 #[cfg(feature = "serde")]
-pub mod serde;
+mod impl_serde;
 #[cfg(feature = "serde")]
-pub use serde::*;
+pub use impl_serde::*;
 
 pub use bivec::*;
 pub use int::*;
@@ -109,6 +109,7 @@ pub use vec::*;
 
 #[cfg(not(feature = "nightly"))]
 pub(crate) use wide;
+
 #[cfg(not(feature = "nightly"))]
 pub use wide::f32x4;
 #[cfg(not(feature = "nightly"))]
@@ -126,6 +127,9 @@ pub use wide::f32x8 as m32x8;
 pub use wide::f64x2 as m64x2;
 #[cfg(not(feature = "nightly"))]
 pub use wide::f64x4 as m64x4;
+
+#[cfg(feature = "nightly")]
+pub(crate) use uv_patch_packed_simd as packed_simd;
 
 #[cfg(feature = "nightly")]
 pub use packed_simd::f32x16;

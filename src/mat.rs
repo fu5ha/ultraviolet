@@ -3,9 +3,6 @@ use std::ops::*;
 
 use crate::*;
 
-#[cfg(feature = "serde")]
-use serde::{de::SeqAccess, Deserialize, Deserializer, Serialize, Serializer};
-
 macro_rules! mat2s {
     ($($n:ident => $m3t:ident, $v3t:ident, $vt:ident, $t:ident),+) => {
         $(/// A 2x2 square matrix.

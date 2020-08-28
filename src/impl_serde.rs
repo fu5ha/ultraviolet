@@ -1,3 +1,5 @@
+use crate::*;
+
 use serde::{
     de::{MapAccess, SeqAccess, Visitor},
     ser::SerializeStruct,
@@ -375,6 +377,7 @@ impl<'de> Deserialize<'de> for Vec4 {
     }
 }
 
+#[cfg(test)]
 mod vec_serde_tests {
     use crate::vec::{Vec2, Vec3, Vec4};
     use serde_test::{assert_tokens, Token};
