@@ -536,17 +536,17 @@ macro_rules! vec3s {
 vec3s!(
     (Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32,
     (Vec2x4, Vec3x4, Bivec3x4, Rotor3x4, Vec4x4) => f32x4,
+    (Vec2x8, Vec3x8, Bivec3x8, Rotor3x8, Vec4x8) => f32x8,
 
     (DVec2, DVec3, DBivec3, DRotor3, DVec4) => f64,
-    (DVec2x2, DVec3x2, DBivec3x2, DRotor3x2, DVec4x2) => f64x2
+    (DVec2x2, DVec3x2, DBivec3x2, DRotor3x2, DVec4x2) => f64x2,
+    (DVec2x4, DVec3x4, DBivec3x4, DRotor3x4, DVec4x4) => f64x4
 );
 
 #[cfg(feature = "nightly")]
 vec3s!(
-    (Vec2x8, Vec3x8, Bivec3x8, Rotor3x8, Vec4x8) => f32x8,
     (Vec2x16, Vec3x16, Bivec3x16, Rotor3x16, Vec4x16) => f32x16,
 
-    (DVec2x4, DVec3x4, DBivec3x4, DRotor3x4, DVec4x4) => f64x4,
     (DVec2x8, DVec3x8, DBivec3x8, DRotor3x8, DVec4x8) => f64x8
 );
 
@@ -697,16 +697,16 @@ macro_rules! impl_wide_vec3s {
 
 impl_wide_vec3s!(
     Vec3x4 => f32, f32x4, m32x4, Vec3, Vec2x4, Vec4x4,
+    Vec3x8 => f32, f32x8, m32x8, Vec3, Vec2x8, Vec4x8,
 
-    DVec3x2 => f64, f64x2, m64x2, DVec3, DVec2x2, DVec4x2
+    DVec3x2 => f64, f64x2, m64x2, DVec3, DVec2x2, DVec4x2,
+    DVec3x4 => f64, f64x4, m64x4, DVec3, DVec2x4, DVec4x4
 );
 
 #[cfg(feature = "nightly")]
 impl_wide_vec3s!(
-    Vec3x8 => f32, f32x8, m32x8, Vec3, Vec2x8, Vec4x8,
     Vec3x16 => f32, f32x16, m32x16, Vec3, Vec2x16, Vec4x16,
 
-    DVec3x4 => f64, f64x4, m64x4, DVec3, DVec2x4, DVec4x4,
     DVec3x8 => f64, f64x8, m64x8, DVec3, DVec2x8, DVec4x8
 );
 
@@ -736,7 +736,6 @@ impl From<[Vec3; 4]> for Vec3x4 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl Into<[Vec3; 8]> for Vec3x8 {
     #[inline]
     fn into(self) -> [Vec3; 8] {
@@ -756,7 +755,6 @@ impl Into<[Vec3; 8]> for Vec3x8 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl From<[Vec3; 8]> for Vec3x8 {
     #[inline]
     fn from(vecs: [Vec3; 8]) -> Self {
@@ -853,7 +851,6 @@ impl From<[DVec3; 2]> for DVec3x2 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl Into<[DVec3; 4]> for DVec3x4 {
     #[inline]
     fn into(self) -> [DVec3; 4] {
@@ -869,7 +866,6 @@ impl Into<[DVec3; 4]> for DVec3x4 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl From<[DVec3; 4]> for DVec3x4 {
     #[inline]
     fn from(vecs: [DVec3; 4]) -> Self {

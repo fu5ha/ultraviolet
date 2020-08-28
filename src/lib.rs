@@ -112,12 +112,20 @@ pub(crate) use wide;
 #[cfg(not(feature = "nightly"))]
 pub use wide::f32x4;
 #[cfg(not(feature = "nightly"))]
+pub use wide::f32x8;
+#[cfg(not(feature = "nightly"))]
 pub use wide::f64x2;
+#[cfg(not(feature = "nightly"))]
+pub use wide::f64x4;
 
 #[cfg(not(feature = "nightly"))]
 pub use wide::f32x4 as m32x4;
 #[cfg(not(feature = "nightly"))]
+pub use wide::f32x8 as m32x8;
+#[cfg(not(feature = "nightly"))]
 pub use wide::f64x2 as m64x2;
+#[cfg(not(feature = "nightly"))]
+pub use wide::f64x4 as m64x4;
 
 #[cfg(feature = "nightly")]
 pub use packed_simd::f32x16;

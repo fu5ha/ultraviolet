@@ -477,17 +477,17 @@ macro_rules! vec4s {
 vec4s!(
     Vec4, Vec2, Vec3 => f32,
     Vec4x4, Vec2x4, Vec3x4 => f32x4,
+    Vec4x8, Vec2x8, Vec3x8 => f32x8,
 
     DVec4, DVec2, DVec3 => f64,
-    DVec4x2, DVec2x2, DVec3x2 => f64x2
+    DVec4x2, DVec2x2, DVec3x2 => f64x2,
+    DVec4x4, DVec2x4, DVec3x4 => f64x4
 );
 
 #[cfg(feature = "nightly")]
 vec4s!(
-    Vec4x8, Vec2x8, Vec3x8 => f32x8,
     Vec4x16, Vec2x16, Vec3x16 => f32x16,
 
-    DVec4x4, DVec2x4, DVec3x4 => f64x4,
     DVec4x8, DVec2x8, DVec3x8 => f64x8
 );
 
@@ -608,16 +608,16 @@ macro_rules! impl_wide_vec4s {
 
 impl_wide_vec4s!(
     Vec4x4 => f32, f32x4, m32x4, Vec4, Vec3x4,
+    Vec4x8 => f32, f32x8, m32x8, Vec4, Vec3x8,
 
-    DVec4x2 => f64, f64x2, m64x2, DVec4, DVec3x2
+    DVec4x2 => f64, f64x2, m64x2, DVec4, DVec3x2,
+    DVec4x4 => f64, f64x4, m64x4, DVec4, DVec3x4
 );
 
 #[cfg(feature = "nightly")]
 impl_wide_vec4s!(
-    Vec4x8 => f32, f32x8, m32x8, Vec4, Vec3x8,
     Vec4x16 => f32, f32x16, m32x16, Vec4, Vec3x16,
 
-    DVec4x4 => f64, f64x4, m64x4, DVec4, DVec3x4,
     DVec4x8 => f64, f64x8, m64x8, DVec4, DVec3x8
 );
 
@@ -649,7 +649,6 @@ impl From<[Vec4; 4]> for Vec4x4 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl Into<[Vec4; 8]> for Vec4x8 {
     #[inline]
     fn into(self) -> [Vec4; 8] {
@@ -670,7 +669,6 @@ impl Into<[Vec4; 8]> for Vec4x8 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl From<[Vec4; 8]> for Vec4x8 {
     #[inline]
     fn from(vecs: [Vec4; 8]) -> Self {
@@ -778,7 +776,6 @@ impl From<[DVec4; 2]> for DVec4x2 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl Into<[DVec4; 4]> for DVec4x4 {
     #[inline]
     fn into(self) -> [DVec4; 4] {
@@ -795,7 +792,6 @@ impl Into<[DVec4; 4]> for DVec4x4 {
     }
 }
 
-#[cfg(feature = "nightly")]
 impl From<[DVec4; 4]> for DVec4x4 {
     #[inline]
     fn from(vecs: [DVec4; 4]) -> Self {

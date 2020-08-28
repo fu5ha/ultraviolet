@@ -208,17 +208,17 @@ macro_rules! mat2s {
 mat2s!(
     Mat2 => Mat3, Vec3, Vec2, f32,
     Mat2x4 => Mat3x4, Vec3x4, Vec2x4, f32x4,
+    Mat2x8 => Mat3x8, Vec3x8, Vec2x8, f32x8,
 
     DMat2 => DMat3, DVec3, DVec2, f64,
-    DMat2x2 => DMat3x2, DVec3x2, DVec2x2, f64x2
+    DMat2x2 => DMat3x2, DVec3x2, DVec2x2, f64x2,
+    DMat2x4 => DMat3x4, DVec3x4, DVec2x4, f64x4
 );
 
 #[cfg(feature = "nightly")]
 mat2s!(
-    Mat2x8 => Mat3x8, Vec3x8, Vec2x8, f32x8,
     Mat2x16 => Mat3x16, Vec3x16, Vec2x16, f32x16,
 
-    DMat2x4 => DMat3x4, DVec3x4, DVec2x4, f64x4,
     DMat2x8 => DMat3x8, DVec3x8, DVec2x8, f64x8
 );
 
@@ -667,17 +667,17 @@ macro_rules! mat3s {
 mat3s!(
     Mat3 => Rotor3, Bivec3, Mat4, Vec4, Vec2, Vec3, f32,
     Mat3x4 => Rotor3x4, Bivec3x4, Mat4x4, Vec4x4, Vec2x4, Vec3x4, f32x4,
+    Mat3x8 => Rotor3x8, Bivec3x8, Mat4x8, Vec4x8, Vec2x8, Vec3x8, f32x8,
 
     DMat3 => DRotor3, DBivec3, DMat4, DVec4, DVec2, DVec3, f64,
-    DMat3x2 => DRotor3x2, DBivec3x2, DMat4x2, DVec4x2, DVec2x2, DVec3x2, f64x2
+    DMat3x2 => DRotor3x2, DBivec3x2, DMat4x2, DVec4x2, DVec2x2, DVec3x2, f64x2,
+    DMat3x4 => DRotor3x4, DBivec3x4, DMat4x4, DVec4x4, DVec2x4, DVec3x4, f64x4
 );
 
 #[cfg(feature = "nightly")]
 mat3s!(
-    Mat3x8 => Rotor3x8, Bivec3x8, Mat4x8, Vec4x8, Vec2x8, Vec3x8, f32x8,
     Mat3x16 => Rotor3x16, Bivec3x16, Mat4x16, Vec4x16, Vec2x16, Vec3x16, f32x16,
 
-    DMat3x4 => DRotor3x4, DBivec3x4, DMat4x4, DVec4x4, DVec2x4, DVec3x4, f64x4,
     DMat3x8 => DRotor3x8, DBivec3x8, DMat4x8, DVec4x8, DVec2x8, DVec3x8, f64x8
 );
 
@@ -1266,17 +1266,17 @@ macro_rules! mat4s {
 mat4s!(
     Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32,
     Mat4x4 => Rotor3x4, Bivec3x4, Vec4x4, Vec3x4, f32x4,
+    Mat4x8 => Rotor3x8, Bivec3x8, Vec4x8, Vec3x8, f32x8,
 
     DMat4 => DRotor3, DBivec3, DVec4, DVec3, f64,
-    DMat4x2 => DRotor3x2, DBivec3x2, DVec4x2, DVec3x2, f64x2
+    DMat4x2 => DRotor3x2, DBivec3x2, DVec4x2, DVec3x2, f64x2,
+    DMat4x4 => DRotor3x4, DBivec3x4, DVec4x4, DVec3x4, f64x4
 );
 
 #[cfg(feature = "nightly")]
 mat4s!(
-    Mat4x8 => Rotor3x8, Bivec3x8, Vec4x8, Vec3x8, f32x8,
     Mat4x16 => Rotor3x16, Bivec3x16, Vec4x16, Vec3x16, f32x16,
 
-    DMat4x4 => DRotor3x4, DBivec3x4, DVec4x4, DVec3x4, f64x4,
     DMat4x8 => DRotor3x8, DBivec3x8, DVec4x8, DVec3x8, f64x8
 );
 
