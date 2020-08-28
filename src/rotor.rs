@@ -73,7 +73,7 @@ macro_rules! rotor2s {
 
         impl $rn {
             #[inline]
-            pub fn new(scalar: $t, bivector: $bt) -> Self {
+            pub const fn new(scalar: $t, bivector: $bt) -> Self {
                 Self {
                     s: scalar,
                     bv: bivector,
@@ -370,7 +370,7 @@ macro_rules! rotor3s {
 
         impl $rn {
             #[inline]
-            pub fn new(scalar: $t, bivector: $bt) -> Self {
+            pub const fn new(scalar: $t, bivector: $bt) -> Self {
                 Self {
                     s: scalar,
                     bv: bivector,

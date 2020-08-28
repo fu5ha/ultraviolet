@@ -55,7 +55,7 @@ macro_rules! bivec2s {
 
         impl $bn {
             #[inline]
-            pub fn new(xy: $t) -> Self {
+            pub const fn new(xy: $t) -> Self {
                 Self {
                     xy
                 }
@@ -149,7 +149,7 @@ macro_rules! bivec2s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $bn as *const $t
             }
 
@@ -335,7 +335,7 @@ macro_rules! bivec3s {
 
         impl $bn {
             #[inline]
-            pub fn new(xy: $t, xz: $t, yz: $t) -> Self {
+            pub const fn new(xy: $t, xz: $t, yz: $t) -> Self {
                 Self {
                     xy, xz, yz
                 }
@@ -448,7 +448,7 @@ macro_rules! bivec3s {
             ///
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
-            pub fn as_ptr(&self) -> *const $t {
+            pub const fn as_ptr(&self) -> *const $t {
                 self as *const $bn as *const $t
             }
 
