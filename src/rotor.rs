@@ -483,7 +483,8 @@ macro_rules! rotor3s {
             }
 
             /// Rotates this rotor by another rotor in-place. Note that if you
-            /// are looking to *compose* rotations (you probably are), you should
+            /// are looking to *compose* rotations which will then be applied to another object/vector
+            /// (you probably are), you should
             /// *NOT* use this operation. Rather, just use regular left-multiplication
             /// as in matrix composition, i.e.
             ///
@@ -553,16 +554,15 @@ macro_rules! rotor3s {
                 let bxy2 = self.bv.xy * self.bv.xy;
                 let bxz2 = self.bv.xz * self.bv.xz;
                 let byz2 = self.bv.yz * self.bv.yz;
-                let two = $t::splat(2.0);
                 let s_bxy = self.s * self.bv.xy;
                 let s_bxz = self.s * self.bv.xz;
                 let s_byz = self.s * self.bv.yz;
                 let bxz_byz = self.bv.xz * self.bv.yz;
                 let bxy_byz = self.bv.xy * self.bv.yz;
                 let bxy_bxz = self.bv.xy * self.bv.xz;
-                let two_vx = two * vec.x;
-                let two_vy = two * vec.y;
-                let two_vz = two * vec.z;
+                let two_vx = vec.x + vec.x;
+                let two_vy = vec.y + vec.y;
+                let two_vz = vec.z + vec.z;
 
                 vec.x = vec.x.mul_add(
                     s2 - bxy2 - bxz2 + byz2,
