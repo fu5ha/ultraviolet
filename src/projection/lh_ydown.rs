@@ -4,7 +4,7 @@
 //! the screen*.
 
 use crate::mat::*;
-use crate::vec::*;
+use crate::standard::vec::*;
 
 /// Orthographic projection matrix for use with OpenGL.
 ///

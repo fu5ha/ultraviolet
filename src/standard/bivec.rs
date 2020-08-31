@@ -33,6 +33,7 @@
 //! basis bivectors. This is analogous to how vector components represent the *projected length* of that vector
 //! onto each unit vector.
 use crate::*;
+use crate::standard::*;
 
 use crate::util::*;
 
@@ -292,18 +293,14 @@ macro_rules! bivec2s {
 bivec2s!(
     (Bivec2) => f32,
     (Bivec2x4) => f32x4,
-    (Bivec2x8) => f32x8,
+    (Bivec2x8) => f32x8
+);
 
+#[cfg(feature = "f64")]
+bivec2s!(
     (DBivec2) => f64,
     (DBivec2x2) => f64x2,
     (DBivec2x4) => f64x4
-);
-
-#[cfg(feature = "nightly")]
-bivec2s!(
-    (Bivec2x16) => f32x16,
-
-    (DBivec2x8) => f64x8
 );
 
 macro_rules! bivec3s {
@@ -599,16 +596,12 @@ macro_rules! bivec3s {
 bivec3s!(
     Bivec3 => (Vec3, f32),
     Bivec3x4 => (Vec3x4, f32x4),
-    Bivec3x8 => (Vec3x8, f32x8),
+    Bivec3x8 => (Vec3x8, f32x8)
+);
 
+#[cfg(feature = "f64")]
+bivec3s!(
     DBivec3 => (DVec3, f64),
     DBivec3x2 => (DVec3x2, f64x2),
     DBivec3x4 => (DVec3x4, f64x4)
-);
-
-#[cfg(feature = "nightly")]
-bivec3s!(
-    Bivec3x16 => (Vec3x16, f32x16),
-
-    DBivec3x8 => (DVec3x8, f64x8)
 );

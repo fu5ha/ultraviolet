@@ -18,6 +18,34 @@ impl Splat<f64> for f64 {
     }
 }
 
+impl Splat<u32> for u32 {
+    #[inline(always)]
+    fn splat(val: u32) -> Self {
+        val
+    }
+}
+
+impl Splat<u64> for u64 {
+    #[inline(always)]
+    fn splat(val: u64) -> Self {
+        val
+    }
+}
+
+impl Splat<i32> for i32 {
+    #[inline(always)]
+    fn splat(val: i32) -> Self {
+        val
+    }
+}
+
+impl Splat<i64> for i64 {
+    #[inline(always)]
+    fn splat(val: i64) -> Self {
+        val
+    }
+}
+
 pub trait EqualsEps {
     fn eq_eps(self, other: Self) -> bool;
 }
@@ -36,9 +64,6 @@ macro_rules! impl_eq_eps_wide {
 }
 
 impl_eq_eps_wide!(f32x4, f32x8, f64x2, f64x4);
-
-#[cfg(feature = "nightly")]
-impl_eq_eps_wide!(f32x16, f64x8);
 
 impl EqualsEps for f32 {
     fn eq_eps(self, other: Self) -> bool {

@@ -1,6 +1,6 @@
 //!
 //! Geometry helper functionality.
-use crate::{Vec3, Vec3i, Vec3u};
+use crate::standard::vec::*;
 
 /// A plane which can be intersected by a ray.
 #[derive(Debug, Copy, Clone)]
@@ -27,9 +27,10 @@ pub struct Ray {
 /// A plane which can be intersected by a ray.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Planeu {
+#[cfg(feature = "int")]
+pub struct UPlane {
     /// plane described as x,y,z normal
-    pub normal: Vec3u,
+    pub normal: UVec3,
 
     /// dot product of the point and normal, representing the plane position
     pub bias: u32,
@@ -38,20 +39,22 @@ pub struct Planeu {
 /// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Rayu {
+#[cfg(feature = "int")]
+pub struct URay {
     /// origin point of the ray
-    pub origin: Vec3u,
+    pub origin: UVec3,
 
     /// normalized direction vector of the ray
-    pub direction: Vec3u,
+    pub direction: UVec3,
 }
 
 /// A plane which can be intersected by a ray.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Planei {
+#[cfg(feature = "int")]
+pub struct IPlane {
     /// plane described as x,y,z normal
-    pub normal: Vec3i,
+    pub normal: IVec3,
 
     /// dot product of the point and normal, representing the plane position
     pub bias: i32,
@@ -60,12 +63,13 @@ pub struct Planei {
 /// A Ray represents an infinite half-line starting at `origin` and going in specified unit length `direction`.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Rayi {
+#[cfg(feature = "int")]
+pub struct IRay {
     /// origin point of the ray
-    pub origin: Vec3i,
+    pub origin: IVec3,
 
     /// normalized direction vector of the ray
-    pub direction: Vec3i,
+    pub direction: IVec3,
 }
 
 macro_rules! impl_plane_ray {
@@ -194,8 +198,10 @@ macro_rules! impl_plane_ray {
 }
 
 impl_plane_ray!(Plane, Ray, Vec3 => f32);
-impl_plane_ray!(Planeu, Rayu, Vec3u => u32);
-impl_plane_ray!(Planei, Rayi, Vec3i => i32);
+#[cfg(feature = "int")]
+impl_plane_ray!(UPlane, URay, UVec3 => u32);
+#[cfg(feature = "int")]
+impl_plane_ray!(IPlane, IRay, IVec3 => i32);
 
 /// An axis-aligned bounding box
 #[derive(Default, Debug, Copy, Clone)]
@@ -206,19 +212,21 @@ pub struct Aabb {
 }
 
 /// An axis-aligned bounding box
-#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Aabbu {
-    pub min: Vec3u,
-    pub max: Vec3u,
+#[cfg(feature = "int")]
+pub struct UAabb {
+    pub min: UVec3,
+    pub max: UVec3,
 }
 
 /// An axis-aligned bounding box
-#[derive(Default, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[repr(C)]
-pub struct Aabbi {
-    pub min: Vec3i,
-    pub max: Vec3i,
+#[cfg(feature = "int")]
+pub struct IAabb {
+    pub min: IVec3,
+    pub max: IVec3,
 }
 
 macro_rules! impl_aabb {
@@ -338,22 +346,27 @@ impl Aabb {
     }
 }
 
-impl Aabbu {
+#[cfg(feature = "int")]
+impl UAabb {
     /// Same as iter_stride, but calls it with a stride of 1.0
     #[inline]
     #[must_use]
-    pub fn iter(&self) -> AabbuLinearIterator {
+    pub fn iter(&self) -> UAabbLinearIterator {
         self.iter_stride(1)
     }
 }
 
-impl Aabbi {
+#[cfg(feature = "int")]
+impl IAabb {
     /// Same as iter_stride, but calls it with a stride of 1.0
     #[inline]
     #[must_use]
-    pub fn iter(&self) -> AabbiLinearIterator {
+    pub fn iter(&self) -> IAabbLinearIterator {
         self.iter_stride(1)
     }
 }
 
-impl_aabb!(Aabb, AabbLinearIterator, Vec3 => f32, Aabbu, AabbuLinearIterator, Vec3u => u32, Aabbi, AabbiLinearIterator, Vec3i => i32);
+impl_aabb!(Aabb, AabbLinearIterator, Vec3 => f32);
+
+#[cfg(feature = "int")]
+impl_aabb!(UAabb, UAabbLinearIterator, UVec3 => u32, IAabb, IAabbLinearIterator, IVec3 => i32);

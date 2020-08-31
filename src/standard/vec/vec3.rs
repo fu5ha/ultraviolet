@@ -1,7 +1,8 @@
 use std::ops::*;
 
-use crate::util::*;
 use crate::*;
+use crate::standard::*;
+use crate::util::*;
 
 macro_rules! vec3s {
     ($(($v2t:ident, $n:ident, $bn:ident, $rn:ident, $v4t:ident) => $t:ident),+) => {
@@ -534,18 +535,14 @@ macro_rules! vec3s {
 vec3s!(
     (Vec2, Vec3, Bivec3, Rotor3, Vec4) => f32,
     (Vec2x4, Vec3x4, Bivec3x4, Rotor3x4, Vec4x4) => f32x4,
-    (Vec2x8, Vec3x8, Bivec3x8, Rotor3x8, Vec4x8) => f32x8,
+    (Vec2x8, Vec3x8, Bivec3x8, Rotor3x8, Vec4x8) => f32x8
+);
 
+#[cfg(feature = "f64")]
+vec3s!(
     (DVec2, DVec3, DBivec3, DRotor3, DVec4) => f64,
     (DVec2x2, DVec3x2, DBivec3x2, DRotor3x2, DVec4x2) => f64x2,
     (DVec2x4, DVec3x4, DBivec3x4, DRotor3x4, DVec4x4) => f64x4
-);
-
-#[cfg(feature = "nightly")]
-vec3s!(
-    (Vec2x16, Vec3x16, Bivec3x16, Rotor3x16, Vec4x16) => f32x16,
-
-    (DVec2x8, DVec3x8, DBivec3x8, DRotor3x8, DVec4x8) => f64x8
 );
 
 // SCALAR VEC3 IMPLS
@@ -603,7 +600,11 @@ macro_rules! impl_scalar_vec3s {
 }
 
 impl_scalar_vec3s!(
-    (Vec3, Vec2, Vec4) => f32,
+    (Vec3, Vec2, Vec4) => f32
+);
+
+#[cfg(feature = "f64")]
+impl_scalar_vec3s!(
     (DVec3, DVec2, DVec4) => f64
 );
 
@@ -691,17 +692,14 @@ macro_rules! impl_wide_vec3s {
 
 impl_wide_vec3s!(
     Vec3x4 => f32, f32x4, m32x4, Vec3, Vec2x4, Vec4x4,
-    Vec3x8 => f32, f32x8, m32x8, Vec3, Vec2x8, Vec4x8,
-
-    DVec3x2 => f64, f64x2, m64x2, DVec3, DVec2x2, DVec4x2,
-    DVec3x4 => f64, f64x4, m64x4, DVec3, DVec2x4, DVec4x4
+    Vec3x8 => f32, f32x8, m32x8, Vec3, Vec2x8, Vec4x8
 );
 
-#[cfg(feature = "nightly")]
-impl_wide_vec3s!(
-    Vec3x16 => f32, f32x16, m32x16, Vec3, Vec2x16, Vec4x16,
 
-    DVec3x8 => f64, f64x8, m64x8, DVec3, DVec2x8, DVec4x8
+#[cfg(feature = "f64")]
+impl_wide_vec3s!(
+    DVec3x2 => f64, f64x2, m64x2, DVec3, DVec2x2, DVec4x2,
+    DVec3x4 => f64, f64x4, m64x4, DVec3, DVec2x4, DVec4x4
 );
 
 impl Into<[Vec3; 4]> for Vec3x4 {
@@ -769,58 +767,7 @@ impl From<[Vec3; 8]> for Vec3x8 {
     }
 }
 
-#[cfg(feature = "nightly")]
-impl Into<[Vec3; 16]> for Vec3x16 {
-    #[inline]
-    fn into(self) -> [Vec3; 16] {
-        let xs: [f32; 16] = self.x.into();
-        let ys: [f32; 16] = self.y.into();
-        let zs: [f32; 16] = self.z.into();
-        [
-            Vec3::new(xs[0], ys[0], zs[0]),
-            Vec3::new(xs[1], ys[1], zs[1]),
-            Vec3::new(xs[2], ys[2], zs[2]),
-            Vec3::new(xs[3], ys[3], zs[3]),
-            Vec3::new(xs[4], ys[4], zs[4]),
-            Vec3::new(xs[5], ys[5], zs[5]),
-            Vec3::new(xs[6], ys[6], zs[6]),
-            Vec3::new(xs[7], ys[7], zs[7]),
-            Vec3::new(xs[8], ys[8], zs[8]),
-            Vec3::new(xs[9], ys[9], zs[9]),
-            Vec3::new(xs[10], ys[10], zs[10]),
-            Vec3::new(xs[11], ys[11], zs[11]),
-            Vec3::new(xs[12], ys[12], zs[12]),
-            Vec3::new(xs[13], ys[13], zs[13]),
-            Vec3::new(xs[14], ys[14], zs[14]),
-            Vec3::new(xs[15], ys[15], zs[15]),
-        ]
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl From<[Vec3; 16]> for Vec3x16 {
-    #[inline]
-    fn from(vecs: [Vec3; 16]) -> Self {
-        Self {
-            x: f32x16::from([
-                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
-                vecs[7].x, vecs[8].x, vecs[9].x, vecs[10].x, vecs[11].x, vecs[12].x, vecs[13].x,
-                vecs[14].x, vecs[15].x,
-            ]),
-            y: f32x16::from([
-                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
-                vecs[7].y, vecs[8].y, vecs[9].y, vecs[10].y, vecs[11].y, vecs[12].y, vecs[13].y,
-                vecs[14].y, vecs[15].y,
-            ]),
-            z: f32x16::from([
-                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
-                vecs[7].z, vecs[8].z, vecs[9].z, vecs[10].z, vecs[11].z, vecs[12].z, vecs[13].z,
-                vecs[14].z, vecs[15].z,
-            ]),
-        }
-    }
-}
-
+#[cfg(feature = "f64")]
 impl Into<[DVec3; 2]> for DVec3x2 {
     #[inline]
     fn into(self) -> [DVec3; 2] {
@@ -834,6 +781,7 @@ impl Into<[DVec3; 2]> for DVec3x2 {
     }
 }
 
+#[cfg(feature = "f64")]
 impl From<[DVec3; 2]> for DVec3x2 {
     #[inline]
     fn from(vecs: [DVec3; 2]) -> Self {
@@ -845,6 +793,7 @@ impl From<[DVec3; 2]> for DVec3x2 {
     }
 }
 
+#[cfg(feature = "f64")]
 impl Into<[DVec3; 4]> for DVec3x4 {
     #[inline]
     fn into(self) -> [DVec3; 4] {
@@ -860,6 +809,7 @@ impl Into<[DVec3; 4]> for DVec3x4 {
     }
 }
 
+#[cfg(feature = "f64")]
 impl From<[DVec3; 4]> for DVec3x4 {
     #[inline]
     fn from(vecs: [DVec3; 4]) -> Self {
@@ -867,47 +817,6 @@ impl From<[DVec3; 4]> for DVec3x4 {
             x: f64x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f64x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
             z: f64x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-        }
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl Into<[DVec3; 8]> for DVec3x8 {
-    #[inline]
-    fn into(self) -> [DVec3; 8] {
-        let xs: [f64; 8] = self.x.into();
-        let ys: [f64; 8] = self.y.into();
-        let zs: [f64; 8] = self.z.into();
-        [
-            DVec3::new(xs[0], ys[0], zs[0]),
-            DVec3::new(xs[1], ys[1], zs[1]),
-            DVec3::new(xs[2], ys[2], zs[2]),
-            DVec3::new(xs[3], ys[3], zs[3]),
-            DVec3::new(xs[4], ys[4], zs[4]),
-            DVec3::new(xs[5], ys[5], zs[5]),
-            DVec3::new(xs[6], ys[6], zs[6]),
-            DVec3::new(xs[7], ys[7], zs[7]),
-        ]
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl From<[DVec3; 8]> for DVec3x8 {
-    #[inline]
-    fn from(vecs: [DVec3; 8]) -> Self {
-        Self {
-            x: f64x8::from([
-                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
-                vecs[7].x,
-            ]),
-            y: f64x8::from([
-                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
-                vecs[7].y,
-            ]),
-            z: f64x8::from([
-                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
-                vecs[7].z,
-            ]),
         }
     }
 }

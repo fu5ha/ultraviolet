@@ -1,12 +1,13 @@
 use std::ops::*;
 
-use crate::util::*;
 use crate::*;
+use crate::standard::*;
+use crate::util::*;
 
-macro_rules! vec4s {
-    ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
-        $(/// A set of four coordinates which may be interpreted as a point or vector in 4d space,
-        /// or as a homogeneous 3d vector or point.
+macro_rules! vec2s {
+    ($(($n:ident, $bn:ident, $rn:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
+        $(
+        /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
@@ -16,61 +17,108 @@ macro_rules! vec4s {
         pub struct $n {
             pub x: $t,
             pub y: $t,
-            pub z: $t,
-            pub w: $t,
         }
 
         impl $n {
             #[inline]
-            pub const fn new(x: $t, y: $t, z: $t, w: $t) -> Self {
-                $n { x, y, z, w }
+            pub const fn new(x: $t, y: $t) -> Self {
+                $n { x, y }
             }
 
             #[inline]
             pub const fn broadcast(val: $t) -> Self {
-                Self::new(val, val, val, val)
+                Self::new(val, val)
             }
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: $t::splat(1.0), y: $t::splat(0.0), z: $t::splat(0.0), w: $t::splat(0.0) }
+                $n{ x: $t::splat(1.0), y: $t::splat(0.0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: $t::splat(0.0), y: $t::splat(1.0), z: $t::splat(0.0), w: $t::splat(0.0) }
+                $n{ x: $t::splat(0.0), y: $t::splat(1.0) }
             }
 
+            /// Create a homogeneous 2d *point* from this vector interpreted as a point,
+            /// meaning the homogeneous component will start with a value of 1.0.
             #[inline]
-            pub fn unit_z() -> Self {
-                $n{ x: $t::splat(0.0), y: $t::splat(0.0), z: $t::splat(1.0), w: $t::splat(0.0) }
+            pub fn into_homogeneous_point(self) -> $v3t {
+                $v3t { x: self.x, y: self.y, z: $t::splat(1.0) }
             }
 
+            /// Create a homogeneous 2d *vector* from this vector,
+            /// meaning the homogeneous component will always have a value of 0.0.
             #[inline]
-            pub fn unit_w() -> Self {
-                $n{ x: $t::splat(0.0), y: $t::splat(0.0), z: $t::splat(0.0), w: $t::splat(1.0) }
+            pub fn into_homogeneous_vector(self) -> $v3t {
+                $v3t { x: self.x, y: self.y, z: $t::splat(0.0) }
+            }
+
+            /// Create a 2d point from a homogeneous 2d *point*, performing
+            /// division by the homogeneous component. This should not be used
+            /// for homogeneous 2d *vectors*, which will have 0 as their
+            /// homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_point(v: $v3t) -> Self {
+                Self { x: v.x / v.z, y: v.y / v.z }
+            }
+
+            /// Create a 2d vector from homogeneous 2d *vector*, which simply
+            /// discards the homogeneous component.
+            #[inline]
+            pub fn from_homogeneous_vector(v: $v3t) -> Self {
+                v.into()
             }
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
-                self.x.mul_add(other.x, self.y.mul_add(other.y, self.z.mul_add(other.z, self.w * other.w)))
+                self.x.mul_add(other.x, self.y * other.y)
+            }
+
+            /// The wedge (aka exterior) product of two vectors.
+            ///
+            /// This operation results in a bivector, which represents
+            /// the plane parallel to the two vectors, and which has a
+            /// 'oriented area' equal to the parallelogram created by extending
+            /// the two vectors, oriented such that the positive direction is the
+            /// one which would move `self` closer to `other`.
+            #[inline]
+            pub fn wedge(&self, other: $n) -> $bn {
+                $bn::new(self.x.mul_add(other.y, -(other.x * self.y)))
+            }
+
+            /// The geometric product of this and another vector, which
+            /// is defined as the sum of the dot product and the wedge product.
+            ///
+            /// This operation results in a 'rotor', named as such as it may define
+            /// a rotation. The rotor which results from the geometric product
+            /// will rotate in the plane parallel to the two vectors, by twice the angle between
+            /// them and in the opposite direction (i.e. it will rotate in the direction that would
+            /// bring `other` towards `self`, and rotate in that direction by twice the angle between them).
+            #[inline]
+            pub fn geom(&self, other: $n) -> $rn {
+                $rn::new(self.dot(other), self.wedge(other))
             }
 
             #[inline]
-            pub fn reflect(&mut self, normal: $n) {
-                *self -= $t::splat(2.0) * self.dot(normal) * normal;
+            pub fn rotate_by(&mut self, rotor: $rn) {
+                rotor.rotate_vec(self);
+            }
+
+            #[inline]
+            pub fn rotated_by(mut self, rotor: $rn) -> Self {
+                rotor.rotate_vec(&mut self);
+                self
             }
 
             #[inline]
             pub fn reflected(&self, normal: $n) -> Self {
-                let mut a = *self;
-                a.reflect(normal);
-                a
+                *self - ($t::splat(2.0) * self.dot(normal) * normal)
             }
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.x.mul_add(self.x, self.y.mul_add(self.y, self.z.mul_add(self.z, self.w * self.w)))
+                self.x.mul_add(self.x, self.y * self.y)
             }
 
             #[inline]
@@ -83,8 +131,6 @@ macro_rules! vec4s {
                 let mag = self.mag();
                 self.x /= mag;
                 self.y /= mag;
-                self.z /= mag;
-                self.w /= mag;
             }
 
             #[inline]
@@ -99,22 +145,18 @@ macro_rules! vec4s {
                 $n::new(
                     self.x.mul_add(mul.x, add.x),
                     self.y.mul_add(mul.y, add.y),
-                    self.z.mul_add(mul.z, add.z),
-                    self.w.mul_add(mul.w, add.w),
                 )
             }
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
+                Self::new(self.x.abs(), self.y.abs())
             }
 
             #[inline]
             pub fn clamp(&mut self, min: Self, max: Self) {
                 self.x = self.x.max(min.x).min(max.x);
                 self.y = self.y.max(min.y).min(max.y);
-                self.z = self.z.max(min.z).min(max.z);
-                self.w = self.w.max(min.w).min(max.w);
             }
 
             #[inline]
@@ -130,8 +172,6 @@ macro_rules! vec4s {
                 $n::new(
                     f(self.x),
                     f(self.y),
-                    f(self.z),
-                    f(self.w),
                 )
             }
 
@@ -141,16 +181,12 @@ macro_rules! vec4s {
             {
                 self.x = f(self.x);
                 self.y = f(self.y);
-                self.z = f(self.z);
-                self.w = f(self.w);
             }
 
             #[inline]
             pub fn max_by_component(mut self, other: Self) -> Self {
                 self.x = self.x.max(other.x);
                 self.y = self.y.max(other.y);
-                self.z = self.z.max(other.z);
-                self.w = self.w.max(other.w);
                 self
             }
 
@@ -158,19 +194,17 @@ macro_rules! vec4s {
             pub fn min_by_component(mut self, other: Self) -> Self {
                 self.x = self.x.min(other.x);
                 self.y = self.y.min(other.y);
-                self.z = self.z.min(other.z);
-                self.w = self.w.min(other.w);
                 self
             }
 
             #[inline]
             pub fn component_max(&self) -> $t {
-                self.x.max(self.y).max(self.z).max(self.w)
+                self.x.max(self.y)
             }
 
             #[inline]
             pub fn component_min(&self) -> $t {
-                self.x.min(self.y).min(self.z).min(self.w)
+                self.x.min(self.y)
             }
 
             #[inline]
@@ -184,13 +218,13 @@ macro_rules! vec4s {
             }
 
             #[inline]
-            pub const fn xy(&self) -> $v2t {
-                $v2t::new(self.x, self.y)
+            pub fn xyz(&self) -> $v3t {
+                $v3t::new(self.x, self.y, $t::splat(0.0))
             }
 
             #[inline]
-            pub const fn xyz(&self) -> $v3t {
-                $v3t::new(self.x, self.y, self.z)
+            pub fn xyzw(&self) -> $v4t {
+                $v4t::new(self.x, self.y, $t::splat(0.0), $t::splat(0.0))
             }
 
             #[inline]
@@ -199,7 +233,7 @@ macro_rules! vec4s {
             }
 
             #[inline]
-            pub fn as_array(&self) -> &[$t; 4] {
+            pub fn as_array(&self) -> &[$t; 2] {
                 use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
@@ -209,7 +243,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const $t, 4)
+                    std::slice::from_raw_parts(self as *const $n as *const $t, 2)
                 }
             }
 
@@ -218,7 +252,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 2 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -227,7 +261,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 4)
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 2)
                 }
             }
 
@@ -236,7 +270,7 @@ macro_rules! vec4s {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
-                    std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 4 * std::mem::size_of::<$t>())
+                    std::slice::from_raw_parts_mut(self as *mut $n as *mut u8, 2 * std::mem::size_of::<$t>())
                 }
             }
 
@@ -249,7 +283,7 @@ macro_rules! vec4s {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub const fn as_ptr(&self) -> *const $t {
-                 self as *const $n as *const $t
+                self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
@@ -265,58 +299,58 @@ macro_rules! vec4s {
             }
         }
 
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
+        impl Into<[$t; 2]> for $n {
+            #[inline]
+            fn into(self) -> [$t; 2] {
+                [self.x, self.y]
             }
         }
 
-        impl Into<[$t; 4]> for $n {
+        impl From<[$t; 2]> for $n {
             #[inline]
-            fn into(self) -> [$t; 4] {
-                [self.x, self.y, self.z, self.w]
+            fn from(comps: [$t; 2]) -> Self {
+                Self::new(comps[0], comps[1])
             }
         }
 
-        impl From<[$t; 4]> for $n {
+        impl From<&[$t; 2]> for $n {
             #[inline]
-            fn from(comps: [$t; 4]) -> Self {
-                Self::new(comps[0], comps[1], comps[2], comps[3])
-            }
-        }
-
-        impl From<&[$t; 4]> for $n {
-            #[inline]
-            fn from(comps: &[$t; 4]) -> Self {
+            fn from(comps: &[$t; 2]) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<&mut [$t; 4]> for $n {
+        impl From<&mut [$t; 2]> for $n {
             #[inline]
-            fn from(comps: &mut [$t; 4]) -> Self {
+            fn from(comps: &mut [$t; 2]) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<($t, $t, $t, $t)> for $n {
+        impl From<($t, $t)> for $n {
             #[inline]
-            fn from(comps: ($t, $t, $t, $t)) -> Self {
-                Self::new(comps.0, comps.1, comps.2, comps.3)
+            fn from(comps: ($t, $t)) -> Self {
+                Self::new(comps.0, comps.1)
             }
         }
 
-        impl From<&($t, $t, $t, $t)> for $n {
+        impl From<&($t, $t)> for $n {
             #[inline]
-            fn from(comps: &($t, $t, $t, $t)) -> Self {
+            fn from(comps: &($t, $t)) -> Self {
                 Self::from(*comps)
             }
         }
 
-        impl From<$n> for ($t, $t, $t, $t) {
+        impl From<$n> for ($t, $t) {
             #[inline]
             fn from(v: $n) -> Self {
-                (v.x, v.y, v.z, v.w)
+                (v.x, v.y)
+            }
+        }
+
+        impl EqualsEps for $n {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y)
             }
         }
 
@@ -324,7 +358,7 @@ macro_rules! vec4s {
             type Output = Self;
             #[inline]
             fn add(self, rhs: $n) -> Self {
-                $n::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z, self.w + rhs.w)
+                $n::new(self.x + rhs.x, self.y + rhs.y)
             }
         }
 
@@ -333,8 +367,6 @@ macro_rules! vec4s {
             fn add_assign(&mut self, rhs: $n) {
                 self.x += rhs.x;
                 self.y += rhs.y;
-                self.z += rhs.z;
-                self.w += rhs.w;
             }
         }
 
@@ -342,7 +374,7 @@ macro_rules! vec4s {
             type Output = Self;
             #[inline]
             fn sub(self, rhs: $n) -> Self {
-                $n::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w)
+                $n::new(self.x - rhs.x, self.y - rhs.y)
             }
         }
 
@@ -351,8 +383,6 @@ macro_rules! vec4s {
             fn sub_assign(&mut self, rhs: $n) {
                 self.x -= rhs.x;
                 self.y -= rhs.y;
-                self.z -= rhs.z;
-                self.w -= rhs.w;
             }
         }
 
@@ -360,7 +390,7 @@ macro_rules! vec4s {
             type Output = Self;
             #[inline]
             fn mul(self, rhs: $n) -> Self {
-                $n::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z, self.w * rhs. w)
+                $n::new(self.x * rhs.x, self.y * rhs.y)
             }
         }
 
@@ -368,7 +398,7 @@ macro_rules! vec4s {
             type Output = $n;
             #[inline]
             fn mul(self, rhs: $n) -> $n {
-                $n::new(self * rhs.x, self * rhs.y, self * rhs.z, self * rhs.w)
+                $n::new(self * rhs.x, self * rhs.y)
             }
         }
 
@@ -376,7 +406,7 @@ macro_rules! vec4s {
             type Output = $n;
             #[inline]
             fn mul(self, rhs: $t) -> $n {
-                $n::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w * rhs)
+                $n::new(self.x * rhs, self.y * rhs)
             }
         }
 
@@ -385,8 +415,6 @@ macro_rules! vec4s {
             fn mul_assign(&mut self, rhs: $n) {
                 self.x *= rhs.x;
                 self.y *= rhs.y;
-                self.z *= rhs.z;
-                self.w *= rhs.w;
             }
         }
 
@@ -395,8 +423,6 @@ macro_rules! vec4s {
             fn mul_assign(&mut self, rhs: $t) {
                 self.x *= rhs;
                 self.y *= rhs;
-                self.z *= rhs;
-                self.w *= rhs;
             }
         }
 
@@ -404,7 +430,7 @@ macro_rules! vec4s {
             type Output = Self;
             #[inline]
             fn div(self, rhs: $n) -> Self {
-                $n::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z, self.w / rhs.w)
+                $n::new(self.x / rhs.x, self.y / rhs.y)
             }
         }
 
@@ -412,7 +438,7 @@ macro_rules! vec4s {
             type Output = $n;
             #[inline]
             fn div(self, rhs: $t) -> $n {
-                $n::new(self.x / rhs, self.y / rhs, self.z / rhs, self.w / rhs)
+                $n::new(self.x / rhs, self.y / rhs)
             }
         }
 
@@ -421,8 +447,6 @@ macro_rules! vec4s {
             fn div_assign(&mut self, rhs: $n) {
                 self.x /= rhs.x;
                 self.y /= rhs.y;
-                self.z /= rhs.z;
-                self.w /= rhs.w;
             }
         }
 
@@ -431,8 +455,6 @@ macro_rules! vec4s {
             fn div_assign(&mut self, rhs: $t) {
                 self.x /= rhs;
                 self.y /= rhs;
-                self.z /= rhs;
-                self.w /= rhs;
             }
         }
 
@@ -451,8 +473,6 @@ macro_rules! vec4s {
                 match index {
                     0 => &self.x,
                     1 => &self.y,
-                    2 => &self.z,
-                    3 => &self.w,
                     _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
                 }
             }
@@ -463,36 +483,30 @@ macro_rules! vec4s {
                 match index {
                     0 => &mut self.x,
                     1 => &mut self.y,
-                    2 => &mut self.z,
-                    3 => &mut self.w,
                     _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
                 }
             }
         }
         )+
-    }
+    };
 }
 
-vec4s!(
-    Vec4, Vec2, Vec3 => f32,
-    Vec4x4, Vec2x4, Vec3x4 => f32x4,
-    Vec4x8, Vec2x8, Vec3x8 => f32x8,
-
-    DVec4, DVec2, DVec3 => f64,
-    DVec4x2, DVec2x2, DVec3x2 => f64x2,
-    DVec4x4, DVec2x4, DVec3x4 => f64x4
+vec2s!(
+    (Vec2, Bivec2, Rotor2, Vec3, Vec4) => f32,
+    (Vec2x4, Bivec2x4, Rotor2x4, Vec3x4, Vec4x4) => f32x4,
+    (Vec2x8, Bivec2x8, Rotor2x8, Vec3x8, Vec4x8) => f32x8
 );
 
-#[cfg(feature = "nightly")]
-vec4s!(
-    Vec4x16, Vec2x16, Vec3x16 => f32x16,
-
-    DVec4x8, DVec2x8, DVec3x8 => f64x8
+#[cfg(feature = "f64")]
+vec2s!(
+    (DVec2, DBivec2, DRotor2, DVec3, DVec4) => f64,
+    (DVec2x2, DBivec2x2, DRotor2x2, DVec3x2, DVec4x2) => f64x2,
+    (DVec2x4, DBivec2x4, DRotor2x4, DVec3x4, DVec4x4) => f64x4
 );
 
-// SCALAR VEC4 IMPLS
+// SCALAR VEC2 IMPLS
 
-macro_rules! impl_scalar_vec4s {
+macro_rules! impl_scalar_vec2s {
     ($(($vt:ident, $v3t:ident) => $t:ident),+) => {
         $(impl $vt {
             #[inline]
@@ -517,40 +531,37 @@ macro_rules! impl_scalar_vec4s {
         impl From<$v3t> for $vt {
             #[inline]
             fn from(vec: $v3t) -> Self {
-                Self {
-                    x: vec.x,
-                    y: vec.y,
-                    z: vec.z,
-                    w: 0.0,
-                }
+                Self { x: vec.x, y: vec.y }
             }
         }
 
         impl PartialEq for $vt {
             fn eq(&self, other: &Self) -> bool {
-                self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w
+                self.x == other.x && self.y == other.y
             }
         })+
-    }
+    };
 }
 
-impl_scalar_vec4s!(
-    (Vec4, Vec3) => f32,
-    (DVec4, DVec3) => f64
+impl_scalar_vec2s!(
+    (Vec2, Vec3) => f32
 );
 
-// WIDE VEC4 IMPLS
+#[cfg(feature = "f64")]
+impl_scalar_vec2s!(
+    (DVec2, DVec3) => f64
+);
 
-macro_rules! impl_wide_vec4s {
+// WIDE VEC2 IMPLS
+
+macro_rules! impl_wide_vec2s {
     ($($vt:ident => $tt:ident, $t:ident, $maskt:ident, $nonwidet:ident, $v3t:ident),+) => {
         $(impl $vt {
             #[inline]
-            pub fn new_splat(x: $tt, y: $tt, z: $tt, w: $tt) -> Self {
+            pub fn new_splat(x: $tt, y: $tt) -> Self {
                 Self {
                     x: $t::splat(x),
                     y: $t::splat(y),
-                    z: $t::splat(z),
-                    w: $t::splat(w),
                 }
             }
 
@@ -559,8 +570,6 @@ macro_rules! impl_wide_vec4s {
                 Self {
                     x: $t::splat(vec.x),
                     y: $t::splat(vec.y),
-                    z: $t::splat(vec.z),
-                    w: $t::splat(vec.w),
                 }
             }
 
@@ -574,9 +583,27 @@ macro_rules! impl_wide_vec4s {
                 Self {
                     x: mask.blend(tru.x, fals.x),
                     y: mask.blend(tru.y, fals.y),
-                    z: mask.blend(tru.z, fals.z),
-                    w: mask.blend(tru.w, fals.w),
                 }
+            }
+
+            #[inline]
+            pub fn refract(&mut self, normal: Self, eta: $t) {
+                *self = self.refracted(normal, eta);
+            }
+
+            #[inline]
+            pub fn refracted(&self, normal: Self, eta: $t) -> Self {
+                let n = normal;
+                let i = *self;
+                let one = $t::splat(1.0);
+                let ndi = n.dot(i);
+
+                let k = one - eta * eta * (one - ndi * ndi);
+                let mask = k.cmp_lt($t::splat(0.0));
+
+                let out = i * eta - (eta * ndi + k.sqrt()) * n;
+
+                Self::blend(mask, Self::zero(), out)
             }
         }
 
@@ -590,83 +617,68 @@ macro_rules! impl_wide_vec4s {
         impl From<$v3t> for $vt {
             #[inline]
             fn from(vec: $v3t) -> Self {
-                Self {
-                    x: vec.x,
-                    y: vec.y,
-                    z: vec.z,
-                    w: $t::splat(0.0),
-                }
+                Self { x: vec.x, y: vec.y }
             }
         })+
-    };
+    }
 }
 
-impl_wide_vec4s!(
-    Vec4x4 => f32, f32x4, m32x4, Vec4, Vec3x4,
-    Vec4x8 => f32, f32x8, m32x8, Vec4, Vec3x8,
-
-    DVec4x2 => f64, f64x2, m64x2, DVec4, DVec3x2,
-    DVec4x4 => f64, f64x4, m64x4, DVec4, DVec3x4
+impl_wide_vec2s!(
+    Vec2x4 => f32, f32x4, m32x4, Vec2, Vec3x4,
+    Vec2x8 => f32, f32x8, m32x8, Vec2, Vec3x8
 );
 
-#[cfg(feature = "nightly")]
-impl_wide_vec4s!(
-    Vec4x16 => f32, f32x16, m32x16, Vec4, Vec3x16,
-
-    DVec4x8 => f64, f64x8, m64x8, DVec4, DVec3x8
+#[cfg(feature = "f64")]
+impl_wide_vec2s!(
+    DVec2x2 => f64, f64x2, m64x2, DVec2, DVec3x2,
+    DVec2x4 => f64, f64x4, m64x4, DVec2, DVec3x4
 );
 
-impl Into<[Vec4; 4]> for Vec4x4 {
+impl Into<[Vec2; 4]> for Vec2x4 {
     #[inline]
-    fn into(self) -> [Vec4; 4] {
+    fn into(self) -> [Vec2; 4] {
         let xs: [f32; 4] = self.x.into();
         let ys: [f32; 4] = self.y.into();
-        let zs: [f32; 4] = self.z.into();
-        let ws: [f32; 4] = self.w.into();
         [
-            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
-            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
-            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
-            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
+            Vec2::new(xs[0], ys[0]),
+            Vec2::new(xs[1], ys[1]),
+            Vec2::new(xs[2], ys[2]),
+            Vec2::new(xs[3], ys[3]),
         ]
     }
 }
 
-impl From<[Vec4; 4]> for Vec4x4 {
+impl From<[Vec2; 4]> for Vec2x4 {
     #[inline]
-    fn from(vecs: [Vec4; 4]) -> Self {
+    fn from(vecs: [Vec2; 4]) -> Self {
         Self {
             x: f32x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f32x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f32x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-            w: f32x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
         }
     }
 }
 
-impl Into<[Vec4; 8]> for Vec4x8 {
+impl Into<[Vec2; 8]> for Vec2x8 {
     #[inline]
-    fn into(self) -> [Vec4; 8] {
+    fn into(self) -> [Vec2; 8] {
         let xs: [f32; 8] = self.x.into();
         let ys: [f32; 8] = self.y.into();
-        let zs: [f32; 8] = self.z.into();
-        let ws: [f32; 8] = self.z.into();
         [
-            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
-            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
-            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
-            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
-            Vec4::new(xs[4], ys[4], zs[4], ws[4]),
-            Vec4::new(xs[5], ys[5], zs[5], ws[5]),
-            Vec4::new(xs[6], ys[6], zs[6], ws[6]),
-            Vec4::new(xs[7], ys[7], zs[7], ws[7]),
+            Vec2::new(xs[0], ys[0]),
+            Vec2::new(xs[1], ys[1]),
+            Vec2::new(xs[2], ys[2]),
+            Vec2::new(xs[3], ys[3]),
+            Vec2::new(xs[4], ys[4]),
+            Vec2::new(xs[5], ys[5]),
+            Vec2::new(xs[6], ys[6]),
+            Vec2::new(xs[7], ys[7]),
         ]
     }
 }
 
-impl From<[Vec4; 8]> for Vec4x8 {
+impl From<[Vec2; 8]> for Vec2x8 {
     #[inline]
-    fn from(vecs: [Vec4; 8]) -> Self {
+    fn from(vecs: [Vec2; 8]) -> Self {
         Self {
             x: f32x8::from([
                 vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
@@ -676,171 +688,53 @@ impl From<[Vec4; 8]> for Vec4x8 {
                 vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
                 vecs[7].y,
             ]),
-            z: f32x8::from([
-                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
-                vecs[7].z,
-            ]),
-            w: f32x8::from([
-                vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
-                vecs[7].w,
-            ]),
-        }
-    }
-}
-#[cfg(feature = "nightly")]
-impl Into<[Vec4; 16]> for Vec4x16 {
-    #[inline]
-    fn into(self) -> [Vec4; 16] {
-        let xs: [f32; 16] = self.x.into();
-        let ys: [f32; 16] = self.y.into();
-        let zs: [f32; 16] = self.z.into();
-        let ws: [f32; 16] = self.z.into();
-        [
-            Vec4::new(xs[0], ys[0], zs[0], ws[0]),
-            Vec4::new(xs[1], ys[1], zs[1], ws[1]),
-            Vec4::new(xs[2], ys[2], zs[2], ws[2]),
-            Vec4::new(xs[3], ys[3], zs[3], ws[3]),
-            Vec4::new(xs[4], ys[4], zs[4], ws[4]),
-            Vec4::new(xs[5], ys[5], zs[5], ws[5]),
-            Vec4::new(xs[6], ys[6], zs[6], ws[6]),
-            Vec4::new(xs[7], ys[7], zs[7], ws[7]),
-            Vec4::new(xs[8], ys[8], zs[8], ws[8]),
-            Vec4::new(xs[9], ys[9], zs[9], ws[9]),
-            Vec4::new(xs[10], ys[10], zs[10], ws[10]),
-            Vec4::new(xs[11], ys[11], zs[11], ws[11]),
-            Vec4::new(xs[12], ys[12], zs[12], ws[12]),
-            Vec4::new(xs[13], ys[13], zs[13], ws[13]),
-            Vec4::new(xs[14], ys[14], zs[14], ws[14]),
-            Vec4::new(xs[15], ys[15], zs[15], ws[15]),
-        ]
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl From<[Vec4; 16]> for Vec4x16 {
-    #[inline]
-    fn from(vecs: [Vec4; 16]) -> Self {
-        Self {
-            x: f32x16::from([
-                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
-                vecs[7].x, vecs[8].x, vecs[9].x, vecs[10].x, vecs[11].x, vecs[12].x, vecs[13].x,
-                vecs[14].x, vecs[15].x,
-            ]),
-            y: f32x16::from([
-                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
-                vecs[7].y, vecs[8].y, vecs[9].y, vecs[10].y, vecs[11].y, vecs[12].y, vecs[13].y,
-                vecs[14].y, vecs[15].y,
-            ]),
-            z: f32x16::from([
-                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
-                vecs[7].z, vecs[8].z, vecs[9].z, vecs[10].z, vecs[11].z, vecs[12].z, vecs[13].z,
-                vecs[14].z, vecs[15].z,
-            ]),
-            w: f32x16::from([
-                vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
-                vecs[7].w, vecs[8].w, vecs[9].w, vecs[10].w, vecs[11].w, vecs[12].w, vecs[13].w,
-                vecs[14].w, vecs[15].w,
-            ]),
         }
     }
 }
 
-impl Into<[DVec4; 2]> for DVec4x2 {
+#[cfg(feature = "f64")]
+impl Into<[DVec2; 2]> for DVec2x2 {
     #[inline]
-    fn into(self) -> [DVec4; 2] {
+    fn into(self) -> [DVec2; 2] {
         let xs: [f64; 2] = self.x.into();
         let ys: [f64; 2] = self.y.into();
-        let zs: [f64; 2] = self.z.into();
-        let ws: [f64; 2] = self.w.into();
-        [
-            DVec4::new(xs[0], ys[0], zs[0], ws[0]),
-            DVec4::new(xs[1], ys[1], zs[1], ws[1]),
-        ]
+        [DVec2::new(xs[0], ys[0]), DVec2::new(xs[1], ys[1])]
     }
 }
 
-impl From<[DVec4; 2]> for DVec4x2 {
+#[cfg(feature = "f64")]
+impl From<[DVec2; 2]> for DVec2x2 {
     #[inline]
-    fn from(vecs: [DVec4; 2]) -> Self {
+    fn from(vecs: [DVec2; 2]) -> Self {
         Self {
             x: f64x2::from([vecs[0].x, vecs[1].x]),
             y: f64x2::from([vecs[0].y, vecs[1].y]),
-            z: f64x2::from([vecs[0].z, vecs[1].z]),
-            w: f64x2::from([vecs[0].w, vecs[1].w]),
         }
     }
 }
 
-impl Into<[DVec4; 4]> for DVec4x4 {
+#[cfg(feature = "f64")]
+impl Into<[DVec2; 4]> for DVec2x4 {
     #[inline]
-    fn into(self) -> [DVec4; 4] {
+    fn into(self) -> [DVec2; 4] {
         let xs: [f64; 4] = self.x.into();
         let ys: [f64; 4] = self.y.into();
-        let zs: [f64; 4] = self.z.into();
-        let ws: [f64; 4] = self.w.into();
         [
-            DVec4::new(xs[0], ys[0], zs[0], ws[0]),
-            DVec4::new(xs[1], ys[1], zs[1], ws[1]),
-            DVec4::new(xs[2], ys[2], zs[2], ws[2]),
-            DVec4::new(xs[3], ys[3], zs[3], ws[3]),
+            DVec2::new(xs[0], ys[0]),
+            DVec2::new(xs[1], ys[1]),
+            DVec2::new(xs[2], ys[2]),
+            DVec2::new(xs[3], ys[3]),
         ]
     }
 }
 
-impl From<[DVec4; 4]> for DVec4x4 {
+#[cfg(feature = "f64")]
+impl From<[DVec2; 4]> for DVec2x4 {
     #[inline]
-    fn from(vecs: [DVec4; 4]) -> Self {
+    fn from(vecs: [DVec2; 4]) -> Self {
         Self {
             x: f64x4::from([vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x]),
             y: f64x4::from([vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y]),
-            z: f64x4::from([vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z]),
-            w: f64x4::from([vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w]),
-        }
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl Into<[DVec4; 8]> for DVec4x8 {
-    #[inline]
-    fn into(self) -> [DVec4; 8] {
-        let xs: [f64; 8] = self.x.into();
-        let ys: [f64; 8] = self.y.into();
-        let zs: [f64; 8] = self.z.into();
-        let ws: [f64; 8] = self.z.into();
-        [
-            DVec4::new(xs[0], ys[0], zs[0], ws[0]),
-            DVec4::new(xs[1], ys[1], zs[1], ws[1]),
-            DVec4::new(xs[2], ys[2], zs[2], ws[2]),
-            DVec4::new(xs[3], ys[3], zs[3], ws[3]),
-            DVec4::new(xs[4], ys[4], zs[4], ws[4]),
-            DVec4::new(xs[5], ys[5], zs[5], ws[5]),
-            DVec4::new(xs[6], ys[6], zs[6], ws[6]),
-            DVec4::new(xs[7], ys[7], zs[7], ws[7]),
-        ]
-    }
-}
-
-#[cfg(feature = "nightly")]
-impl From<[DVec4; 8]> for DVec4x8 {
-    #[inline]
-    fn from(vecs: [DVec4; 8]) -> Self {
-        Self {
-            x: f64x8::from([
-                vecs[0].x, vecs[1].x, vecs[2].x, vecs[3].x, vecs[4].x, vecs[5].x, vecs[6].x,
-                vecs[7].x,
-            ]),
-            y: f64x8::from([
-                vecs[0].y, vecs[1].y, vecs[2].y, vecs[3].y, vecs[4].y, vecs[5].y, vecs[6].y,
-                vecs[7].y,
-            ]),
-            z: f64x8::from([
-                vecs[0].z, vecs[1].z, vecs[2].z, vecs[3].z, vecs[4].z, vecs[5].z, vecs[6].z,
-                vecs[7].z,
-            ]),
-            w: f64x8::from([
-                vecs[0].w, vecs[1].w, vecs[2].w, vecs[3].w, vecs[4].w, vecs[5].w, vecs[6].w,
-                vecs[7].w,
-            ]),
         }
     }
 }

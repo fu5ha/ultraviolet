@@ -1,12 +1,18 @@
 //! ## `ultraviolet`
 //!
-//! This is a crate to computer-graphics and games-related linear algebra, but *fast*, both in terms
+//! This is a crate to computer-graphics and games-related linear and geometric algebra, but *fast*, both in terms
 //! of productivity and in terms of runtime performance.
 //!
 //! In terms of productivity, ultraviolet uses no generics and is designed to be as straightforward
 //! of an interface as possible, resulting in fast compilation times and clear code. In addition, the
 //! lack of generics and Rust type-system "hacks" result in clear and concise errors that are easy to
-//! parse and fix for the user.
+//! parse and fix for the user. It also implements optimized versions of the extremely expressive 2d
+//! and 3d geometric algebras P(R(2,0,1)) and P(R(3,0,1)) which make working with geometric primitives
+//! in 2d and 3d euclidean space extremely intuitive. Check out the 
+//! [Siggraph 2019 course on Geometric Algebra](https://www.youtube.com/watch?v=tX4H_ctggYo/) for a great
+//! introduction to the topic, and and the final chapter of Eric Lengyel's
+//! [Foundations of Game Engine Development, Volume 1: Mathematics](https://www.amazon.com/Foundations-Game-Engine-Development-Mathematics/dp/0985811749)
+//! for a more thorough and grounded introduction to its practical use.
 //!
 //! In terms of runtime performance, ultraviolet was designed from the start with performance in mind.
 //! To do so, we provide two separate kinds of each type, each with nearly identical functionality,
@@ -15,51 +21,56 @@
 //! take full advantage of SIMD.
 //!
 //! The 'wide' types use an "SoA" (Structure of Arrays) architecture
-//! such that each `Wec` (wide-Vec) actually contains the data for 4 `Vec`s and will do any operation
-//! on all 4 of the vector 'lanes' at the same time (the same concept applies to a `Wat`, or 'wide-Mat').
-//! Doing this is potentially *much* (factor of 10)
-//! faster than an "AoS" (Array of Structs) layout, as all current Rust linear algebra libraries do,
-//! though it does depend on your workload. Algorithms must be carefully architected to take full advantage
-//! of this, and doing so can be easier said than done, especially if your algorithm involves significant
-//! branching.
+//! such that each wide data structure actually contains the data for 4 or 8 of its associated data type and will do any operation
+//! on all of the simd 'lanes' at the same time. For example, a `Vec3x8` is equivalent to 8 `Vec3`s all bundled together into one
+//! data structure.
 //!
-//! ### Benchmarks
+//! Doing this is potentially *much* (factor of 10) faster than an standard "AoS" (Array of Structs) layout,
+//! though it does depend on your workload and algorithm requirements. Algorithms must be carefully architected to take full advantage
+//! of this, and doing so can be easier said than done, especially if your algorithm involves significant branching.
 //!
-//! Benchmarks done using my own fork of [mathbench-rs](https://github.com/bitshifter/mathbench-rs) with support for
-//! ultraviolet added to some benchmarks.
+//! `ultraviolet` was the first Rust math library to be designed in this "AoSoA" manner, though
+//! `nalgebra` now supports it for several of their data structures as well.
 //!
-//! For the euler 2d and 3d benchmarks, the work being done is exactly equivalent. For the rest of the benchmarks,
-//! the work being done is *made equivalent* by performing 4 of the benchmarked operation per iteration instead of just
-//! one for all of the other libraries, since `ultraviolet` is computing that operation on four Vec/Mats at a time.
+//! #### Cargo Features
 //!
-//! | benchmark              |        glam   |       cgmath   |     nalgebra   |       euclid   |   ultraviolet   |
-//! |------------------------|---------------|----------------|----------------|----------------|-----------------|
-//! | euler 2d               |    9.911 us   |     9.583 us   |     21.99 us   |     15.22 us   |    __6.675 us__ |
-//! | euler 3d               |    15.11 us   |     32.88 us   |     237.2 us   |     32.62 us   |    __9.928 us__ |
-//! | mat3 transform vector3 |   6.1533 ns   |   15.2933 ns   |   15.6202 ns   |      N/A       |   __4.4778 ns__ |
-//! | vec3 cross             |   7.6824 ns   |   16.9919 ns   |   12.3683 ns   |   12.4657 ns   |   __3.3286 ns__ |
-//! | vec3 dot               |   5.6354 ns   |   10.4704 ns   |    8.7803 ns   |    7.4304 ns   |   __2.4937 ns__ |
-//! | vec3 length            |   5.8759 ns   |    4.2015 ns   |    4.5598 ns   |    4.2083 ns   |   __1.9067 ns__ |
-//! | vec3 normalize         |   8.7861 ns   |    8.1677 ns   |   33.2839 ns   |    7.6300 ns   |   __4.4362 ns__ |
+//! To help further improve build times, `ultraviolet` puts various functionality under feature flags. For example, the 2d and 3d projective geometric algebras
+//! as well as f64 and integer types are disabled by default. In order to enable them, enable the corresponding crate feature flags in your `Cargo.toml`. For example:
+//!
+//! ```toml
+//! [dependencies]
+//! ultraviolet = { version = "0.7", features = [ "f64", "pga3d" ] }
+//! ```
+//!
+//! Will enable the `f64` and `pga3d` features. Here's a list of the available features:
+//!
+//! * `f64` - Enable f64 bit wide floating point support. Naming convention is `D[Type]`, such as `DVec3x4` would be a collection of 4 3d vectors with f64 precision each.
+//! * `int` - Enable integer vector types.
+//! * `pga2d`/`pga3d` - Enable the 2d and 3d Projective Geometric Algebra modules, respectively
+//! * `geometry` - Enable some geometry helper functionality, adding structures such as `Ray`, `Aabb`, etc.
 //!
 //! ### Features
 //!
 //! This crate is currently being dogfooded in my ray tracer [`rayn`](https://github.com/termhn/rayn),
-//! and is being used by some Amethyst developers in experimental projects while it is considered for adoption
-//! into Amethyst. It does what those users have currently needed it to do.
+//! and is being used by various independent Rust game developers for various projects.
+//! It does what those users have currently needed it to do.
 //!
-//! There are a couple relatively unique/novel features in this lib, the most important being the use of the Geometric Algebra
-//! concepts of Bivectors and Rotors to represent 2d and 3d rotations, rather than implementing complex number algebra
-//! and Quaternion algebra.
+//! There are a couple relatively unique/novel features in this library, the most important being the use of the Geometric Algebra.
+//! This library implements 3d and 2d Projective Geometric Algebra in the `pga3d` and `pga2d` modules, but it also uses some geometric algebra
+//! within the mostly linear-algebra `standard` module.
+//!
+//! Instead of implementing complex number algebra (for 2d rotations) and Quaternion algebra (for 3d rotations), we use
+//! Rotors, a concept taken from Geometric Algebra, to represent 2d and 3d rotations.
 //!
 //! What this means for the programmer is that you will be using the `Rotor3` type in place of
 //! a Quaternion, though you can expect it to do basically all the same things that a Quaternion does. In fact, Quaternions
-//! are essentially just a special case of Rotors. The reason this decision was made was twofold: first, the derivation of
-//! the math is actually quite simple to understand. All the derivations for the code implemented in the Rotor structs in this
-//! library are written out in the `docs` folder of the GitHub repo; I derived them manually as part of the implementation.
+//! are directly isomorphic to Rotors (meaning they are in essense the same thing, just formulated differently). The reason this decision was made was twofold:
+//! first, the derivation of the math is actually quite simple to understand. All the derivations for the code implemented in the Rotor structs in this
+//! library are written out in the `derivations` folder of the GitHub repo; I derived them manually as part of the implementation.
+//!
 //! On the other hand, Quaternions are often basically just seen as black boxes that we programmers use to do rotations because
 //! they have some nice properties, but that we don't really understand. You can use Rotors this same way, but you can also easily
-//! understand them. Second is that in some sense they can be seen as 'more correct' than Quaternions, and especially they
+//! understand them. Second is that in some sense they can be seen as 'more correct' than Quaternions. Specifically, they
 //! facilitate a more proper understanding of rotation as being something that occurs *within a plane* rather than something
 //! that occurs *around an axis*, as it is generally thought. Finally, Rotors also generalize to 4 and even higher dimensions,
 //! and if someone wants to they could implement a Rotor4 which retains all the properties of a Rotor3/Quaternion but does rotation
@@ -74,85 +85,45 @@ extern crate serde;
 #[cfg(all(test, feature = "serde"))]
 extern crate serde_test;
 
-mod util;
-
-pub(crate) use util::Splat;
-
-#[cfg(feature = "nightly")]
-mod shim;
-
-#[cfg(feature = "nightly")]
-pub(crate) use shim::*;
-
-pub mod bivec;
-pub mod geometry;
-pub mod int;
-pub mod interp;
-pub mod mat;
-pub mod projection;
-pub mod rotor;
-pub mod transform;
-pub mod vec;
-
 #[cfg(feature = "serde")]
 mod impl_serde;
 #[cfg(feature = "serde")]
 pub use impl_serde::*;
 
-pub use bivec::*;
-pub use int::*;
+mod util;
+
+pub(crate) use util::Splat;
+
+pub mod standard;
+#[cfg(feature = "pga2d")]
+pub mod pga2d;
+#[cfg(feature = "pga3d")]
+pub mod pga3d;
+
+pub mod interp;
+pub mod mat;
+pub mod projection;
+
 pub use interp::*;
 pub use mat::*;
-pub use rotor::*;
-pub use transform::*;
-pub use vec::*;
-
-#[cfg(not(feature = "nightly"))]
 pub(crate) use wide;
 
-#[cfg(not(feature = "nightly"))]
+pub use wide::i32x4;
+pub use wide::i32x8;
+pub use wide::i64x2;
+pub use wide::i64x4;
+
+pub use wide::u32x4;
+pub use wide::u32x8;
+pub use wide::u64x2;
+pub use wide::u64x4;
+
 pub use wide::f32x4;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f32x8;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f64x2;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f64x4;
 
-#[cfg(not(feature = "nightly"))]
 pub use wide::f32x4 as m32x4;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f32x8 as m32x8;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f64x2 as m64x2;
-#[cfg(not(feature = "nightly"))]
 pub use wide::f64x4 as m64x4;
-
-#[cfg(feature = "nightly")]
-pub(crate) use uv_patch_packed_simd as packed_simd;
-
-#[cfg(feature = "nightly")]
-pub use packed_simd::f32x16;
-#[cfg(feature = "nightly")]
-pub use packed_simd::f32x4;
-#[cfg(feature = "nightly")]
-pub use packed_simd::f32x8;
-#[cfg(feature = "nightly")]
-pub use packed_simd::f64x2;
-#[cfg(feature = "nightly")]
-pub use packed_simd::f64x4;
-#[cfg(feature = "nightly")]
-pub use packed_simd::f64x8;
-
-#[cfg(feature = "nightly")]
-pub use packed_simd::m32x16;
-#[cfg(feature = "nightly")]
-pub use packed_simd::m32x4;
-#[cfg(feature = "nightly")]
-pub use packed_simd::m32x8;
-#[cfg(feature = "nightly")]
-pub use packed_simd::m64x2;
-#[cfg(feature = "nightly")]
-pub use packed_simd::m64x4;
-#[cfg(feature = "nightly")]
-pub use packed_simd::m64x8;

@@ -1,0 +1,1 @@
+//! 2d Projective Geometric Algebra, i.e. P(R(2,0,1))

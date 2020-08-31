@@ -1,39 +1,39 @@
+use crate::*;
+
 use std::convert::{TryFrom, TryInto};
 use std::ops::*;
 
-pub trait MulAdd<A = Self, B = Self> {
-    /// The resulting type after applying the fused multiply-add.
-    type Output;
-
-    /// Performs the fused multiply-add operation.
-    fn mul_add(self, a: A, b: B) -> Self::Output;
+pub trait MulAdd {
+    fn mul_add(self, a: Self, b: Self) -> Self;
 }
 
-impl MulAdd<u32, u32> for u32 {
-    type Output = u32;
+macro_rules! impl_mul_add {
+    ($($t:ty),+) => {
+        $(impl MulAdd for $t {
 
-    fn mul_add(self, a: u32, b: u32) -> Self::Output {
-        (self * a) + b
+            #[inline]
+            fn mul_add(self, a: $t, b: $t) -> $t {
+                (self * a) + b
+            }
+        })+
     }
 }
 
-impl MulAdd<i32, i32> for i32 {
-    type Output = i32;
+impl_mul_add!(i32, u32);
 
-    fn mul_add(self, a: i32, b: i32) -> Self::Output {
-        (self * a) + b
-    }
-}
-
-macro_rules! vec2i {
-    ($(($n:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
+macro_rules! vec2s {
+    {
+        $($(#[$attr:meta])*
+        ($n:ident, $v3t:ident, $v4t:ident) => $t:ident)+
+    } => {
         $(
         /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+        #[derive(Clone, Copy, Debug)]
+        $(#[$attr])*
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -54,26 +54,26 @@ macro_rules! vec2i {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: 1, y: 0 }
+                $n{ x: $t::splat(1), y: $t::splat(0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: 0, y: 1 }
+                $n{ x: $t::splat(0), y: $t::splat(1) }
             }
 
             /// Create a homogeneous 2d *point* from this vector interpreted as a point,
             /// meaning the homogeneous component will start with a value of 1.
             #[inline]
             pub fn into_homogeneous_point(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: 1 }
+                $v3t { x: self.x, y: self.y, z: $t::splat(1) }
             }
 
             /// Create a homogeneous 2d *vector* from this vector,
             /// meaning the homogeneous component will always have a value of 0.
             #[inline]
             pub fn into_homogeneous_vector(self) -> $v3t {
-                $v3t { x: self.x, y: self.y, z: 0 }
+                $v3t { x: self.x, y: self.y, z: $t::splat(0) }
             }
 
             /// Create a 2d point from a homogeneous 2d *point*, performing
@@ -99,7 +99,7 @@ macro_rules! vec2i {
 
             #[inline]
             pub fn reflected(&self, normal: $n) -> Self {
-                *self - (2 * self.dot(normal) * normal)
+                *self - ($t::splat(2) * self.dot(normal) * normal)
             }
 
             #[inline]
@@ -215,7 +215,6 @@ macro_rules! vec2i {
 
             #[inline]
             pub fn as_array(&self) -> [$t; 2] {
-                use std::convert::TryInto;
                 self.as_slice().try_into().unwrap()
             }
 
@@ -448,18 +447,32 @@ macro_rules! vec2i {
     };
 }
 
-vec2i!((Vec2u, Vec3u, Vec4u) => u32);
-vec2i!((Vec2i, Vec3i, Vec4i) => i32);
+vec2s!{
+    #[derive(PartialEq, Eq, Hash)]
+    (UVec2, UVec3, UVec4) => u32
 
-macro_rules! vec3i {
-    ($(($v2t:ident, $n:ident, $v4t:ident) => $t:ident),+) => {
-        /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
+    #[derive(PartialEq, Eq, Hash)]
+    (IVec2, IVec3, IVec4) => i32
+
+    // (IVec2x4, IVec3x4, IVec4x4) => i32x4
+    // (IVec2x8, IVec3x8, IVec4x8) => i32x8
+    // (UVec2x4, UVec3x4, UVec4x4) => u32x4
+    // (UVec2x8, UVec3x8, UVec4x8) => u32x8
+}
+
+macro_rules! vec3s {
+    {
+        $($(#[$attr:meta])*
+        ($v2t:ident, $n:ident, $v4t:ident) => $t:ident)+
+    } => {
+        $(/// A set of three coordinates which may be interpreted as a point or vector in 3d space,
         /// or as a homogeneous 2d vector or point.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+        #[derive(Clone, Copy, Debug)]
+        $(#[$attr])*
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -480,17 +493,17 @@ macro_rules! vec3i {
 
             #[inline]
             pub fn unit_x() -> Self {
-                $n{ x: 1, y: 0, z: 0 }
+                $n{ x: $t::splat(1), y: $t::splat(0), z: $t::splat(0) }
             }
 
             #[inline]
             pub fn unit_y() -> Self {
-                $n{ x: 0, y: 1, z: 0 }
+                $n{ x: $t::splat(0), y: $t::splat(1), z: $t::splat(0) }
             }
 
             #[inline]
             pub fn unit_z() -> Self {
-                $n{ x: 0, y: 0, z: 1 }
+                $n{ x: $t::splat(0), y: $t::splat(0), z: $t::splat(1) }
             }
 
             #[inline]
@@ -540,7 +553,7 @@ macro_rules! vec3i {
 
             #[inline]
             pub fn reflect(&mut self, normal: $n) {
-                *self -= 2 * self.dot(normal) * normal;
+                *self -= $t::splat(2) * self.dot(normal) * normal;
             }
 
             #[inline]
@@ -911,18 +924,32 @@ macro_rules! vec3i {
     }
 }
 
-vec3i!((Vec2u, Vec3u, Vec4u) => u32);
-vec3i!((Vec2i, Vec3i, Vec4i) => i32);
+vec3s!{
+    #[derive(PartialEq, Eq, Hash)]
+    (UVec2, UVec3, UVec4) => u32
 
-macro_rules! vec4i {
-    ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
+    #[derive(PartialEq, Eq, Hash)]
+    (IVec2, IVec3, IVec4) => i32
+
+    // (IVec2x4, IVec3x4, IVec4x4) => i32x4
+    // (IVec2x8, IVec3x8, IVec4x8) => i32x8
+    // (UVec2x4, UVec3x4, UVec4x4) => u32x4
+    // (UVec2x8, UVec3x8, UVec4x8) => u32x8
+}
+
+macro_rules! vec4s {
+    {
+        $($(#[$attr:meta])*
+        ($n:ident, $v2t:ident, $v3t:ident) => $t:ident)+
+    } => {
         /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
         /// or as a homogeneous 3d vector or point.
         ///
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        $(#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+        $(#[derive(Clone, Copy, Debug, Default)]
+        $(#[$attr])*
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -1349,19 +1376,30 @@ macro_rules! vec4i {
     }
 }
 
-vec4i!(Vec4u, Vec2u, Vec3u => u32);
-vec4i!(Vec4i, Vec2i, Vec3i => i32);
+vec4s!{
+    #[derive(PartialEq, Eq, Hash)]
+    (UVec4, UVec2, UVec3) => u32
 
-impl From<Vec3u> for Vec2u {
+    #[derive(PartialEq, Eq, Hash)]
+    (IVec4, IVec2, IVec3) => i32
+
+    // (IVec4x4, IVec2x4, IVec3x4) => i32x4
+    // (IVec4x8, IVec2x8, IVec3x8) => i32x8
+    // (UVec4x4, UVec2x4, UVec3x4) => u32x4
+    // (UVec4x8, UVec2x8, UVec3x8) => u32x8
+}
+
+
+impl From<UVec3> for UVec2 {
     #[inline]
-    fn from(vec: Vec3u) -> Self {
+    fn from(vec: UVec3) -> Self {
         Self { x: vec.x, y: vec.y }
     }
 }
 
-impl From<Vec3u> for Vec4u {
+impl From<UVec3> for UVec4 {
     #[inline]
-    fn from(vec: Vec3u) -> Self {
+    fn from(vec: UVec3) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1371,9 +1409,9 @@ impl From<Vec3u> for Vec4u {
     }
 }
 
-impl From<Vec4u> for Vec3u {
+impl From<UVec4> for UVec3 {
     #[inline]
-    fn from(vec: Vec4u) -> Self {
+    fn from(vec: UVec4) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1382,16 +1420,16 @@ impl From<Vec4u> for Vec3u {
     }
 }
 
-impl From<Vec3i> for Vec2i {
+impl From<IVec3> for IVec2 {
     #[inline]
-    fn from(vec: Vec3i) -> Self {
+    fn from(vec: IVec3) -> Self {
         Self { x: vec.x, y: vec.y }
     }
 }
 
-impl From<Vec3i> for Vec4i {
+impl From<IVec3> for IVec4 {
     #[inline]
-    fn from(vec: Vec3i) -> Self {
+    fn from(vec: IVec3) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1401,9 +1439,9 @@ impl From<Vec3i> for Vec4i {
     }
 }
 
-impl From<Vec4i> for Vec3i {
+impl From<IVec4> for IVec3 {
     #[inline]
-    fn from(vec: Vec4i) -> Self {
+    fn from(vec: IVec4) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1412,10 +1450,10 @@ impl From<Vec4i> for Vec3i {
     }
 }
 
-impl TryFrom<Vec3u> for Vec3i {
+impl TryFrom<UVec3> for IVec3 {
     type Error = <i32 as TryFrom<u32>>::Error;
 
-    fn try_from(rhv: Vec3u) -> Result<Self, Self::Error> {
+    fn try_from(rhv: UVec3) -> Result<Self, Self::Error> {
         Ok(Self {
             x: rhv.x.try_into()?,
             y: rhv.y.try_into()?,
@@ -1424,10 +1462,10 @@ impl TryFrom<Vec3u> for Vec3i {
     }
 }
 
-impl TryFrom<Vec3i> for Vec3u {
+impl TryFrom<IVec3> for UVec3 {
     type Error = <u32 as TryFrom<i32>>::Error;
 
-    fn try_from(rhv: Vec3i) -> Result<Self, Self::Error> {
+    fn try_from(rhv: IVec3) -> Result<Self, Self::Error> {
         Ok(Self {
             x: rhv.x.try_into()?,
             y: rhv.y.try_into()?,

@@ -1,5 +1,6 @@
 //! Interpolation on types for which it makes sense.
 use crate::*;
+use crate::standard::*;
 
 /// Pure linear interpolation, i.e. `(1.0 - t) * self + (t) * end`.
 ///
@@ -44,18 +45,14 @@ macro_rules! impl_lerp {
 impl_lerp!(
     f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2, Rotor3),
     f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4, Rotor3x4),
-    f32x8 => (Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8, Rotor3x8),
+    f32x8 => (Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8, Rotor3x8)
+);
 
+#[cfg(feature = "f64")]
+impl_lerp!(
     f64 => (DVec2, DVec3, DVec4, DBivec2, DBivec3, DRotor2, DRotor3),
     f64x2 => (DVec2x2, DVec3x2, DVec4x2, DBivec2x2, DBivec3x2, DRotor2x2, DRotor3x2),
     f64x4 => (DVec2x4, DVec3x4, DVec4x4, DBivec2x4, DBivec3x4, DRotor2x4, DRotor3x4)
-);
-
-#[cfg(feature = "nightly")]
-impl_lerp!(
-    f32x16 => (Vec2x16, Vec3x16, Vec4x16, Bivec2x16, Bivec3x16, Rotor2x16, Rotor3x16),
-
-    f64x8 => (DVec2x8, DVec3x8, DVec4x8, DBivec2x8, DBivec3x8, DRotor2x8, DRotor3x8)
 );
 
 /// Spherical-linear interpolation.
@@ -113,10 +110,10 @@ macro_rules! impl_slerp_rotor3 {
     };
 }
 
-impl_slerp_rotor3!(
-    f32 => (Rotor3),
-    f64 => (DRotor3)
-);
+impl_slerp_rotor3!(f32 => (Rotor3));
+
+#[cfg(feature = "f64")]
+impl_slerp_rotor3!(f64 => (DRotor3));
 
 macro_rules! impl_slerp_rotor3_wide {
     ($($tt:ident => ($($vt:ident),+)),+) => {
@@ -162,17 +159,13 @@ macro_rules! impl_slerp_rotor3_wide {
 
 impl_slerp_rotor3_wide!(
     f32x4 => (Rotor3x4),
-    f32x8 => (Rotor3x8),
-
-    f64x2 => (DRotor3x2),
-    f64x4 => (DRotor3x4)
+    f32x8 => (Rotor3x8)
 );
 
-#[cfg(feature = "nightly")]
+#[cfg(feature = "f64")]
 impl_slerp_rotor3_wide!(
-    f32x16 => (Rotor3x16),
-
-    f64x8 => (DRotor3x8)
+    f64x2 => (DRotor3x2),
+    f64x4 => (DRotor3x4)
 );
 
 macro_rules! impl_slerp_gen {
@@ -213,16 +206,12 @@ macro_rules! impl_slerp_gen {
 impl_slerp_gen!(
     f32 => (Vec2, Vec3, Vec4, Bivec2, Bivec3, Rotor2),
     f32x4 => (Vec2x4, Vec3x4, Vec4x4, Bivec2x4, Bivec3x4, Rotor2x4),
-    f32x8 => (Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8),
+    f32x8 => (Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8)
+);
 
+#[cfg(feature = "f64")]
+impl_slerp_gen!(
     f64 => (DVec2, DVec3, DVec4, DBivec2, DBivec3, DRotor2),
     f64x2 => (DVec2x2, DVec3x2, DVec4x2, DBivec2x2, DBivec3x2, DRotor2x2),
     f64x4 => (DVec2x4, DVec3x4, DVec4x4, DBivec2x4, DBivec3x4, DRotor2x4)
-);
-
-#[cfg(feature = "nightly")]
-impl_slerp_gen!(
-    f32x16 => (Vec2x16, Vec3x16, Vec4x16, Bivec2x16, Bivec3x16, Rotor2x16),
-
-    f64x8 => (DVec2x8, DVec3x8, DVec4x8, DBivec2x8, DBivec3x8, DRotor2x8)
 );
