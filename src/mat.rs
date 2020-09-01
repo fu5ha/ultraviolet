@@ -483,6 +483,18 @@ macro_rules! mat3s {
                 )
             }
 
+            /// Transform a Vec2 by self, interpreting it as a vector.
+            #[inline]
+            pub fn transform_vec2(self, vec: $v2t) -> $v2t {
+                (self * vec.into_homogeneous_vector()).truncated()
+            }
+
+            /// Transform a Vec2 by self, interpreting it as a point.
+            #[inline]
+            pub fn transform_point2(self, point: $v2t) -> $v2t {
+                (self * point.into_homogeneous_point()).normalized_homogeneous_point().truncated()
+            }
+
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
@@ -1048,6 +1060,18 @@ macro_rules! mat4s {
 
                 let rcp_det = $t::splat(1.0) / dot1;
                 inverse * rcp_det
+            }
+
+            /// Transform a Vec3 by self, interpreting it as a vector.
+            #[inline]
+            pub fn transform_vec3(self, vec: $v3t) -> $v3t {
+                (self * vec.into_homogeneous_vector()).truncated()
+            }
+
+            /// Transform a Vec3 by self, interpreting it as a point.
+            #[inline]
+            pub fn transform_point3(self, point: $v3t) -> $v3t {
+                (self * point.into_homogeneous_point()).normalized_homogeneous_point().truncated()
             }
 
             #[inline]

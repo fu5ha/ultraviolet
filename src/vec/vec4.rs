@@ -94,6 +94,35 @@ macro_rules! vec4s {
                 r
             }
 
+            /// Normalize `self` in-place by interpreting it as a homogeneous point, i.e.
+            /// scaling the vector to ensure the homogeneous component has length 1.
+            #[inline]
+            pub fn normalize_homogeneous_point(&mut self) {
+                self.x /= self.w;
+                self.y /= self.w;
+                self.z /= self.w;
+                self.w = $t::splat(1.0);
+            }
+
+            /// Normalize `self` by interpreting it as a homogeneous point, i.e.
+            /// scaling the vector to ensure the homogeneous component has length 1.
+            #[inline]
+            pub fn normalized_homogeneous_point(&self) -> Self{
+                let mut r = self.clone();
+                r.normalize_homogeneous_point();
+                r
+            }
+
+            /// Convert `self` into a Vec3 by simply removing its `w` component.
+            #[inline]
+            pub fn truncated(&self) -> $v3t {
+                $v3t::new(
+                    self.x,
+                    self.y,
+                    self.z
+                )
+            }
+
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
