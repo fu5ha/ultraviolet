@@ -1,6 +1,7 @@
 ## 0.6
-- Upgrade `wide` to 0.5.x
+- Significantly improve performance of Rotors and transform types (Isometry, Similarity)
 - Add support for f64/double precision floats. Naming convention is `D[TypeName]` for the f64 versions.
+- Upgrade `wide` to 0.5.x
 - Rename `W[TypeName]` to `[TypeName]x4`, allowing room for `[TypeName]x8` and `[TypeName]x16`.
 - Add support for 256 bit AVX vectors.
 - Add support for `packed_simd` under "nightly" feature flag (required nightly Rust compiler)
