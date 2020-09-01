@@ -550,35 +550,17 @@ macro_rules! rotor3s {
             /// `self` *must* be normalized!
             #[inline]
             pub fn rotate_vec(self, vec: &mut $vt) {
-                let s2 = self.s * self.s;
-                let bxy2 = self.bv.xy * self.bv.xy;
-                let bxz2 = self.bv.xz * self.bv.xz;
-                let byz2 = self.bv.yz * self.bv.yz;
-                let s_bxy = self.s * self.bv.xy;
-                let s_bxz = self.s * self.bv.xz;
-                let s_byz = self.s * self.bv.yz;
-                let bxz_byz = self.bv.xz * self.bv.yz;
-                let bxy_byz = self.bv.xy * self.bv.yz;
-                let bxy_bxz = self.bv.xy * self.bv.xz;
-                let two_vx = vec.x + vec.x;
-                let two_vy = vec.y + vec.y;
-                let two_vz = vec.z + vec.z;
+                // see derivation/rotor3_rotate_vec_derivation for a derivation
+                // f = geometric product of (self)(vec)
+                let fx = self.s.mul_add(vec.x, self.bv.xy.mul_add(vec.y, self.bv.xz * vec.z));
+                let fy = self.s.mul_add(vec.y, -(self.bv.xy.mul_add(vec.x, -(self.bv.yz * vec.z))));
+                let fz = self.s.mul_add(vec.z, -(self.bv.xz.mul_add(vec.x, self.bv.yz * vec.y)));
+                let fw = self.bv.xy.mul_add(vec.z, -(self.bv.xz.mul_add(vec.y, -(self.bv.yz * vec.x))));
 
-                vec.x = vec.x.mul_add(
-                    s2 - bxy2 - bxz2 + byz2,
-                    two_vy.mul_add(
-                        s_bxy - bxz_byz,
-                        two_vz * (s_bxz + bxy_byz)));
-                vec.y = two_vx.mul_add(
-                    -(bxz_byz + s_bxy),
-                    vec.y.mul_add(
-                        s2 - bxy2 + bxz2 - byz2,
-                        two_vz * (s_byz - bxy_bxz)));
-                vec.z = two_vx.mul_add(
-                    bxy_byz - s_bxz,
-                    -two_vy.mul_add(
-                        bxy_bxz + s_byz,
-                        -(vec.z  * (s2 + bxy2 - bxz2 - byz2))));
+                // result = geometric product of (f)(self~)
+                vec.x = self.s.mul_add(fx, self.bv.xy.mul_add(fy, self.bv.xz.mul_add(fz, self.bv.yz * fw)));
+                vec.y = self.s.mul_add(fy, -(self.bv.xy.mul_add(fx, self.bv.xz.mul_add(fw, -(self.bv.yz * fz)))));
+                vec.z = self.s.mul_add(fz, self.bv.xy.mul_add(fw, -(self.bv.xz.mul_add(fx, self.bv.yz * fy))));
             }
 
             #[inline]

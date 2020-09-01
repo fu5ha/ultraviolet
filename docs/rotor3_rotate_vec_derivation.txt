@@ -23,13 +23,39 @@ ab v = (s + BxyE1E2 + BxzE1E3 + ByzE2E3)(VxE1 + VyE2 + VzE3)
 - BxzVxE3 - BxzVyE1E2E3 + BxzVzE1
 + ByzVxE1E2E3 - ByzVyE3 + ByzVzE2
 
-(factored, though we dont end up using this)
-= (SVx + BxyVy + BxzBz)E1
+= (SVx + BxyVy + BxzVz)E1
 + (SVy - BxyVx + ByzVz)E2
 + (SVz - BxzVx - ByzVy)E3
 + (BxyVz - BxzVy + ByzVx)E1E2E3
 
+FxE1
+FyE2
+FzE3
+FwE1E2E3
+
+factored version (for rotor rotate_by)
 -------------
+
+ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
+= (FxE1 + FyE2 + FzE3 + FwE1E2E3)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
+
+= SFxE1 + SFyE2 + SFzE3 + SFwE1E2E3
+- BxyFxE1E1E2 - BxyFyE2E1E2 - BxyFzE3E1E2 - BxyFwE1E2E3E1E2
+- BxzFxE1E1E3 - BxzFyE2E1E3 - BxzFzE3E1E3 - BxzFwE1E2E3E1E3
+- ByzFxE1E2E3 - ByzFyE2E2E3 - ByzFzE3E2E3 - ByzFwE1E2E3E2E3
+
+= SFxE1 + SFyE2 + SFzE3 + SFwE1E2E3
+- BxyFxE2 + BxyFyE1 - BxyFzE1E2E3 + BxyFwE3
+- BxzFxE3 - BxzFyE1E2E3 + BxzFzE1 - BxzFwE2
+- ByzFxE1E2E3 - ByzFyE3 + ByzFzE2 + ByzFwE1
+
+= (SFx + BxyFy + BxzFz + ByzFw)E1
++ (SFy - BxyFx - BxzFw + ByzFz)E2
++ (SFz + BxyFw - BxzFx - ByzFy)E3
++ (SFw - BxyFz - BxzFy - ByzFx)E1E2E3
+
+unfactored version (used below for conversion to matrix)
+------------
 
 ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
 = S * (SVxE1 + SVyE2 + SVzE3
@@ -82,9 +108,8 @@ ab v ba = (ab v)(S - BxyE1E2 - BxzE1E3 - ByzE2E3)
 + ((ByzBxy - SBxz)2Vx - (SByz - BxzBxy)2Vy + (S^2 + Bxy^2 - Bxz^2 - Byz^2)Vz)E3
 + ((BxzBxy - BxyBxz)Vx + (ByzBxz - BxyByz)Vy + (ByzBxz - BxzByz)Vz)E1E2E3
 
-------------
-
 convert rotor3 into mat3
+-----------------
 
 rotate basis vectors by the rotor.
 
