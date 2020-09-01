@@ -191,13 +191,11 @@ macro_rules! rotor2s {
             /// `self` *must* be normalized!
             #[inline]
             pub fn rotate_vec(self, vec: &mut $vt) {
-                let s2_minus_bxy2 = self.s * self.s - self.bv.xy * self.bv.xy;
-                let two_s_bxy = $t::splat(2.0) * self.s * self.bv.xy;
+                let fx = self.s.mul_add(vec.x, self.bv.xy * vec.y);
+                let fy = self.s.mul_add(vec.y, -(self.bv.xy * vec.x));
 
-                let v = *vec;
-
-                vec.x = s2_minus_bxy2.mul_add(v.x, two_s_bxy * v.y);
-                vec.y = s2_minus_bxy2.mul_add(v.y, -(two_s_bxy * v.x));
+                vec.x = self.s.mul_add(fx, -(self.bv.xy * fy));
+                vec.y = self.s.mul_add(fy, self.bv.xy * fx);
             }
 
             #[inline]
@@ -493,6 +491,7 @@ macro_rules! rotor3s {
             /// ```
             #[inline]
             pub fn rotate_by(&mut self, rhs: Self) {
+                // TODO make this faster by adding intermediate factored object
                 let b = *self;
                 let a = rhs;
                 let two = $t::splat(2.0);
