@@ -679,7 +679,7 @@ impl Into<[Vec4; 8]> for Vec4x8 {
         let xs: [f32; 8] = self.x.into();
         let ys: [f32; 8] = self.y.into();
         let zs: [f32; 8] = self.z.into();
-        let ws: [f32; 8] = self.z.into();
+        let ws: [f32; 8] = self.w.into();
         [
             Vec4::new(xs[0], ys[0], zs[0], ws[0]),
             Vec4::new(xs[1], ys[1], zs[1], ws[1]),
@@ -723,7 +723,7 @@ impl Into<[Vec4; 16]> for Vec4x16 {
         let xs: [f32; 16] = self.x.into();
         let ys: [f32; 16] = self.y.into();
         let zs: [f32; 16] = self.z.into();
-        let ws: [f32; 16] = self.z.into();
+        let ws: [f32; 16] = self.w.into();
         [
             Vec4::new(xs[0], ys[0], zs[0], ws[0]),
             Vec4::new(xs[1], ys[1], zs[1], ws[1]),
@@ -835,7 +835,7 @@ impl Into<[DVec4; 8]> for DVec4x8 {
         let xs: [f64; 8] = self.x.into();
         let ys: [f64; 8] = self.y.into();
         let zs: [f64; 8] = self.z.into();
-        let ws: [f64; 8] = self.z.into();
+        let ws: [f64; 8] = self.w.into();
         [
             DVec4::new(xs[0], ys[0], zs[0], ws[0]),
             DVec4::new(xs[1], ys[1], zs[1], ws[1]),
