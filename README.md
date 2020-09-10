@@ -31,7 +31,7 @@ of this, and doing so can be easier said than done, especially if your algorithm
 
 ## Benchmarks
 
-See [`mathbench-rs`](https://github.com/bitshifter/mathbench-rs) for latest benchmarks.
+See [`mathbench-rs`](https://github.com/bitshifter/mathbench-rs) for latest benchmarks (may not be fully up-to-date with git master).
 
 ## Cargo Features
 
@@ -40,7 +40,7 @@ as well as f64 and integer types are disabled by default. In order to enable the
 
 ```toml
 [dependencies]
-ultraviolet = { version = "0.7", features = [ "f64", "int" ] }
+ultraviolet = { version = "0.6", features = [ "f64", "int" ] }
 ```
 
 Will enable the `f64` and `int` features. Here's a list of the available features:

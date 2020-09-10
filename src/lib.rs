@@ -37,7 +37,7 @@
 //! 
 //! ```toml
 //! [dependencies]
-//! ultraviolet = { version = "0.7", features = [ "f64", "int" ] }
+//! ultraviolet = { version = "0.6", features = [ "f64", "int" ] }
 //! ```
 //! 
 //! Will enable the `f64` and `int` features. Here's a list of the available features:
