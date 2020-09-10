@@ -166,8 +166,11 @@ isometries!(
 
     Isometry3 => (Mat4, Rotor3, Vec3, f32),
     Isometry3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4),
-    Isometry3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8),
+    Isometry3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8)
+);
 
+#[cfg(feature = "f64")]
+isometries!(
     DIsometry2 => (DMat3, DRotor2, DVec2, f64),
     DIsometry2x2 => (DMat3x2, DRotor2x2, DVec2x2, f64x2),
     DIsometry2x4 => (DMat3x4, DRotor2x4, DVec2x4, f64x4),
@@ -175,17 +178,6 @@ isometries!(
     DIsometry3 => (DMat4, DRotor3, DVec3, f64),
     DIsometry3x2 => (DMat4x2, DRotor3x2, DVec3x2, f64x2),
     DIsometry3x4 => (DMat4x4, DRotor3x4, DVec3x4, f64x4)
-);
-
-#[cfg(feature = "nightly")]
-isometries!(
-    Isometry2x16 => (Mat3x16, Rotor2x16, Vec2x16, f32x16),
-
-    Isometry3x16 => (Mat4x16, Rotor3x16, Vec3x16, f32x16),
-
-    DIsometry2x8 => (DMat3x8, DRotor2x8, DVec2x8, f64x8),
-
-    DIsometry3x8 => (DMat4x8, DRotor3x8, DVec3x8, f64x8)
 );
 
 macro_rules! similarities {
@@ -374,9 +366,12 @@ similarities!(
 
     Similarity3 => (Mat4, Rotor3, Vec3, f32),
     Similarity3x4 => (Mat4x4, Rotor3x4, Vec3x4, f32x4),
-    Similarity3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8),
+    Similarity3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8)
+);
 
 
+#[cfg(feature = "f64")]
+similarities!(
     DSimilarity2 => (DMat3, DRotor2, DVec2, f64),
     DSimilarity2x2 => (DMat3x2, DRotor2x2, DVec2x2, f64x2),
     DSimilarity2x4 => (DMat3x4, DRotor2x4, DVec2x4, f64x4),
@@ -384,16 +379,4 @@ similarities!(
     DSimilarity3 => (DMat4, DRotor3, DVec3, f64),
     DSimilarity3x2 => (DMat4x2, DRotor3x2, DVec3x2, f64x2),
     DSimilarity3x4 => (DMat4x4, DRotor3x4, DVec3x4, f64x4)
-);
-
-#[cfg(feature = "nightly")]
-similarities!(
-    Similarity2x16 => (Mat3x16, Rotor2x16, Vec2x16, f32x16),
-
-    Similarity3x16 => (Mat4x16, Rotor3x16, Vec3x16, f32x16),
-
-
-    DSimilarity2x8 => (DMat3x8, DRotor2x8, DVec2x8, f64x8),
-
-    DSimilarity3x8 => (DMat4x8, DRotor3x8, DVec3x8, f64x8)
 );

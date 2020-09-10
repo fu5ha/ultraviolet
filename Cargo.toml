@@ -11,15 +11,14 @@ license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
 # wide = { path = "../wide", optional = true }
-wide = { version = "~0.5.2", optional = true }
+wide = { version = "~0.5.2" }
 serde = { version = "1.0", features = [], optional = true }
-# packed_simd = { version = "~0.3.3", optional = true }
-# uv_patch_packed_simd = { path = "../packed_simd", optional = true }
-uv_patch_packed_simd = { version = "0.3.5", optional = true }
+mint = { version = "0.5", optional = true }
 
 [features]
-default = [ "wide" ]
-nightly = [ "uv_patch_packed_simd" ]
+default = []
+f64 = []
+int = []
 
 [dev-dependencies]
 serde_test = "1.0"

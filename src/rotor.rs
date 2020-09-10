@@ -337,19 +337,16 @@ macro_rules! rotor2s {
 rotor2s!(
     Rotor2 => (Mat2, Vec2, Bivec2, f32),
     Rotor2x4 => (Mat2x4, Vec2x4, Bivec2x4, f32x4),
-    Rotor2x8 => (Mat2x8, Vec2x8, Bivec2x8, f32x8),
+    Rotor2x8 => (Mat2x8, Vec2x8, Bivec2x8, f32x8)
+);
 
+#[cfg(feature = "f64")]
+rotor2s!(
     DRotor2 => (DMat2, DVec2, DBivec2, f64),
     DRotor2x2 => (DMat2x2, DVec2x2, DBivec2x2, f64x2),
     DRotor2x4 => (DMat2x4, DVec2x4, DBivec2x4, f64x4)
 );
 
-#[cfg(feature = "nightly")]
-rotor2s!(
-    Rotor2x16 => (Mat2x16, Vec2x16, Bivec2x16, f32x16),
-
-    DRotor2x8 => (DMat2x8, DVec2x8, DBivec2x8, f64x8)
-);
 
 macro_rules! rotor3s {
     ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
@@ -723,18 +720,14 @@ macro_rules! rotor3s {
 rotor3s!(
     Rotor3 => (Mat3, Vec3, Bivec3, f32),
     Rotor3x4 => (Mat3x4, Vec3x4, Bivec3x4, f32x4),
-    Rotor3x8 => (Mat3x8, Vec3x8, Bivec3x8, f32x8),
+    Rotor3x8 => (Mat3x8, Vec3x8, Bivec3x8, f32x8)
+);
 
+#[cfg(feature = "f64")]
+rotor3s!(
     DRotor3 => (DMat3, DVec3, DBivec3, f64),
     DRotor3x2 => (DMat3x2, DVec3x2, DBivec3x2, f64x2),
     DRotor3x4 => (DMat3x4, DVec3x4, DBivec3x4, f64x4)
-);
-
-#[cfg(feature = "nightly")]
-rotor3s!(
-    Rotor3x16 => (Mat3x16, Vec3x16, Bivec3x16, f32x16),
-
-    DRotor3x8 => (DMat3x8, DVec3x8, DBivec3x8, f64x8)
 );
 
 #[cfg(test)]

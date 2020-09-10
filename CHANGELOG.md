@@ -1,14 +1,15 @@
 ## 0.6
 - Significantly improve performance of Rotors and transform types (Isometry, Similarity)
 - Add support for f64/double precision floats. Naming convention is `D[TypeName]` for the f64 versions.
-- Upgrade `wide` to 0.5.x
-- Rename `W[TypeName]` to `[TypeName]x4`, allowing room for `[TypeName]x8` and `[TypeName]x16`.
+- Rename `W[TypeName]` to `[TypeName]x4`, allowing room for `[TypeName]x8`.
 - Add support for 256 bit AVX vectors.
-- Add support for `packed_simd` under "nightly" feature flag (required nightly Rust compiler)
-- Under `nightly` feature, add support for 512-bit wide SIMD vectors (can often be a perf trap, though. 256 bit is often the fastest option for non-highly-specific algorithms).
-- Rename `[WideType]::merge()` to `[WideType]::blend()`
+- Add support for `mint` for scalar types
 - Add `wgpu`-specfic notes to `projection` module (adds `_wgpu` to some function names)
 - Add spherical linear interpolation and better docs around interpolation
+- Rename `[WideType]::merge()` to `[WideType]::blend()`
 - Add `Into<Vec2; N> for Vec2xN` implementations
 - Fix some doc comments not appearing properly on Vec and Mat types.
 - Make most initializers `const`
+- Various performance improvements, especially for Rotor-transform-vector and some matrix operations
+- Add `MatN::determinant()`
+- Add `Mat2::inverse()`

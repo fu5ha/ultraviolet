@@ -37,9 +37,6 @@ macro_rules! impl_eq_eps_wide {
 
 impl_eq_eps_wide!(f32x4, f32x8, f64x2, f64x4);
 
-#[cfg(feature = "nightly")]
-impl_eq_eps_wide!(f32x16, f64x8);
-
 impl EqualsEps for f32 {
     fn eq_eps(self, other: Self) -> bool {
         (self - other).abs() <= 0.01

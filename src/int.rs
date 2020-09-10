@@ -25,7 +25,7 @@ impl MulAdd<i32, i32> for i32 {
     }
 }
 
-macro_rules! vec2i {
+macro_rules! IVec2 {
     ($(($n:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
         $(
         /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
@@ -448,10 +448,7 @@ macro_rules! vec2i {
     };
 }
 
-vec2i!((Vec2u, Vec3u, Vec4u) => u32);
-vec2i!((Vec2i, Vec3i, Vec4i) => i32);
-
-macro_rules! vec3i {
+macro_rules! IVec3 {
     ($(($v2t:ident, $n:ident, $v4t:ident) => $t:ident),+) => {
         /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
         /// or as a homogeneous 2d vector or point.
@@ -911,10 +908,7 @@ macro_rules! vec3i {
     }
 }
 
-vec3i!((Vec2u, Vec3u, Vec4u) => u32);
-vec3i!((Vec2i, Vec3i, Vec4i) => i32);
-
-macro_rules! vec4i {
+macro_rules! IVec4 {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
         /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
         /// or as a homogeneous 3d vector or point.
@@ -1349,19 +1343,16 @@ macro_rules! vec4i {
     }
 }
 
-vec4i!(Vec4u, Vec2u, Vec3u => u32);
-vec4i!(Vec4i, Vec2i, Vec3i => i32);
-
-impl From<Vec3u> for Vec2u {
+impl From<UVec3> for UVec2 {
     #[inline]
-    fn from(vec: Vec3u) -> Self {
+    fn from(vec: UVec3) -> Self {
         Self { x: vec.x, y: vec.y }
     }
 }
 
-impl From<Vec3u> for Vec4u {
+impl From<UVec3> for UVec4 {
     #[inline]
-    fn from(vec: Vec3u) -> Self {
+    fn from(vec: UVec3) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1371,9 +1362,9 @@ impl From<Vec3u> for Vec4u {
     }
 }
 
-impl From<Vec4u> for Vec3u {
+impl From<UVec4> for UVec3 {
     #[inline]
-    fn from(vec: Vec4u) -> Self {
+    fn from(vec: UVec4) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1382,16 +1373,16 @@ impl From<Vec4u> for Vec3u {
     }
 }
 
-impl From<Vec3i> for Vec2i {
+impl From<IVec3> for IVec2 {
     #[inline]
-    fn from(vec: Vec3i) -> Self {
+    fn from(vec: IVec3) -> Self {
         Self { x: vec.x, y: vec.y }
     }
 }
 
-impl From<Vec3i> for Vec4i {
+impl From<IVec3> for IVec4 {
     #[inline]
-    fn from(vec: Vec3i) -> Self {
+    fn from(vec: IVec3) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1401,9 +1392,9 @@ impl From<Vec3i> for Vec4i {
     }
 }
 
-impl From<Vec4i> for Vec3i {
+impl From<IVec4> for IVec3 {
     #[inline]
-    fn from(vec: Vec4i) -> Self {
+    fn from(vec: IVec4) -> Self {
         Self {
             x: vec.x,
             y: vec.y,
@@ -1412,10 +1403,10 @@ impl From<Vec4i> for Vec3i {
     }
 }
 
-impl TryFrom<Vec3u> for Vec3i {
+impl TryFrom<UVec3> for IVec3 {
     type Error = <i32 as TryFrom<u32>>::Error;
 
-    fn try_from(rhv: Vec3u) -> Result<Self, Self::Error> {
+    fn try_from(rhv: UVec3) -> Result<Self, Self::Error> {
         Ok(Self {
             x: rhv.x.try_into()?,
             y: rhv.y.try_into()?,
@@ -1424,10 +1415,10 @@ impl TryFrom<Vec3u> for Vec3i {
     }
 }
 
-impl TryFrom<Vec3i> for Vec3u {
+impl TryFrom<IVec3> for UVec3 {
     type Error = <u32 as TryFrom<i32>>::Error;
 
-    fn try_from(rhv: Vec3i) -> Result<Self, Self::Error> {
+    fn try_from(rhv: IVec3) -> Result<Self, Self::Error> {
         Ok(Self {
             x: rhv.x.try_into()?,
             y: rhv.y.try_into()?,
@@ -1435,3 +1426,12 @@ impl TryFrom<Vec3i> for Vec3u {
         })
     }
 }
+
+IVec2!((UVec2, UVec3, UVec4) => u32);
+IVec2!((IVec2, IVec3, IVec4) => i32);
+
+IVec3!((UVec2, UVec3, UVec4) => u32);
+IVec3!((IVec2, IVec3, IVec4) => i32);
+
+IVec4!(UVec4, UVec2, UVec3 => u32);
+IVec4!(IVec4, IVec2, IVec3 => i32);
