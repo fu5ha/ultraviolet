@@ -170,8 +170,9 @@ macro_rules! vec3s {
             /// scaling the vector to ensure the homogeneous component has length 1.
             #[inline]
             pub fn normalize_homogeneous_point(&mut self) {
-                self.x /= self.z;
-                self.y /= self.z;
+                let recip_z = $t::splat(1.0) / self.z;
+                self.x *= recip_z;
+                self.y *= recip_z;
                 self.z = $t::splat(1.0);
             }
 

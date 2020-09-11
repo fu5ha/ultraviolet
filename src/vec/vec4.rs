@@ -98,9 +98,10 @@ macro_rules! vec4s {
             /// scaling the vector to ensure the homogeneous component has length 1.
             #[inline]
             pub fn normalize_homogeneous_point(&mut self) {
-                self.x /= self.w;
-                self.y /= self.w;
-                self.z /= self.w;
+                let recip_z = $t::splat(1.0) / self.w;
+                self.x *= recip_z;
+                self.y *= recip_z;
+                self.z *= recip_z;
                 self.w = $t::splat(1.0);
             }
 
