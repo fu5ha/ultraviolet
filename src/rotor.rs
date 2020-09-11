@@ -347,7 +347,6 @@ rotor2s!(
     DRotor2x4 => (DMat2x4, DVec2x4, DBivec2x4, f64x4)
 );
 
-
 macro_rules! rotor3s {
     ($($rn:ident => ($mt:ident, $vt:ident, $bt:ident, $t:ident)),+) => {
         $(
@@ -559,6 +558,59 @@ macro_rules! rotor3s {
                 vec.z = self.s.mul_add(fz, self.bv.xy.mul_add(fw, -(self.bv.xz.mul_add(fx, self.bv.yz * fy))));
             }
 
+            /// Rotates multiple vectors by this rotor.
+            ///
+            /// This will be faster than calling `rotate_vec` individually on many vecs
+            /// as intermediate values can be precomputed once and applied to each vector.
+            ///
+            /// `self` must be normalized!
+            pub fn rotate_vecs(self, vecs: &mut [$vt]) {
+                let s2 = self.s * self.s;
+                let bxy2 = self.bv.xy * self.bv.xy;
+                let bxz2 = self.bv.xz * self.bv.xz;
+                let byz2 = self.bv.yz * self.bv.yz;
+                let s_bxy = self.s * self.bv.xy;
+                let s_bxz = self.s * self.bv.xz;
+                let s_byz = self.s * self.bv.yz;
+                let bxz_byz = self.bv.xz * self.bv.yz;
+                let bxy_byz = self.bv.xy * self.bv.yz;
+                let bxy_bxz = self.bv.xy * self.bv.xz;
+
+                let xa = s2 - bxy2 - bxz2 + byz2;
+                let xb = s_bxy - bxz_byz;
+                let xc = s_bxz + bxy_byz;
+
+                let ya = -(bxz_byz + s_bxy);
+                let yb = s2 - bxy2 + bxz2 - byz2;
+                let yc = s_byz - bxy_bxz;
+
+                let za = bxy_byz - s_bxz;
+                let zb = bxy_bxz + s_byz;
+                let zc = -(s2 + bxy2 - bxz2 - byz2);
+
+                for vec in vecs {
+                    let two_vx = vec.x + vec.x;
+                    let two_vy = vec.y + vec.y;
+                    let two_vz = vec.z + vec.z;
+
+                    vec.x = vec.x.mul_add(
+                        xa,
+                        two_vy.mul_add(
+                            xb,
+                            two_vz * xc));
+                    vec.y = two_vx.mul_add(
+                        ya,
+                        vec.y.mul_add(
+                            yb,
+                            two_vz * yc));
+                    vec.z = two_vx.mul_add(
+                        za,
+                        -two_vy.mul_add(
+                            zb,
+                            vec.z * zc));
+                }
+            }
+
             #[inline]
             pub fn into_matrix(self) -> $mt {
                 let s2 = self.s * self.s;
@@ -616,6 +668,9 @@ macro_rules! rotor3s {
         /// you first perform `q` and then `self`.
         impl Mul for $rn {
             type Output = Self;
+
+            /// The composition of `self` with `q`, i.e. `self * q` gives the rotation as though
+            /// you first perform `q` and then `self`.
             #[inline]
             fn mul(self, q: Self) -> Self {
                 Self {

@@ -1,6 +1,7 @@
 ## 0.6
 - Significantly improve performance of Rotors and transform types (Isometry, Similarity)
-- Add support for f64/double precision floats. Naming convention is `D[TypeName]` for the f64 versions.
+- Add `Rotor3::rotate_vecs()` for improved performance on rotating multiple vecs with the same rotor
+- Add support for f64/double precision floats under `f64` feature. Naming convention is `D[TypeName]` for the f64 versions.
 - Rename `W[TypeName]` to `[TypeName]x4`, allowing room for `[TypeName]x8`.
 - Add support for 256 bit AVX vectors.
 - Add support for `mint` for scalar types
