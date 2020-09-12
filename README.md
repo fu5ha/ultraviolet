@@ -295,8 +295,6 @@ fn ray_sphere_intersect_x8(
 
     let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
 
-    let miss = uv::f32x8::splat(std::f32::MAX);
-
     let desc_sqrt = descrim.sqrt();
 
     let t1 = -b - desc_sqrt;
@@ -305,7 +303,7 @@ fn ray_sphere_intersect_x8(
     let t2 = -b + desc_sqrt;
     let t2_valid = t2.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
 
-    let t = t2_valid.blend(t2, miss);
+    let t = t2_valid.blend(t2, uv::f32x8::splat(std::f32::MAX));
     let t = t1_valid.blend(t1, t);
 
     t
