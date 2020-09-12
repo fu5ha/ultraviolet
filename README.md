@@ -142,7 +142,7 @@ Scalar code that operates on a single value at a time needs some restructuring t
 Below is an example of scalar ray-sphere instersection code using `Vec3` for points and vectors:
 
 ```rust
-fn rsi_uv_scalar_inner(
+fn ray_sphere_intersect(
     ray_o: uv::Vec3,
     ray_d: uv::Vec3,
     sphere_o: uv::Vec3,
@@ -178,7 +178,7 @@ This porting guide will not discuss the details of the algorithm, but will focus
 The first thing to do is to convert the parameter types from scalar `Vec3` to wide `Vec3x8` and `f32x8`:
 
 ```rust
-fn ray_sphere_intersect_uv_256(
+fn ray_sphere_intersect_x8(
     ray_o: uv::Vec3x8,
     ray_d: uv::Vec3x8,
     sphere_o: uv::Vec3x8,
@@ -280,7 +280,7 @@ And that is exactly what `t1_valid.blend(t1, ???)` would select! So we can combi
 Below is the full example of the same ray-sphere intersection algorithm implemented using the wide `Vec3x8` type:
 
 ```rust
-fn ray_sphere_intersect_uv_256(
+fn ray_sphere_intersect_x8(
     sphere_o: uv::Vec3x8,
     sphere_r_sq: uv::f32x8,
     ray_o: uv::Vec3x8,
