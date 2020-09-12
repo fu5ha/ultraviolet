@@ -86,6 +86,8 @@ let mut pos: Vec<uv::Vec3> = Vec::with_capacity(100);
 let mut vel: Vec<uv::Vec3> = Vec::with_capacity(100);
 let mut acc: Vec<uv::Vec3> = Vec::with_capacity(100);
 
+// You would probably write these values in-line but
+// they are here for illustrative purposes
 let pos_x = 1.0f32;
 let pos_y = 2.0f32;
 let pos_z = 3.0f32;
