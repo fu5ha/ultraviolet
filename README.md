@@ -124,14 +124,14 @@ fn integrate_x8(
 
 This function now processes 8 sets of vectors in parallel and brings significant speed gains!
 
-The only caveat is that the calling code that creates the slices of vectors needs to be modified to populate these wide data types with 8 sets of values instead of just one. The scalar code for that (just using constant values for illustrative purposes) looks like this:
+The only caveat is that the calling code that creates the slices of vectors needs to be modified to populate these wide data types with 8 sets of values instead of just one. The scalar code for that looks like this:
 
 ```rust
 let mut pos: Vec<uv::Vec3> = Vec::with_capacity(100);
 let mut vel: Vec<uv::Vec3> = Vec::with_capacity(100);
 let mut acc: Vec<uv::Vec3> = Vec::with_capacity(100);
 
-// You would probably write these values in-line but
+// You would probably write these constant values in-line but
 // they are here for illustrative purposes
 let pos_x = 1.0f32;
 let pos_y = 2.0f32;
