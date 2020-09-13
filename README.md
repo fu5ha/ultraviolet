@@ -57,7 +57,7 @@ fn integrate(
 }
 ```
 
-The code loops over each set of corresponding position, velocity, and acceleration vectors, it adjusts the velocity by the acceleration scaled by the amount of time that has passed, and then adjusts the position by the velocity scaled by the amount of time that has passed.
+The code loops over each set of corresponding position, velocity, and acceleration vectors. It first adjusts the velocity by the acceleration scaled by the amount of time that has passed and then adjusts the position by the velocity scaled by the amount of time that has passed.
 
 These are all multiplication, addition, and assignment operators that need to be applied in the same way to all of the variables in question.
 
