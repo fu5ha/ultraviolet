@@ -326,7 +326,7 @@ And that is exactly what `t1_valid.blend(t1, ???)` would select! So we can combi
     let t = t1_valid.blend(t1, t);
 ```
 
-`t` now contains either `t1`, `t2` or `f32::MAX` as appropriate for each of the lanes! We have completed the port of the scalar algorithm code to leverage SIMD operations on 8-lane wide data types to calculate 8 ray-sphere intersections in parallel!
+`t` now contains `t1`, `t2` or `f32::MAX` as appropriate for each of the lanes! We have completed the port of the scalar algorithm code to leverage SIMD operations on 8-lane wide data types to calculate 8 ray-sphere intersections in parallel!
 
 Below is the full example of the same ray-sphere intersection algorithm implemented using the wide `Vec3x8` type:
 
