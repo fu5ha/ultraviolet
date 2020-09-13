@@ -256,7 +256,7 @@ To create the mask for 8 lanes of `descrim` values with `0.0`:
     let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
 ```
 
-In the true case of the original scalar version, we have more arithmetic operations that end up looking the exact same when we do them on the vectorized version:
+In the true case of the original scalar version, we then have more arithmetic operations that end up looking the exact same when we do them on the vectorized version:
 
 ```rust
     let desc_sqrt = descrim.sqrt();
