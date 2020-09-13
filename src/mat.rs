@@ -213,6 +213,46 @@ macro_rules! mat2s {
             }
         }
 
+        impl Mul<$t> for $n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> $n {
+                $n::new(
+                    self.cols[0] * rhs,
+                    self.cols[1] * rhs,
+                )
+            }
+        }
+        
+        impl Mul<$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> $n {
+                $n::new(
+                    rhs.cols[0] * self,
+                    rhs.cols[1] * self,
+                )
+            }
+        }
+
+        impl Add for $n {
+            type Output = Self;
+            #[inline]
+            fn add(self, rhs: $n) -> Self {
+                $n::new(
+                    self.cols[0] + rhs.cols[0],
+                    self.cols[1] + rhs.cols[1],
+                )
+            }
+        }
+
+        impl AddAssign for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: $n) {
+                *self = *self + rhs;
+            }
+        }
+
         impl From<[$t; 4]> for $n {
             #[inline]
             fn from(comps: [$t; 4]) -> Self {
@@ -684,6 +724,49 @@ macro_rules! mat3s {
                     a.y.mul_add(rhs.x, b.y.mul_add(rhs.y, c.y * rhs.z)),
                     a.z.mul_add(rhs.x, b.z.mul_add(rhs.y, c.z * rhs.z)),
                 )
+            }
+        }
+        
+        impl Mul<$t> for $n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> $n {
+                $n::new(
+                    self.cols[0] * rhs,
+                    self.cols[1] * rhs,
+                    self.cols[2] * rhs,
+                )
+            }
+        }
+
+        impl Mul<$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> $n {
+                $n::new(
+                    rhs.cols[0] * self,
+                    rhs.cols[1] * self,
+                    rhs.cols[2] * self,
+                )
+            }
+        }
+
+        impl Add for $n {
+            type Output = Self;
+            #[inline]
+            fn add(self, rhs: $n) -> Self {
+                $n::new(
+                    self.cols[0] + rhs.cols[0],
+                    self.cols[1] + rhs.cols[1],
+                    self.cols[2] + rhs.cols[2],
+                )
+            }
+        }
+
+        impl AddAssign for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: $n) {
+                *self = *self + rhs;
             }
         }
 
@@ -1304,11 +1387,48 @@ macro_rules! mat4s {
         }
 
         impl Mul<$t> for $n {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $t) -> $n {
+                $n::new(
+                    self.cols[0] * rhs,
+                    self.cols[1] * rhs,
+                    self.cols[2] * rhs,
+                    self.cols[3] * rhs,
+                )
+            }
+        }
+
+        impl Mul<$n> for $t {
+            type Output = $n;
+            #[inline]
+            fn mul(self, rhs: $n) -> $n {
+                $n::new(
+                    rhs.cols[0] * self,
+                    rhs.cols[1] * self,
+                    rhs.cols[2] * self,
+                    rhs.cols[3] * self,
+                )
+            }
+        }
+
+        impl Add for $n {
             type Output = Self;
             #[inline]
-            fn mul(mut self, rhs: $t) -> Self {
-                self.cols.iter_mut().for_each(|c| *c = rhs * *c);
-                self
+            fn add(self, rhs: $n) -> Self {
+                $n::new(
+                    self.cols[0] + rhs.cols[0],
+                    self.cols[1] + rhs.cols[1],
+                    self.cols[2] + rhs.cols[2],
+                    self.cols[3] + rhs.cols[3],
+                )
+            }
+        }
+
+        impl AddAssign for $n {
+            #[inline]
+            fn add_assign(&mut self, rhs: $n) {
+                *self = *self + rhs;
             }
         }
 

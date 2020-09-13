@@ -14,3 +14,6 @@
 - Various performance improvements, especially for Rotor-transform-vector and some matrix operations
 - Add `MatN::determinant()`
 - Add `Mat2::inverse()`
+
+## 0.6.1
+- Add scalar multiplication and componentwise addition for `MatN`
