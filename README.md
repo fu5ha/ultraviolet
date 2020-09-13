@@ -222,7 +222,7 @@ fn ray_sphere_intersect(
 
 This porting guide will not discuss the details of the algorithm, but will focus on how to convert the code to apply parallel SIMD operations on wide data types.
 
-The first thing to do is to convert the parameter types from scalar `Vec3` to wide `Vec3x8` and `f32x8`:
+The first thing to do is to convert the parameter and return types from scalar `Vec3` to wide `Vec3x8` and `f32x8`:
 
 ```rust
 fn ray_sphere_intersect_x8(
