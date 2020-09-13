@@ -201,7 +201,9 @@ Despite this code being the same, the calculations for 8 rays and spheres will b
 
 The next line of the scalar code tests the value of `descrim` to see if it is greater than `0.0`. When operating on 8 values at a time, the code cannot branch along two separate paths because the value of `descrim` for each of the 8 values may cause branching to different sets of operations. To support this we would need to convert back to scalar code and then we lose all the performance benefits of parallel processing.
 
-So, how do we convert this? It turns out, the trick is to do the calculations for both branches for all 8 lanes, and then filter the results with masks that select the correct values from the possibilities at the end.
+So, how do we convert this? We have a tradeoff to consider depending on the frequency of divergence, that is depending on how often the branch will follow one or the other path. If it is very likely for the given data and algorithm that the majority of branches will take one path, we can check whether all lanes take that path and then branch based on that. These cases are relatively rare, and in the case of this algorithm it is common to branch either way so this approach would produce slower code.
+
+Another approach is to calculate the results for both branches for all 8 lanes, and then filter the results with masks that select the correct values from the possibilities at the end.
 
 To create the mask for 8 lanes of `descrim` values with `0.0`:
 
