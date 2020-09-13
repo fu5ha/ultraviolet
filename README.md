@@ -39,7 +39,7 @@ See [`mathbench-rs`](https://github.com/bitshifter/mathbench-rs) for latest benc
 
 [Euler Integration](https://en.wikipedia.org/wiki/Euler_method) is a method for numerically solving ordinary differential equations. If that sounds complicated, don't worry! The details of the method don't matter if you're not looking to implement any kind of physics simulation but this method is common in games. Keep reading for the code below!
 
-The point is that if you are doing the same basic math operations on multiple floating point values with no conditions (no `if`s), porting to wide data types and parallel processing is quite simple.
+The point is that if you are doing the same basic math operations on multiple floating point values with no conditionals (no `if`s), porting to wide data types and parallel processing is quite simple.
 
 Here is the scalar example of Euler Integration:
 
