@@ -281,7 +281,7 @@ The true case of the `t1 > 0.0` condition just returns `t1`, but the false case 
 
 This may sound like it could be slower than scalar code because this algorithm being applied to wide data types is doing all the calculations for both branches regardless of which is true, and you would be right!
 
-This approach is indeed a tradeoff and depends on the likelihood of branching one way or the other, and the cost of calculation of the branches. However, even with an algorithm that is particularly branch-heavy like the ray-sphere intersection we're analyzing here, in practice, the benefits of being able to calculate multiple pieces of data in one often results in a net win! As with all optimization, measurement tells the truth.
+This approach is indeed a tradeoff and depends on the likelihood of branching one way or the other, and the cost of calculation of the branches. However, even with an algorithm that is particularly branch-heavy like the ray-sphere intersection we're analyzing here, in practice, the benefits of being able to calculate multiple pieces of data simultaneously often results in a net win! As with all optimization, measurement tells the truth.
 
 At this point, we have ported almost the entire algorithm. We have values for `t1` and `t2` for each of the 8 lanes. We have mask values in `t1_valid` that indicate whether both `descrim > 0.0 && t1 > 0.0` for each lane. And we have `t2_valid` with values indicating exactly `descrim > 0.0 && t2 > 0.0`. When the scalar code does not return `t1` or `t2`, it returns `f32::MAX`. How do we now select the correct return value for each of the lanes?
 
