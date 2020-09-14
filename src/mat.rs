@@ -857,6 +857,44 @@ impl_partialeq_mat3!(Mat3);
 #[cfg(feature = "f64")]
 impl_partialeq_mat3!(DMat3);
 
+macro_rules! impl_mat3_to_rotor {
+    ($($mt:ident, $t:ident, $rt:ident, $bt:ident),+) => {
+        $(impl $mt {
+            /// If `self` is a rotation matrix, return a `Rotor3` representing the same rotation.
+            ///
+            /// If `self` is not a rotation matrix, the returned value is a `Rotor3` with undefied
+            /// properties. The fact that `self` is a rotation matrix is not checked by the
+            /// library.
+            pub fn into_rotor3(self) -> $rt {
+                // Adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+
+                let yz = {
+                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.copysign(self[2][1] - self[1][2])
+                };
+
+                let xz = {
+                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.copysign(self[2][0] - self[0][2])
+                };
+
+                let xy = {
+                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.copysign(self[1][0] - self[0][1])
+                };
+
+                $rt::new(w, $bt::new(xy, xz, yz))
+            }
+        })+
+    }
+}
+
+impl_mat3_to_rotor!(Mat3, f32, Rotor3, Bivec3);
+
+#[cfg(feature = "f64")]
+impl_partialeq_mat3!(DMat3, f64, DRotor3, DBivec3);
+
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
         $(/// A 4x4 square matrix.
