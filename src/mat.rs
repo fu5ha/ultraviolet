@@ -857,7 +857,7 @@ impl_partialeq_mat3!(Mat3);
 #[cfg(feature = "f64")]
 impl_partialeq_mat3!(DMat3);
 
-macro_rules! impl_mat3_to_rotor {
+macro_rules! impl_mat3 {
     ($($mt:ident, $t:ident, $rt:ident, $bt:ident),+) => {
         $(impl $mt {
             /// If `self` is a rotation matrix, return a `Rotor3` representing the same rotation.
@@ -890,10 +890,50 @@ macro_rules! impl_mat3_to_rotor {
     }
 }
 
-impl_mat3_to_rotor!(Mat3, f32, Rotor3, Bivec3);
+impl_mat3!(Mat3, f32, Rotor3, Bivec3);
 
 #[cfg(feature = "f64")]
-impl_partialeq_mat3!(DMat3, f64, DRotor3, DBivec3);
+impl_mat3!(DMat3, f64, DRotor3, DBivec3);
+
+macro_rules! impl_mat3_wide {
+    ($($mt:ident => $t:ident, $rt:ident, $bt:ident),+) => {
+        $(impl $mt {
+            /// If `self` is a rotation matrix, return a `Rotor3` representing the same rotation.
+            ///
+            /// If `self` is not a rotation matrix, the returned value is a `Rotor3` with undefied
+            /// properties. The fact that `self` is a rotation matrix is not checked by the
+            /// library.
+            pub fn into_rotor3(self) -> $rt {
+                // Adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+
+                let yz = {
+                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.flip_signs(self[2][1] - self[1][2])
+                };
+
+                let xz = {
+                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.flip_signs(self[2][0] - self[0][2])
+                };
+
+                let xy = {
+                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    s.flip_signs(self[1][0] - self[0][1])
+                };
+
+                $rt::new(w, $bt::new(xy, xz, yz))
+            }
+        })+
+    }
+}
+
+impl_mat3_wide!(Mat3x4 => f32x4, Rotor3x4, Bivec3x4,
+                Mat3x8 => f32x8, Rotor3x8, Bivec3x8);
+
+#[cfg(feature = "f64")]
+impl_mat3_wide!(DMat3x4 => f32x4, DRotor3x4, DBivec3x4,
+                DMat3x8 => f32x8, DRotor3x8, DBivec3x8);
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
@@ -1561,3 +1601,51 @@ impl_partialeq_mat4!(Mat4);
 
 #[cfg(feature = "f64")]
 impl_partialeq_mat4!(DMat4);
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::util::*;
+    use std::f32::consts::PI;
+    use std::f32::consts::FRAC_PI_2;
+
+    #[test]
+    pub fn mat3_to_rotor_corner_cases(){
+        for i in 0..64 {
+            let alpha = {
+                match i % 4 {
+                    0 => -FRAC_PI_2,
+                    1 => 0.,
+                    2 => FRAC_PI_2,
+                    3 => PI,
+                    _ => unreachable!()
+                }
+            };
+            let beta = {
+                match (i / 4) % 4 {
+                    0 => -FRAC_PI_2,
+                    1 => 0.,
+                    2 => FRAC_PI_2,
+                    3 => PI,
+                    _ => unreachable!()
+                }
+            };
+            let gamma = {
+                match (i / 16) % 4 {
+                    0 => -FRAC_PI_2,
+                    1 => 0.,
+                    2 => FRAC_PI_2,
+                    3 => PI,
+                    _ => unreachable!()
+                }
+            };
+            let rotor = Rotor3::from_euler_angles(alpha, beta, gamma);
+            let mat = rotor.into_matrix();
+            let rotor2 = mat.into_rotor3();
+            assert!(Vec3::unit_x().rotated_by(rotor).eq_eps(Vec3::unit_x().rotated_by(rotor2)));
+            assert!(Vec3::unit_y().rotated_by(rotor).eq_eps(Vec3::unit_y().rotated_by(rotor2)));
+            assert!(Vec3::unit_z().rotated_by(rotor).eq_eps(Vec3::unit_z().rotated_by(rotor2)));
+        }
+
+    }
+}
