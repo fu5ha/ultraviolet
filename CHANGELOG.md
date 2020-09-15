@@ -1,3 +1,9 @@
+## Unreleased
+- Add Mat3 into Rotor3 conversion for rotation matrices
+
+## 0.6.1
+- Add scalar multiplication and componentwise addition for `MatN`
+
 ## 0.6
 - Significantly improve performance of Rotors and transform types (Isometry, Similarity)
 - Add `Rotor3::rotate_vecs()` for improved performance on rotating multiple vecs with the same rotor
@@ -14,6 +20,3 @@
 - Various performance improvements, especially for Rotor-transform-vector and some matrix operations
 - Add `MatN::determinant()`
 - Add `Mat2::inverse()`
-
-## 0.6.1
-- Add scalar multiplication and componentwise addition for `MatN`
