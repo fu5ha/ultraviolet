@@ -932,8 +932,8 @@ impl_mat3_wide!(Mat3x4 => f32x4, Rotor3x4, Bivec3x4,
                 Mat3x8 => f32x8, Rotor3x8, Bivec3x8);
 
 #[cfg(feature = "f64")]
-impl_mat3_wide!(DMat3x4 => f64x4, DRotor3x4, DBivec3x4,
-                DMat3x8 => f64x8, DRotor3x8, DBivec3x8);
+impl_mat3_wide!(DMat3x2 => f64x2, DRotor3x2, DBivec3x2,
+                DMat3x4 => f64x4, DRotor3x4, DBivec3x4);
 
 macro_rules! mat4s {
     ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
