@@ -867,20 +867,20 @@ macro_rules! impl_mat3 {
             /// library.
             pub fn into_rotor3(self) -> $rt {
                 // Adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
-                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
 
                 let yz = {
-                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.copysign(self[2][1] - self[1][2])
                 };
 
                 let xz = {
-                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.copysign(self[2][0] - self[0][2])
                 };
 
                 let xy = {
-                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.copysign(self[1][0] - self[0][1])
                 };
 
@@ -905,20 +905,20 @@ macro_rules! impl_mat3_wide {
             /// library.
             pub fn into_rotor3(self) -> $rt {
                 // Adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
-                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                let w = ($t::splat(1.0) + self[0][0] + self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
 
                 let yz = {
-                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) + self[0][0] - self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.flip_signs(self[2][1] - self[1][2])
                 };
 
                 let xz = {
-                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.flip_signs(self[2][0] - self[0][2])
                 };
 
                 let xy = {
-                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() / $t::splat(2.0);
+                    let s = ($t::splat(1.0) - self[0][0] - self[1][1] + self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
                     s.flip_signs(self[1][0] - self[0][1])
                 };
 
@@ -1268,9 +1268,9 @@ macro_rules! mat4s {
                 let vec3 = $vt::new(m13, m03, m03, m03);
 
                 let inv0 = (vec1 * fac0) - (vec2 * fac1) + (vec3 * fac2);
-                let inv0 = (vec0 * fac0) - (vec2 * fac3) + (vec3 * fac4);
-                let inv0 = (vec0 * fac1) - (vec1 * fac3) + (vec3 * fac5);
-                let inv0 = (vec0 * fac2) - (vec1 * fac4) + (vec2 * fac5);
+                let inv1 = (vec0 * fac0) - (vec2 * fac3) + (vec3 * fac4);
+                let inv2 = (vec0 * fac1) - (vec1 * fac3) + (vec3 * fac5);
+                let inv3 = (vec0 * fac2) - (vec1 * fac4) + (vec2 * fac5);
 
                 let sign_a = $vt::new($t::splat(1.0), $t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0));
                 let sign_b = $vt::new($t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0), $t::splat(1.0));

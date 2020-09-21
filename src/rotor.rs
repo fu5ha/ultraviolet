@@ -122,7 +122,7 @@ macro_rules! rotor2s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.s.mul_add(self.s, self.bv.mag_sq())
+                self.s * self.s + self.bv.mag_sq()
             }
 
             #[inline]
@@ -158,7 +158,7 @@ macro_rules! rotor2s {
 
             #[inline]
             pub fn dot(&self, rhs: Self) -> $t {
-                self.s.mul_add(rhs.s, self.bv.dot(rhs.bv))
+                self.s * rhs.s + self.bv.dot(rhs.bv)
             }
 
             /// Rotates this rotor by another rotor in-place. Note that if you
@@ -191,11 +191,11 @@ macro_rules! rotor2s {
             /// `self` *must* be normalized!
             #[inline]
             pub fn rotate_vec(self, vec: &mut $vt) {
-                let fx = self.s.mul_add(vec.x, self.bv.xy * vec.y);
-                let fy = self.s.mul_add(vec.y, -(self.bv.xy * vec.x));
+                let fx = self.s * vec.x + self.bv.xy * vec.y;
+                let fy = self.s * vec.y - (self.bv.xy * vec.x);
 
-                vec.x = self.s.mul_add(fx, -(self.bv.xy * fy));
-                vec.y = self.s.mul_add(fy, self.bv.xy * fx);
+                vec.x = self.s * fx - (self.bv.xy * fy);
+                vec.y = self.s * fy + self.bv.xy * fx;
             }
 
             #[inline]
@@ -238,9 +238,9 @@ macro_rules! rotor2s {
             #[inline]
             fn mul(self, rhs: Self) -> Self {
                 Self {
-                    s: self.s.mul_add(rhs.s, -(self.bv.xy * rhs.bv.xy)),
+                    s: self.s * rhs.s - (self.bv.xy * rhs.bv.xy),
                     bv: $bt {
-                        xy: self.s.mul_add(rhs.bv.xy, rhs.s * self.bv.xy)
+                        xy: self.s * rhs.bv.xy + rhs.s * self.bv.xy,
                     }
                 }
             }
@@ -435,7 +435,7 @@ macro_rules! rotor3s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.s.mul_add(self.s, self.bv.mag_sq())
+                self.s * self.s + self.bv.mag_sq()
             }
 
             #[inline]
@@ -473,7 +473,7 @@ macro_rules! rotor3s {
 
             #[inline]
             pub fn dot(&self, rhs: Self) -> $t {
-                self.s.mul_add(rhs.s, self.bv.dot(rhs.bv))
+                self.s * rhs.s + self.bv.dot(rhs.bv)
             }
 
             /// Rotates this rotor by another rotor in-place. Note that if you
@@ -507,23 +507,17 @@ macro_rules! rotor3s {
 
                 self.s = (sa2 + baxy2 + baxz2 + bayz2) * b.s;
 
-                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2).mul_add(
-                    b.bv.xy,
-                    (baxy_baxz + sa_bayz).mul_add(
-                        two_bbxz,
-                        (baxy_bayz - sa_baxz) * two_bbyz));
+                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2) * b.bv.xy
+                    + (baxy_baxz + sa_bayz) * two_bbxz
+                    + (baxy_bayz - sa_baxz) * two_bbyz;
 
-                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2).mul_add(
-                    b.bv.xz,
-                    (baxy_baxz - sa_bayz).mul_add(
-                        two_bbxy,
-                        (baxz_bayz + sa_baxy) * two_bbyz));
+                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2) * b.bv.xz
+                    + (baxy_baxz - sa_bayz) * two_bbxy
+                    + (baxz_bayz + sa_baxy) * two_bbyz;
 
-                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2).mul_add(
-                    b.bv.yz,
-                    (baxy_bayz + sa_baxz).mul_add(
-                        two_bbxy,
-                        (baxz_bayz - sa_baxy) * two_bbxz));
+                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2) * b.bv.yz
+                    + (baxy_bayz + sa_baxz) * two_bbxy
+                    + (baxz_bayz - sa_baxy) * two_bbxz;
             }
 
             /// Rotates this rotor by another rotor and returns the result. Note that if you
@@ -547,15 +541,15 @@ macro_rules! rotor3s {
             pub fn rotate_vec(self, vec: &mut $vt) {
                 // see derivation/rotor3_rotate_vec_derivation for a derivation
                 // f = geometric product of (self)(vec)
-                let fx = self.s.mul_add(vec.x, self.bv.xy.mul_add(vec.y, self.bv.xz * vec.z));
-                let fy = self.s.mul_add(vec.y, -(self.bv.xy.mul_add(vec.x, -(self.bv.yz * vec.z))));
-                let fz = self.s.mul_add(vec.z, -(self.bv.xz.mul_add(vec.x, self.bv.yz * vec.y)));
-                let fw = self.bv.xy.mul_add(vec.z, -(self.bv.xz.mul_add(vec.y, -(self.bv.yz * vec.x))));
+                let fx = self.s * vec.x + self.bv.xy * vec.y + self.bv.xz * vec.z;
+                let fy = self.s * vec.y - self.bv.xy * vec.x + self.bv.yz * vec.z;
+                let fz = self.s * vec.z - self.bv.xz * vec.x - self.bv.yz * vec.y;
+                let fw = self.bv.xy * vec.z - self.bv.xz * vec.y + self.bv.yz * vec.x;
 
                 // result = geometric product of (f)(self~)
-                vec.x = self.s.mul_add(fx, self.bv.xy.mul_add(fy, self.bv.xz.mul_add(fz, self.bv.yz * fw)));
-                vec.y = self.s.mul_add(fy, -(self.bv.xy.mul_add(fx, self.bv.xz.mul_add(fw, -(self.bv.yz * fz)))));
-                vec.z = self.s.mul_add(fz, self.bv.xy.mul_add(fw, -(self.bv.xz.mul_add(fx, self.bv.yz * fy))));
+                vec.x = self.s * fx + self.bv.xy * fy + self.bv.xz * fz + self.bv.yz * fw;
+                vec.y = self.s * fy - self.bv.xy * fx - self.bv.xz * fw + self.bv.yz * fz;
+                vec.z = self.s * fz + self.bv.xy * fw - self.bv.xz * fx - self.bv.yz * fy;
             }
 
             /// Rotates multiple vectors by this rotor.
@@ -593,21 +587,9 @@ macro_rules! rotor3s {
                     let two_vy = vec.y + vec.y;
                     let two_vz = vec.z + vec.z;
 
-                    vec.x = vec.x.mul_add(
-                        xa,
-                        two_vy.mul_add(
-                            xb,
-                            two_vz * xc));
-                    vec.y = two_vx.mul_add(
-                        ya,
-                        vec.y.mul_add(
-                            yb,
-                            two_vz * yc));
-                    vec.z = two_vx.mul_add(
-                        za,
-                        -two_vy.mul_add(
-                            zb,
-                            vec.z * zc));
+                    vec.x = vec.x * xa + two_vy * xb + two_vz * xc;
+                    vec.y = two_vx * ya + vec.y * yb + two_vz * yc;
+                    vec.z = two_vx * za - two_vy * zb - vec.z * zc;
                 }
             }
 
@@ -674,11 +656,11 @@ macro_rules! rotor3s {
             #[inline]
             fn mul(self, q: Self) -> Self {
                 Self {
-                    s: self.s.mul_add(q.s, -self.bv.xy.mul_add(q.bv.xy, self.bv.xz.mul_add(q.bv.xz, self.bv.yz * q.bv.yz))),
+                    s: self.s * q.s - self.bv.xy * q.bv.xy - self.bv.xz * q.bv.xz - self.bv.yz * q.bv.yz,
                     bv: $bt {
-                        xy: self.bv.xy.mul_add(q.s, self.s.mul_add(q.bv.xy, self.bv.yz.mul_add(q.bv.xz, -(self.bv.xz * q.bv.yz)))),
-                        xz: self.bv.xz.mul_add(q.s, self.s.mul_add(q.bv.xz, -self.bv.yz.mul_add(q.bv.xy, -(self.bv.xy * q.bv.yz)))),
-                        yz: self.bv.yz.mul_add(q.s, self.s.mul_add(q.bv.yz, self.bv.xz.mul_add(q.bv.xy, -(self.bv.xy * q.bv.xz)))),
+                        xy: self.bv.xy * q.s + self.s * q.bv.xy + self.bv.yz * q.bv.xz - self.bv.xz * q.bv.yz,
+                        xz: self.bv.xz * q.s + self.s * q.bv.xz - self.bv.yz * q.bv.xy + self.bv.xy * q.bv.yz,
+                        yz: self.bv.yz * q.s + self.s * q.bv.yz + self.bv.xz * q.bv.xy - self.bv.xy * q.bv.xz,
                     }
                 }
             }

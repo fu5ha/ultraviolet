@@ -128,8 +128,8 @@ macro_rules! vec2s {
             #[inline]
             pub fn normalize(&mut self) {
                 let r_mag = $t::splat(1.0) /self.mag();
-                self.x *= mag;
-                self.y *= mag;
+                self.x *= r_mag;
+                self.y *= r_mag;
             }
 
             #[inline]

@@ -81,10 +81,10 @@ macro_rules! vec4s {
             #[inline]
             pub fn normalize(&mut self) {
                 let r_mag = $t::splat(1.0) / self.mag();
-                self.x *= mag;
-                self.y *= mag;
-                self.z *= mag;
-                self.w *= mag;
+                self.x *= r_mag;
+                self.y *= r_mag;
+                self.z *= r_mag;
+                self.w *= r_mag;
             }
 
             #[inline]
