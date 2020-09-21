@@ -1,3 +1,4 @@
+<!-- next-header -->
 ## Unreleased
 - Add Mat3 into Rotor3 conversion for rotation matrices
 - Remove heavy reliance on `mul_add` due to negligible performance benefit and in many cases performance detriment.
