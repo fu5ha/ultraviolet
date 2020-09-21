@@ -77,7 +77,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
-                self.x.mul_add(other.x, (self.y * other.y) + (self.z * other.z))
+                (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
             }
 
             /// The wedge (aka exterior) product of two vectors.
@@ -90,9 +90,9 @@ macro_rules! vec3s {
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
                 $bn::new(
-                    self.x.mul_add(other.y, -(self.y * other.x)),
-                    self.x.mul_add(other.z, -(self.z * other.x)),
-                    self.y.mul_add(other.z, -(self.z * other.y)),
+                    (self.x * other.y) - (self.y * other.x),
+                    (self.x * other.z) - (self.z * other.x),
+                    (self.y * other.z) - (self.z * other.y),
                 )
             }
 
@@ -143,7 +143,7 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.x.mul_add(self.x, (self.y * self.y) + (self.z * self.z))
+                (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
             }
 
             #[inline]

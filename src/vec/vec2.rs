@@ -83,7 +83,7 @@ macro_rules! vec2s {
             /// one which would move `self` closer to `other`.
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
-                $bn::new(self.x.mul_add(other.y, -(other.x * self.y)))
+                $bn::new((self.x * other.y) - (other.x * self.y))
             }
 
             /// The geometric product of this and another vector, which
