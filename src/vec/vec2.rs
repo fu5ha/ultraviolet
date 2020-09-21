@@ -142,8 +142,8 @@ macro_rules! vec2s {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    (self.x * mul.x) + add.x,
-                    (self.y * mul.y) + add.y,
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
                 )
             }
 

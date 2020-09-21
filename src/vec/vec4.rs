@@ -127,10 +127,10 @@ macro_rules! vec4s {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    (self.x * mul.x) + add.x,
-                    (self.y * mul.y) + add.y,
-                    (self.z * mul.z) + add.z,
-                    (self.w * mul.w) + add.w,
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
+                    self.z.mul_add(mul.z, add.z),
+                    self.w.mul_add(mul.w, add.w),
                 )
             }
 

@@ -115,8 +115,8 @@ macro_rules! IVec2 {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    (self.x * mul.x) + add.x,
-                    (self.y * mul.y) + add.y,
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
                 )
             }
 
@@ -560,9 +560,9 @@ macro_rules! IVec3 {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    (self.x * mul.x) + add.x,
-                    (self.y * mul.y) + add.y,
-                    (self.z * mul.z) + add.z,
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
+                    self.z.mul_add(mul.z, add.z),
                 )
             }
 
@@ -986,10 +986,10 @@ macro_rules! IVec4 {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    (self.x * mul.x) + add.x,
-                    (self.y * mul.y) + add.y,
-                    (self.z * mul.z) + add.z,
-                    (self.w * mul.w) + add.w,
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
+                    self.z.mul_add(mul.z, add.z),
+                    self.w.mul_add(mul.w, add.w),
                 )
             }
 
