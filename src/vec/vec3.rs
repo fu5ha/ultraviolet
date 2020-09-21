@@ -153,10 +153,10 @@ macro_rules! vec3s {
 
             #[inline]
             pub fn normalize(&mut self) {
-                let mag = self.mag();
-                self.x /= mag;
-                self.y /= mag;
-                self.z /= mag;
+                let r_mag = $t::splat(1.0) / self.mag();
+                self.x *= r_mag;
+                self.y *= r_mag;
+                self.z *= r_mag;
             }
 
             #[inline]
