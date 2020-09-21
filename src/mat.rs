@@ -1267,10 +1267,10 @@ macro_rules! mat4s {
                 let vec2 = $vt::new(m12, m02, m02, m02);
                 let vec3 = $vt::new(m13, m03, m03, m03);
 
-                let inv0 = (vec1 * fac0) - ((vec2 * fac1) - (vec3 * fac2));
-                let inv1 = (vec0 * fac0) - ((vec2 * fac3) - (vec3 * fac4));
-                let inv2 = (vec0 * fac1) - ((vec1 * fac3) - (vec3 * fac5));
-                let inv3 = (vec0 * fac2) - ((vec1 * fac4) - (vec2 * fac5));
+                let inv0 = (vec1 * fac0) - (vec2 * fac1) + (vec3 * fac2);
+                let inv0 = (vec0 * fac0) - (vec2 * fac3) + (vec3 * fac4);
+                let inv0 = (vec0 * fac1) - (vec1 * fac3) + (vec3 * fac5);
+                let inv0 = (vec0 * fac2) - (vec1 * fac4) + (vec2 * fac5);
 
                 let sign_a = $vt::new($t::splat(1.0), $t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0));
                 let sign_b = $vt::new($t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0), $t::splat(1.0));
