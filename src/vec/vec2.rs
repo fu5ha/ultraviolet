@@ -71,7 +71,7 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
-                self.x.mul_add(other.x, self.y * other.y)
+                (self.x * other.x) + (self.y * other.y)
             }
 
             /// The wedge (aka exterior) product of two vectors.
@@ -83,7 +83,7 @@ macro_rules! vec2s {
             /// one which would move `self` closer to `other`.
             #[inline]
             pub fn wedge(&self, other: $n) -> $bn {
-                $bn::new(self.x.mul_add(other.y, -(other.x * self.y)))
+                $bn::new((self.x * other.y) - (other.x * self.y))
             }
 
             /// The geometric product of this and another vector, which
@@ -117,7 +117,7 @@ macro_rules! vec2s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.x.mul_add(self.x, self.y * self.y)
+                (self.x * self.x) + (self.y * self.y)
             }
 
             #[inline]
