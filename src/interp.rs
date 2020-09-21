@@ -99,10 +99,10 @@ macro_rules! impl_slerp_rotor3 {
 
                 let mut n = *self;
 
-                n.s = c.mul_add(self.s, s * v2.s);
-                n.bv.xy = c.mul_add(self.bv.xy, s * v2.bv.xy);
-                n.bv.xz = c.mul_add(self.bv.xz, s * v2.bv.xz);
-                n.bv.yz = c.mul_add(self.bv.yz, s * v2.bv.yz);
+                n.s = (c * self.s) + (s * v2.s);
+                n.bv.xy = (c * self.bv.xy) + (s * v2.bv.xy);
+                n.bv.xz = (c * self.bv.xz) + (s * v2.bv.xz);
+                n.bv.yz = (c * self.bv.yz) + (s * v2.bv.yz);
 
                 n
             }
@@ -150,10 +150,10 @@ macro_rules! impl_slerp_rotor3_wide {
 
                 let mut n = *self;
 
-                n.s = c.mul_add(self.s, s * v2.s);
-                n.bv.xy = c.mul_add(self.bv.xy, s * v2.bv.xy);
-                n.bv.xz = c.mul_add(self.bv.xz, s * v2.bv.xz);
-                n.bv.yz = c.mul_add(self.bv.yz, s * v2.bv.yz);
+                n.s = (c * self.s) + (s * v2.s);
+                n.bv.xy = (c * self.bv.xy) + (s * v2.bv.xy);
+                n.bv.xz = (c * self.bv.xz) + (s * v2.bv.xz);
+                n.bv.yz = (c * self.bv.yz) + (s * v2.bv.yz);
 
                 n
             }
