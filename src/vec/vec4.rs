@@ -53,7 +53,7 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn dot(&self, other: $n) -> $t {
-                self.x.mul_add(other.x, self.y.mul_add(other.y, self.z.mul_add(other.z, self.w * other.w)))
+                self.x.mul_add(other.x, self.y.mul_add(other.y, (self.z * other.z) + (self.w * other.w)))
             }
 
             #[inline]
@@ -70,7 +70,7 @@ macro_rules! vec4s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                self.x.mul_add(self.x, self.y.mul_add(self.y, self.z.mul_add(self.z, self.w * self.w)))
+                self.x.mul_add(self.x, self.y.mul_add(self.y, (self.z * self.z) + (self.w * self.w)))
             }
 
             #[inline]
@@ -127,10 +127,10 @@ macro_rules! vec4s {
             #[inline]
             pub fn mul_add(&self, mul: $n, add: $n) -> Self {
                 $n::new(
-                    self.x.mul_add(mul.x, add.x),
-                    self.y.mul_add(mul.y, add.y),
-                    self.z.mul_add(mul.z, add.z),
-                    self.w.mul_add(mul.w, add.w),
+                    (self.x * mul.x) + add.x,
+                    (self.y * mul.y) + add.y,
+                    (self.z * mul.z) + add.z,
+                    (self.w * mul.w) + add.w,
                 )
             }
 
