@@ -59,7 +59,7 @@ macro_rules! mat2s {
 
             #[inline]
             pub fn determinant(&self) -> $t {
-                self.cols[0].x.mul_add(self.cols[1].y, -(self.cols[1].x * self.cols[0].y))
+                (self.cols[0].x * self.cols[1].y) - (self.cols[1].x * self.cols[0].y)
             }
 
             /// If this matrix is not currently invertable, this function will return
@@ -189,12 +189,12 @@ macro_rules! mat2s {
                 let ob = rhs.cols[1];
                 Self::new(
                     $vt::new(
-                        sa.x.mul_add(oa.x, sb.x * oa.y),
-                        sa.y.mul_add(oa.x, sb.y * oa.y),
+                        (sa.x * oa.x) + (sb.x * oa.y),
+                        (sa.y * oa.x) + (sb.y * oa.y),
                     ),
                     $vt::new(
-                        sa.x.mul_add(ob.x, sb.x * ob.y),
-                        sa.y.mul_add(ob.x, sb.y * ob.y),
+                        (sa.x * ob.x) + (sb.x * ob.y),
+                        (sa.y * ob.x) + (sb.y * ob.y),
                     ),
                 )
             }
@@ -207,8 +207,8 @@ macro_rules! mat2s {
                 let a = self.cols[0];
                 let b = self.cols[1];
                 $vt::new(
-                    a.x.mul_add(rhs.x, b.x * rhs.y),
-                    a.y.mul_add(rhs.x, b.y * rhs.y),
+                    (a.x * rhs.x) + (b.x * rhs.y),
+                    (a.y * rhs.x) + (b.y * rhs.y),
                 )
             }
         }
@@ -223,7 +223,7 @@ macro_rules! mat2s {
                 )
             }
         }
-        
+
         impl Mul<$n> for $t {
             type Output = $n;
             #[inline]
@@ -694,19 +694,19 @@ macro_rules! mat3s {
                 let oc = rhs.cols[2];
                 Self::new(
                     $vt::new(
-                        sa.x.mul_add(oa.x, sb.x.mul_add(oa.y, sc.x * oa.z)),
-                        sa.y.mul_add(oa.x, sb.y.mul_add(oa.y, sc.y * oa.z)),
-                        sa.z.mul_add(oa.x, sb.z.mul_add(oa.y, sc.z * oa.z)),
+                        (sa.x * oa.x) + (sb.x * oa.y) + (sc.x * oa.z),
+                        (sa.y * oa.x) + (sb.y * oa.y) + (sc.y * oa.z),
+                        (sa.z * oa.x) + (sb.z * oa.y) + (sc.z * oa.z),
                     ),
                     $vt::new(
-                        sa.x.mul_add(ob.x, sb.x.mul_add(ob.y, sc.x * ob.z)),
-                        sa.y.mul_add(ob.x, sb.y.mul_add(ob.y, sc.y * ob.z)),
-                        sa.z.mul_add(ob.x, sb.z.mul_add(ob.y, sc.z * ob.z)),
+                        (sa.x * ob.x) + (sb.x + ob.y) + (sc.x * ob.z),
+                        (sa.y * ob.x) + (sb.y + ob.y) + (sc.y * ob.z),
+                        (sa.z * ob.x) + (sb.z + ob.y) + (sc.z * ob.z),
                     ),
                     $vt::new(
-                        sa.x.mul_add(oc.x, sb.x.mul_add(oc.y, sc.x * oc.z)),
-                        sa.y.mul_add(oc.x, sb.y.mul_add(oc.y, sc.y * oc.z)),
-                        sa.z.mul_add(oc.x, sb.z.mul_add(oc.y, sc.z * oc.z)),
+                        (sa.x * oc.x) + (sb.x + oc.y) + (sc.x * oc.z),
+                        (sa.y * oc.x) + (sb.y + oc.y) + (sc.y * oc.z),
+                        (sa.z * oc.x) + (sb.z + oc.y) + (sc.z * oc.z),
                     ),
                 )
             }
@@ -720,13 +720,13 @@ macro_rules! mat3s {
                 let b = self.cols[1];
                 let c = self.cols[2];
                 $vt::new(
-                    a.x.mul_add(rhs.x, b.x.mul_add(rhs.y, c.x * rhs.z)),
-                    a.y.mul_add(rhs.x, b.y.mul_add(rhs.y, c.y * rhs.z)),
-                    a.z.mul_add(rhs.x, b.z.mul_add(rhs.y, c.z * rhs.z)),
+                    (a.x * rhs.x) + (b.x * rhs.y) + (c.x * rhs.z),
+                    (a.y * rhs.x) + (b.y * rhs.y) + (c.y * rhs.z),
+                    (a.z * rhs.x) + (b.z * rhs.y) + (c.z * rhs.z),
                 )
             }
         }
-        
+
         impl Mul<$t> for $n {
             type Output = $n;
             #[inline]
@@ -1204,12 +1204,12 @@ macro_rules! mat4s {
                 let (m20, m21, m22, m23) = self.cols[2].into();
                 let (m30, m31, m32, m33) = self.cols[3].into();
 
-                let a2323 = m22.mul_add(m33, -(m23 * m32));
-                let a1323 = m21.mul_add(m33, -(m23 * m31));
-                let a1223 = m21.mul_add(m32, -(m22 * m31));
-                let a0323 = m20.mul_add(m33, -(m23 * m30));
-                let a0223 = m20.mul_add(m32, -(m22 * m30));
-                let a0123 = m20.mul_add(m31, -(m21 * m30));
+                let a2323 = (m22 * m33) - (m23 * m32);
+                let a1323 = (m21 * m33) - (m23 * m31);
+                let a1223 = (m21 * m32) - (m22 * m31);
+                let a0323 = (m20 * m33) - (m23 * m30);
+                let a0223 = (m20 * m32) - (m22 * m30);
+                let a0123 = (m20 * m31) - (m21 * m30);
 
                 m00.mul_add(
                     m11.mul_add(a2323, -(m12.mul_add(a1323, -(m13 * a1223)))),
@@ -1231,29 +1231,29 @@ macro_rules! mat4s {
                 let (m20, m21, m22, m23) = self.cols[2].into();
                 let (m30, m31, m32, m33) = self.cols[3].into();
 
-                let coef00 = m22.mul_add(m33, -(m32 * m23));
-                let coef02 = m12.mul_add(m33, -(m32 * m13));
-                let coef03 = m12.mul_add(m23, -(m22 * m13));
+                let coef00 = (m22 * m33) - (m32 * m23);
+                let coef02 = (m12 * m33) - (m32 * m13);
+                let coef03 = (m12 * m23) - (m22 * m13);
 
-                let coef04 = m21.mul_add(m33, -(m31 * m23));
-                let coef06 = m11.mul_add(m33, -(m31 * m13));
-                let coef07 = m11.mul_add(m23, -(m21 * m13));
+                let coef04 = (m21 * m33) - (m31 * m23);
+                let coef06 = (m11 * m33) - (m31 * m13);
+                let coef07 = (m11 * m23) - (m21 * m13);
 
-                let coef08 = m21.mul_add(m32, -(m31 * m22));
-                let coef10 = m11.mul_add(m32, -(m31 * m12));
-                let coef11 = m11.mul_add(m22, -(m21 * m12));
+                let coef08 = (m21 * m32) - (m31 * m22);
+                let coef10 = (m11 * m32) - (m31 * m12);
+                let coef11 = (m11 * m22) - (m21 * m12);
 
-                let coef12 = m20.mul_add(m33, -(m30 * m23));
-                let coef14 = m10.mul_add(m33, -(m30 * m13));
-                let coef15 = m10.mul_add(m23, -(m20 * m13));
+                let coef12 = (m20 * m33) - (m30 * m23);
+                let coef14 = (m10 * m33) - (m30 * m13);
+                let coef15 = (m10 * m23) - (m20 * m13);
 
-                let coef16 = m20.mul_add(m32, -(m30 * m22));
-                let coef18 = m10.mul_add(m32, -(m30 * m12));
-                let coef19 = m10.mul_add(m22, -(m20 * m12));
+                let coef16 = (m20 * m32) - (m30 * m22);
+                let coef18 = (m10 * m32) - (m30 * m12);
+                let coef19 = (m10 * m22) - (m20 * m12);
 
-                let coef20 = m20.mul_add(m31, -(m30 * m21));
-                let coef22 = m10.mul_add(m31, -(m30 * m11));
-                let coef23 = m10.mul_add(m21, -(m20 * m11));
+                let coef20 = (m20 * m31) - (m30 * m21);
+                let coef22 = (m10 * m31) - (m30 * m11);
+                let coef23 = (m10 * m21) - (m20 * m11);
 
                 let fac0 = $vt::new(coef00, coef00, coef02, coef03);
                 let fac1 = $vt::new(coef04, coef04, coef06, coef07);
@@ -1267,10 +1267,10 @@ macro_rules! mat4s {
                 let vec2 = $vt::new(m12, m02, m02, m02);
                 let vec3 = $vt::new(m13, m03, m03, m03);
 
-                let inv0 = vec1.mul_add(fac0, -(vec2.mul_add(fac1, -(vec3 * fac2))));
-                let inv1 = vec0.mul_add(fac0, -(vec2.mul_add(fac3, -(vec3 * fac4))));
-                let inv2 = vec0.mul_add(fac1, -(vec1.mul_add(fac3, -(vec3 * fac5))));
-                let inv3 = vec0.mul_add(fac2, -(vec1.mul_add(fac4, -(vec2 * fac5))));
+                let inv0 = (vec1 * fac0) - ((vec2 * fac1) - (vec3 * fac2));
+                let inv1 = (vec0 * fac0) - ((vec2 * fac3) - (vec3 * fac4));
+                let inv2 = (vec0 * fac1) - ((vec1 * fac3) - (vec3 * fac5));
+                let inv3 = (vec0 * fac2) - ((vec1 * fac4) - (vec2 * fac5));
 
                 let sign_a = $vt::new($t::splat(1.0), $t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0));
                 let sign_b = $vt::new($t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0), $t::splat(1.0));
@@ -1420,28 +1420,28 @@ macro_rules! mat4s {
                 let od = rhs.cols[3];
                 Self::new(
                     $vt::new(
-                        sa.x.mul_add(oa.x, sb.x.mul_add(oa.y, sc.x.mul_add(oa.z, sd.x * oa.w))),
-                        sa.y.mul_add(oa.x, sb.y.mul_add(oa.y, sc.y.mul_add(oa.z, sd.y * oa.w))),
-                        sa.z.mul_add(oa.x, sb.z.mul_add(oa.y, sc.z.mul_add(oa.z, sd.z * oa.w))),
-                        sa.w.mul_add(oa.x, sb.w.mul_add(oa.y, sc.w.mul_add(oa.z, sd.w * oa.w))),
+                        (sa.x * oa.x) + (sb.x * oa.y) + (sc.x * oa.z) + (sd.x * oa.w),
+                        (sa.y * oa.x) + (sb.y * oa.y) + (sc.y * oa.z) + (sd.y * oa.w),
+                        (sa.z * oa.x) + (sb.z * oa.y) + (sc.z * oa.z) + (sd.z * oa.w),
+                        (sa.w * oa.x) + (sb.w * oa.y) + (sc.w * oa.z) + (sd.w * oa.w),
                     ),
                     $vt::new(
-                        sa.x.mul_add(ob.x, sb.x.mul_add(ob.y, sc.x.mul_add(ob.z, sd.x * ob.w))),
-                        sa.y.mul_add(ob.x, sb.y.mul_add(ob.y, sc.y.mul_add(ob.z, sd.y * ob.w))),
-                        sa.z.mul_add(ob.x, sb.z.mul_add(ob.y, sc.z.mul_add(ob.z, sd.z * ob.w))),
-                        sa.w.mul_add(ob.x, sb.w.mul_add(ob.y, sc.w.mul_add(ob.z, sd.w * ob.w))),
+                        (sa.x * ob.x) + (sb.x * ob.y) + (sc.x * ob.z) + (sd.x * ob.w),
+                        (sa.y * ob.x) + (sb.y * ob.y) + (sc.y * ob.z) + (sd.y * ob.w),
+                        (sa.z * ob.x) + (sb.z * ob.y) + (sc.z * ob.z) + (sd.z * ob.w),
+                        (sa.w * ob.x) + (sb.w * ob.y) + (sc.w * ob.z) + (sd.w * ob.w),
                     ),
                     $vt::new(
-                        sa.x.mul_add(oc.x, sb.x.mul_add(oc.y, sc.x.mul_add(oc.z, sd.x * oc.w))),
-                        sa.y.mul_add(oc.x, sb.y.mul_add(oc.y, sc.y.mul_add(oc.z, sd.y * oc.w))),
-                        sa.z.mul_add(oc.x, sb.z.mul_add(oc.y, sc.z.mul_add(oc.z, sd.z * oc.w))),
-                        sa.w.mul_add(oc.x, sb.w.mul_add(oc.y, sc.w.mul_add(oc.z, sd.w * oc.w))),
+                        (sa.x * oc.x) + (sb.x * oc.y) + (sc.x * oc.z) + (sd.x * oc.w),
+                        (sa.y * oc.x) + (sb.y * oc.y) + (sc.y * oc.z) + (sd.y * oc.w),
+                        (sa.z * oc.x) + (sb.z * oc.y) + (sc.z * oc.z) + (sd.z * oc.w),
+                        (sa.w * oc.x) + (sb.w * oc.y) + (sc.w * oc.z) + (sd.w * oc.w),
                     ),
                     $vt::new(
-                        sa.x.mul_add(od.x, sb.x.mul_add(od.y, sc.x.mul_add(od.z, sd.x * od.w))),
-                        sa.y.mul_add(od.x, sb.y.mul_add(od.y, sc.y.mul_add(od.z, sd.y * od.w))),
-                        sa.z.mul_add(od.x, sb.z.mul_add(od.y, sc.z.mul_add(od.z, sd.z * od.w))),
-                        sa.w.mul_add(od.x, sb.w.mul_add(od.y, sc.w.mul_add(od.z, sd.w * od.w))),
+                        (sa.x * od.x) + (sb.x * od.y) + (sc.x * od.z) + (sd.x * od.w),
+                        (sa.y * od.x) + (sb.y * od.y) + (sc.y * od.z) + (sd.y * od.w),
+                        (sa.z * od.x) + (sb.z * od.y) + (sc.z * od.z) + (sd.z * od.w),
+                        (sa.w * od.x) + (sb.w * od.y) + (sc.w * od.z) + (sd.w * od.w),
                     ),
                 )
             }
