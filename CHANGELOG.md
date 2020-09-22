@@ -4,7 +4,8 @@
 - Remove heavy reliance on `mul_add` due to negligible performance benefit and in many cases performance detriment.
 - Slightly optimize Vector `normalize`.
 - `Rotor2::from_angle_plane()` now takes plane and angle as separate arguments.
-- Add `MatN::adjugate()`
+- Add `MatN::adjugate()`.
+- `Mat3::from_nonuniform_scale_homogeneous()` now takes a `Vec2` instead of a `Vec3`.
 
 ## 0.6.1
 - Add scalar multiplication and componentwise addition for `MatN`

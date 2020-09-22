@@ -396,7 +396,7 @@ macro_rules! mat3s {
 
             /// Assumes homogeneous 2d coordinates.
             #[inline]
-            pub fn from_nonuniform_scale_homogeneous(scale: $vt) -> Self {
+            pub fn from_nonuniform_scale_homogeneous(scale: $v2t) -> Self {
                 let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(scale.x, zero, zero),
