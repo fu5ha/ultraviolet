@@ -733,14 +733,14 @@ macro_rules! mat3s {
                         (sa.z * oa.x) + (sb.z * oa.y) + (sc.z * oa.z),
                     ),
                     $vt::new(
-                        (sa.x * ob.x) + (sb.x + ob.y) + (sc.x * ob.z),
-                        (sa.y * ob.x) + (sb.y + ob.y) + (sc.y * ob.z),
-                        (sa.z * ob.x) + (sb.z + ob.y) + (sc.z * ob.z),
+                        (sa.x * ob.x) + (sb.x * ob.y) + (sc.x * ob.z),
+                        (sa.y * ob.x) + (sb.y * ob.y) + (sc.y * ob.z),
+                        (sa.z * ob.x) + (sb.z * ob.y) + (sc.z * ob.z),
                     ),
                     $vt::new(
-                        (sa.x * oc.x) + (sb.x + oc.y) + (sc.x * oc.z),
-                        (sa.y * oc.x) + (sb.y + oc.y) + (sc.y * oc.z),
-                        (sa.z * oc.x) + (sb.z + oc.y) + (sc.z * oc.z),
+                        (sa.x * oc.x) + (sb.x * oc.y) + (sc.x * oc.z),
+                        (sa.y * oc.x) + (sb.y * oc.y) + (sc.y * oc.z),
+                        (sa.z * oc.x) + (sb.z * oc.y) + (sc.z * oc.z),
                     ),
                 )
             }
