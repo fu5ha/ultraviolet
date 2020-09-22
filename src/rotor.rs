@@ -96,19 +96,18 @@ macro_rules! rotor2s {
                     to.wedge(from)).normalized()
             }
 
-            /// Construct a rotor given a bivector which defines a plane, rotation orientation,
-            /// and rotation angle. The bivector defines the plane and orientation, and its magnitude
-            /// defines the angle of rotation in radians. In 2d, there is only one possible plane of
-            /// rotation, but two possible orientations of rotation in that plane.
+            /// Construct a rotor given a bivector which defines a plane and rotation orientation,
+            /// and a rotation angle.
+            ///
+            /// `plane` must be normalized!
+            ///
+            /// This is the equivalent of an axis-angle rotation.
             #[inline]
-            pub fn from_angle_plane(planeangle: $bt) -> Self {
-                let angle = planeangle.mag();
-                let plane = planeangle / angle;
-                let half_angle = angle / $t::splat(2.0);
+            pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
+                let half_angle = angle * $t::splat(0.5);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, plane * -sin)
             }
-
             /// Construct a rotor given only an angle. This is possible in 2d since there is only one
             /// possible plane of rotation. However, there are two possible orientations. This function
             /// uses the common definition of positive angle in 2d as meaning the direction which brings
@@ -395,7 +394,7 @@ macro_rules! rotor3s {
             /// This is the equivalent of an axis-angle rotation.
             #[inline]
             pub fn from_angle_plane(angle: $t, plane: $bt) -> Self {
-                let half_angle = angle / $t::splat(2.0);
+                let half_angle = angle * $t::splat(0.5);
                 let (sin, cos) = half_angle.sin_cos();
                 Self::new(cos, plane * -sin)
             }

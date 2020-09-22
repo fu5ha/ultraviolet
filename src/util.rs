@@ -39,13 +39,25 @@ impl_eq_eps_wide!(f32x4, f32x8, f64x2, f64x4);
 
 impl EqualsEps for f32 {
     fn eq_eps(self, other: Self) -> bool {
-        (self - other).abs() <= 0.01
+        let diff = (self - other).abs();
+        if diff <= 0.01 {
+            true
+        } else {
+            println!("{} should equal {} with epsilon 0.01 but doesn't.", self, other);
+            false
+        }
     }
 }
 
 impl EqualsEps for f64 {
     fn eq_eps(self, other: Self) -> bool {
-        (self - other).abs() <= 0.01
+        let diff = (self - other).abs();
+        if diff <= 0.01 {
+            true
+        } else {
+            println!("{} should equal {} with epsilon 0.01 but doesn't.", self, other);
+            false
+        }
     }
 }
 
