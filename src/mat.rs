@@ -62,6 +62,25 @@ macro_rules! mat2s {
                 (self.cols[0].x * self.cols[1].y) - (self.cols[1].x * self.cols[0].y)
             }
 
+            /// The adjugate of this matrix, i.e. the transpose of
+            /// the cofactor matrix.
+            ///
+            /// This is equivalent to the inverse
+            /// but without dividing by the determinant of the matrix,
+            /// which can be useful in some contexts for better performance.
+            ///
+            /// One such case is when this matrix is interpreted as a
+            /// a homogeneous transformation matrix, in which case uniform scaling will
+            /// not affect the resulting projected 3d version of transformed points or
+            /// vectors.
+            #[inline]
+            pub fn adjugate(&self) -> Self {
+                Self::new(
+                    $vt::new(self.cols[1].y, -self.cols[0].y),
+                    $vt::new(-self.cols[1].x, self.cols[0].x),
+                )
+            }
+
             /// If this matrix is not currently invertable, this function will return
             /// an invalid inverse. This status is not checked by the library.
             #[inline]
@@ -77,10 +96,7 @@ macro_rules! mat2s {
                 let det = self.determinant();
                 let inv_det = $t::splat(1.0) / det;
 
-                Self::new(
-                    $vt::new(self.cols[1].y * inv_det, -self.cols[0].y * inv_det),
-                    $vt::new(-self.cols[1].x * inv_det, self.cols[0].x * inv_det),
-                )
+                inv_det * self.adjugate()
             }
 
             #[inline]
@@ -537,6 +553,26 @@ macro_rules! mat3s {
                 )
             }
 
+            /// The adjugate of this matrix, i.e. the transpose of
+            /// the cofactor matrix.
+            ///
+            /// This is equivalent to the inverse
+            /// but without dividing by the determinant of the matrix,
+            /// which can be useful in some contexts for better performance.
+            ///
+            /// One such case is when this matrix is interpreted as a
+            /// a homogeneous transformation matrix, in which case uniform scaling will
+            /// not affect the resulting projected 3d version of transformed points or
+            /// vectors.
+            #[inline]
+            pub fn adjugate(&self) -> Self {
+                let x = self.cols[1].cross(self.cols[2]);
+                let y = self.cols[2].cross(self.cols[0]);
+                let z = self.cols[0].cross(self.cols[1]);
+
+                Self::new(x, y, z).transposed()
+            }
+
             /// If this matrix is not currently invertable, this function will return
             /// an invalid inverse. This status is not checked by the library.
             #[inline]
@@ -548,13 +584,11 @@ macro_rules! mat3s {
             /// an invalid inverse. This status is not checked by the library.
             #[inline]
             pub fn inversed(&self) -> Self {
-                let x = self.cols[1].cross(self.cols[2]);
-                let y = self.cols[2].cross(self.cols[0]);
-                let z = self.cols[0].cross(self.cols[1]);
+                let adjugate = self.adjugate();
                 let det = self.determinant();
                 let inv_det = $t::splat(1.0) / det;
 
-                Self::new(x * inv_det, y * inv_det, z * inv_det).transposed()
+                inv_det * adjugate
             }
 
             #[inline]
@@ -1211,21 +1245,25 @@ macro_rules! mat4s {
                 let a0223 = (m20 * m32) - (m22 * m30);
                 let a0123 = (m20 * m31) - (m21 * m30);
 
-                m00.mul_add(
-                    m11.mul_add(a2323, -(m12.mul_add(a1323, -(m13 * a1223)))),
-                    -(m01.mul_add(
-                        m10.mul_add(a2323, -(m12.mul_add(a0323, -(m13 * a0223)))),
-                        -(m02.mul_add(
-                            m10.mul_add(a1323, -(m11.mul_add(a0323, -(m13 * a0123)))),
-                            -(m03 * m10.mul_add(a1223, -(m11.mul_add(a0223, -(m12 * a0123)))))
-                        ))
-                    ))
-                )
+                m00 * (m11 * a2323 - m12 * a1323 + m13 * a1223)
+                    - m01 * (m10 * a2323 - m12 * a0323 + m13 * a0223)
+                    + m02 * (m10 * a1323 - m11 * a0323 + m13 * a0123)
+                    - m03 * (m10 * a1223 - m11 * a0223 + m12 * a0123)
             }
-            /// If this matrix is not currently invertable, this function will return
-            /// an invalid inverse. This status is not checked by the library.
+
+            /// The adjugate of this matrix, i.e. the transpose of
+            /// the cofactor matrix.
+            ///
+            /// This is equivalent to the inverse
+            /// but without dividing by the determinant of the matrix,
+            /// which can be useful in some contexts for better performance.
+            ///
+            /// One such case is when this matrix is interpreted as a
+            /// a homogeneous transformation matrix, in which case uniform scaling will
+            /// not affect the resulting projected 3d version of transformed points or
+            /// vectors.
             #[inline]
-            pub fn inversed(&self) -> Self {
+            pub fn adjugate(&self) -> Self {
                 let (m00, m01, m02, m03) = self.cols[0].into();
                 let (m10, m11, m12, m13) = self.cols[1].into();
                 let (m20, m21, m22, m23) = self.cols[2].into();
@@ -1275,27 +1313,35 @@ macro_rules! mat4s {
                 let sign_a = $vt::new($t::splat(1.0), $t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0));
                 let sign_b = $vt::new($t::splat(-1.0), $t::splat(1.0), $t::splat(-1.0), $t::splat(1.0));
 
-                let inverse = Self {
+                Self {
                     cols: [
                         inv0 * sign_a,
                         inv1 * sign_b,
                         inv2 * sign_a,
                         inv3 * sign_b,
                     ]
-                };
+                }
+            }
+
+
+            /// If this matrix is not currently invertable, this function will return
+            /// an invalid inverse. This status is not checked by the library.
+            #[inline]
+            pub fn inversed(&self) -> Self {
+                let adjugate = self.adjugate();
 
                 let row0 = $vt::new(
-                    inverse.cols[0].x,
-                    inverse.cols[1].x,
-                    inverse.cols[2].x,
-                    inverse.cols[3].x,
+                    adjugate.cols[0].x,
+                    adjugate.cols[1].x,
+                    adjugate.cols[2].x,
+                    adjugate.cols[3].x,
                 );
 
                 let dot0 = self.cols[0] * row0;
                 let dot1 = dot0.x + dot0.y + dot0.z + dot0.w;
 
                 let rcp_det = $t::splat(1.0) / dot1;
-                inverse * rcp_det
+                adjugate * rcp_det
             }
 
             /// Transform a Vec3 by self, interpreting it as a vector.
