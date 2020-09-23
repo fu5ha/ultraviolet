@@ -1,5 +1,6 @@
 <!-- next-header -->
 ## Unreleased
+- Fix typo in `Mat3::inverse` implementation which made it transpose instead
 
 ## 0.7.0
 - Add Mat3 into Rotor3 conversion for rotation matrices
