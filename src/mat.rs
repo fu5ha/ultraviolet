@@ -577,7 +577,7 @@ macro_rules! mat3s {
             /// an invalid inverse. This status is not checked by the library.
             #[inline]
             pub fn inverse(&mut self) {
-                *self = self.transposed();
+                *self = self.inversed();
             }
 
             /// If this matrix is not currently invertable, this function will return
