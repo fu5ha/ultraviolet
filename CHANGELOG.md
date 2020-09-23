@@ -1,5 +1,7 @@
 <!-- next-header -->
 ## Unreleased
+
+## 0.7.1
 - Fix typo in `Mat3::inverse` implementation which made it transpose instead
 
 ## 0.7.0
