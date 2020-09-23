@@ -585,7 +585,6 @@ bivec2s!(
     (Bivec2x8) => f32x8
 );
 
-
 #[cfg(feature = "f64")]
 bivec2s!(
     (DBivec2) => f64,
@@ -605,4 +604,3 @@ bivec3s!(
     DBivec3x2 => (DVec3x2, f64x2),
     DBivec3x4 => (DVec3x4, f64x4)
 );
-

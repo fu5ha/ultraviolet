@@ -369,7 +369,6 @@ similarities!(
     Similarity3x8 => (Mat4x8, Rotor3x8, Vec3x8, f32x8)
 );
 
-
 #[cfg(feature = "f64")]
 similarities!(
     DSimilarity2 => (DMat3, DRotor2, DVec2, f64),

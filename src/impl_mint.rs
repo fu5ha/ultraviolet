@@ -8,7 +8,7 @@ macro_rules! from_vec2s {
                 Self::new(v.x, v.y)
             }
         }
-        
+
         impl From<$uvtype> for $minttype {
             #[inline]
             fn from(v: $uvtype) -> Self {
@@ -51,7 +51,7 @@ macro_rules! from_vec4s {
                 Self::new(v.x, v.y, v.z, v.w)
             }
         }
-        
+
         impl From<$uvtype> for $minttype {
             #[inline]
             fn from(v: $uvtype) -> Self {
@@ -75,7 +75,7 @@ from_vec2s!(
     mint::Vector2<f64> => DVec2,
     mint::Point2<f64> => DVec2
 );
-    
+
 from_vec3s!(
     mint::Vector3<f32> => Vec3,
     mint::Point3<f32> => Vec3
@@ -89,7 +89,7 @@ from_vec3s!(
 from_vec4s!(mint::Vector4<f32> => Vec4);
 #[cfg(feature = "f64")]
 from_vec4s!(mint::Vector4<f64> => DVec4);
-    
+
 macro_rules! from_mat2s {
     ($($minttype:ty => $uvtype:ty),+) => {
         $(impl From<$minttype> for $uvtype {
@@ -97,7 +97,7 @@ macro_rules! from_mat2s {
             fn from(v: $minttype) -> Self {
                 Self::new(v.x.into(), v.y.into())
             }
-        } 
+        }
 
         impl From<$uvtype> for $minttype {
             #[inline]
@@ -118,7 +118,7 @@ macro_rules! from_mat3s {
             fn from(v: $minttype) -> Self {
                 Self::new(v.x.into(), v.y.into(), v.z.into())
             }
-        } 
+        }
 
         impl From<$uvtype> for $minttype {
             #[inline]
@@ -140,7 +140,7 @@ macro_rules! from_mat4s {
             fn from(v: $minttype) -> Self {
                 Self::new(v.x.into(), v.y.into(), v.z.into(), v.w.into())
             }
-        } 
+        }
 
         impl From<$uvtype> for $minttype {
             #[inline]

@@ -1648,7 +1648,7 @@ impl_partialeq_mat4!(Mat4);
 #[cfg(feature = "f64")]
 impl_partialeq_mat4!(DMat4);
 
-/* TODO: 
+/* TODO:
 Re-enable these. The current way that Matrix3::into_rotor() works sometimes fails these
 edge cases based on rounding error accumulated from the round trip due to the way it uses
 copysign()

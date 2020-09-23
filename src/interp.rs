@@ -47,7 +47,6 @@ impl_lerp!(
     f32x8 => (f32x8, Vec2x8, Vec3x8, Vec4x8, Bivec2x8, Bivec3x8, Rotor2x8, Rotor3x8)
 );
 
-
 #[cfg(feature = "f64")]
 impl_lerp!(
     f64 => (f64, DVec2, DVec3, DVec4, DBivec2, DBivec3, DRotor2, DRotor3),

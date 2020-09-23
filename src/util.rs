@@ -43,7 +43,10 @@ impl EqualsEps for f32 {
         if diff <= 0.01 {
             true
         } else {
-            println!("{} should equal {} with epsilon 0.01 but doesn't.", self, other);
+            println!(
+                "{} should equal {} with epsilon 0.01 but doesn't.",
+                self, other
+            );
             false
         }
     }
@@ -55,7 +58,10 @@ impl EqualsEps for f64 {
         if diff <= 0.01 {
             true
         } else {
-            println!("{} should equal {} with epsilon 0.01 but doesn't.", self, other);
+            println!(
+                "{} should equal {} with epsilon 0.01 but doesn't.",
+                self, other
+            );
             false
         }
     }
