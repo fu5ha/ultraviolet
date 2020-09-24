@@ -75,7 +75,7 @@ macro_rules! vec2s {
             }
 
             /// The wedge (aka exterior) product of two vectors.
-
+            ///
             /// Note: Sometimes called "cross" product in 2D.
             /// Such a product is not well defined in 2 dimensions
             /// and is really just shorthand notation for a hacky operation that 
