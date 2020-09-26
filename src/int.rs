@@ -739,7 +739,7 @@ macro_rules! IVec3 {
         impl From<&[$t; 3]> for $n {
             #[inline]
             fn from(comps: &[$t; 3]) -> Self {
-               Self::from(*comps)
+                Self::from(*comps)
             }
         }
 
@@ -750,7 +750,7 @@ macro_rules! IVec3 {
             }
         }
 
-       impl From<($t, $t, $t)> for $n {
+        impl From<($t, $t, $t)> for $n {
             #[inline]
             fn from(comps: ($t, $t, $t)) -> Self {
                 Self::new(comps.0, comps.1, comps.2)
@@ -1072,7 +1072,7 @@ macro_rules! IVec4 {
                 $v2t::new(self.x, self.y)
             }
 
-             #[inline]
+            #[inline]
             pub fn xyz(&self) -> $v3t {
                 $v3t::new(self.x, self.y, self.z)
             }
@@ -1134,7 +1134,7 @@ macro_rules! IVec4 {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub fn as_ptr(&self) -> *const $t {
-                 self as *const $n as *const $t
+                self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.

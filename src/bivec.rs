@@ -104,7 +104,7 @@ macro_rules! bivec2s {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
-             #[inline]
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
@@ -386,7 +386,7 @@ macro_rules! bivec3s {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
-             #[inline]
+            #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors

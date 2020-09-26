@@ -382,7 +382,7 @@ macro_rules! vec3s {
         impl From<&[$t; 3]> for $n {
             #[inline]
             fn from(comps: &[$t; 3]) -> Self {
-               Self::from(*comps)
+                Self::from(*comps)
             }
         }
 
@@ -393,7 +393,7 @@ macro_rules! vec3s {
             }
         }
 
-       impl From<($t, $t, $t)> for $n {
+        impl From<($t, $t, $t)> for $n {
             #[inline]
             fn from(comps: ($t, $t, $t)) -> Self {
                 Self::new(comps.0, comps.1, comps.2)
