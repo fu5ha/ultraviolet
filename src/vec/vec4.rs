@@ -279,7 +279,7 @@ macro_rules! vec4s {
             /// It is up to the caller to correctly use this pointer and its bounds.
             #[inline]
             pub const fn as_ptr(&self) -> *const $t {
-                 self as *const $n as *const $t
+                self as *const $n as *const $t
             }
 
             /// Returns a mutable unsafe pointer to the underlying data in the underlying type.
