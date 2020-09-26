@@ -78,14 +78,14 @@ macro_rules! vec2s {
             ///
             /// Note: Sometimes called "cross" product in 2D.
             /// Such a product is not well defined in 2 dimensions
-            /// and is really just shorthand notation for a hacky operation that 
+            /// and is really just shorthand notation for a hacky operation that
             /// extends the vectors into 3 dimensions, takes the cross product,
             /// then returns only the resulting Z component as a pseudoscalar value.
             /// This value is will have the same value as
             /// the resulting bivector of the wedge product in 2d (a 2d
             /// bivector is also a kind of pseudoscalar value), so you may use
             /// this product to calculate the same value.
-            /// 
+            ///
             /// This operation results in a bivector, which represents
             /// the plane parallel to the two vectors, and which has a
             /// 'oriented area' equal to the parallelogram created by extending
