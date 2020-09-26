@@ -499,6 +499,22 @@ macro_rules! vec4s {
                 }
             }
         }
+
+        impl std::iter::Sum<$n> for $n {
+            fn sum<I>(iter: I) -> Self where I: Iterator<Item = Self> {
+                // Kahan summation algorithm
+                // https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+                let mut sum = $n::zero();
+                let mut c = $n::zero();
+                for v in iter {
+                    let y = v - c;
+                    let t = sum + y;
+                    c = (t - sum) - y;
+                    sum = t;
+                }
+                sum
+            }
+        }
         )+
     }
 }
