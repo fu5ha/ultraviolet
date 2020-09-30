@@ -1104,6 +1104,8 @@ mod bivec_serde_tests {
     use serde_test::{assert_ser_tokens, Token, Deserializer};
     use serde::Deserialize;
 
+    // This is a workarround for testing despite the fact that `Bivec2` does not implement
+    // PartialEq. The code is copied and paste from the serde_test library.
     pub fn assert_de_tokens_bivec2<'de>(value: &Bivec2, tokens: &'de [Token])
     {
         let mut de = Deserializer::new(tokens);
@@ -1231,6 +1233,400 @@ mod bivec_serde_tests {
                 Token::F32(0.36),
                 Token::Str("yz"),
                 Token::F32(0.63),
+                Token::StructEnd,
+            ],
+        );
+    }
+}
+
+impl Serialize for Rotor2 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Rotor2", 2)?;
+        state.serialize_field("s", &self.s)?;
+        state.serialize_field("bv", &self.bv)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Rotor2 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            S,
+            Bv,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`s` or `bv`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "s" => Ok(Field::S),
+                            "bv" => Ok(Field::Bv),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Rotor2Visitor;
+
+        impl<'de> Visitor<'de> for Rotor2Visitor {
+            type Value = Rotor2;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Rotor2")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Rotor2, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let s = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let bv = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Rotor2::new(s, bv))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Rotor2, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut s = None;
+                let mut bv = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::S => {
+                            if s.is_some() {
+                                return Err(serde::de::Error::duplicate_field("s"));
+                            }
+                            s = Some(map.next_value()?);
+                        }
+                        Field::Bv => {
+                            if bv.is_some() {
+                                return Err(serde::de::Error::duplicate_field("bv"));
+                            }
+                            bv = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
+                let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
+                Ok(Rotor2::new(s, bv))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["s", "bv"];
+
+        deserializer.deserialize_struct("Rotor2", FIELDS, Rotor2Visitor)
+    }
+}
+
+impl Serialize for Rotor3 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Rotor3", 2)?;
+        state.serialize_field("s", &self.s)?;
+        state.serialize_field("bv", &self.bv)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Rotor3 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            S,
+            Bv,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`s` or `bv`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "s" => Ok(Field::S),
+                            "bv" => Ok(Field::Bv),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Rotor3Visitor;
+
+        impl<'de> Visitor<'de> for Rotor3Visitor {
+            type Value = Rotor3;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Rotor3")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Rotor3, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let s = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let bv = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Rotor3::new(s, bv))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Rotor3, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut s = None;
+                let mut bv = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::S => {
+                            if s.is_some() {
+                                return Err(serde::de::Error::duplicate_field("s"));
+                            }
+                            s = Some(map.next_value()?);
+                        }
+                        Field::Bv => {
+                            if bv.is_some() {
+                                return Err(serde::de::Error::duplicate_field("bv"));
+                            }
+                            bv = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
+                let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
+                Ok(Rotor3::new(s, bv))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["s", "bv"];
+
+        deserializer.deserialize_struct("Rotor3", FIELDS, Rotor3Visitor)
+    }
+}
+
+#[cfg(test)]
+mod rotor_serde_tests {
+    use crate::bivec::{Bivec2, Bivec3};
+    use crate::rotor::{Rotor2, Rotor3};
+    use serde_test::{assert_ser_tokens, Token, Deserializer};
+    use serde::Deserialize;
+
+    // This is a workarround for testing despite the fact that `Rotor2` does not implement
+    // PartialEq. The code is copied and paste from the serde_test library.
+    pub fn assert_de_tokens_rotor2<'de>(value: &Rotor2, tokens: &'de [Token])
+    {
+        let mut de = Deserializer::new(tokens);
+        let mut deserialized_val = match Rotor2::deserialize(&mut de) {
+            Ok(v) => {
+                assert_eq!(v.s, value.s);
+                assert_eq!(v.bv.xy, value.bv.xy);
+                v
+            }
+            Err(e) => panic!("tokens failed to deserialize: {}", e),
+        };
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+
+        // Do the same thing for deserialize_in_place. This isn't *great* because a
+        // no-op impl of deserialize_in_place can technically succeed here. Still,
+        // this should catch a lot of junk.
+        let mut de = Deserializer::new(tokens);
+        match Rotor2::deserialize_in_place(&mut de, &mut deserialized_val) {
+            Ok(()) => {
+                assert_eq!(deserialized_val.s, value.s);
+                assert_eq!(deserialized_val.bv.xy, value.bv.xy);
+            }
+            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
+        }
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+    }
+
+    #[test]
+    fn bivec2() {
+        let rotor2 = Rotor2::new(1., Bivec2::new(0.78));
+
+        assert_ser_tokens(
+            &rotor2,
+            &[
+                Token::Struct {
+                    name: "Rotor2",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec2",
+                    len: 1,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens_rotor2(
+            &rotor2,
+            &[
+                Token::Struct {
+                    name: "Rotor2",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec2",
+                    len: 1,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    pub fn assert_de_tokens_rotor3<'de>(value: &Rotor3, tokens: &'de [Token])
+    {
+        let mut de = Deserializer::new(tokens);
+        let mut deserialized_val = match Rotor3::deserialize(&mut de) {
+            Ok(v) => {
+                assert_eq!(v.s, value.s);
+                assert_eq!(v.bv.xy, value.bv.xy);
+                assert_eq!(v.bv.xz, value.bv.xz);
+                assert_eq!(v.bv.yz, value.bv.yz);
+                v
+            }
+            Err(e) => panic!("tokens failed to deserialize: {}", e),
+        };
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+
+        // Do the same thing for deserialize_in_place. This isn't *great* because a
+        // no-op impl of deserialize_in_place can technically succeed here. Still,
+        // this should catch a lot of junk.
+        let mut de = Deserializer::new(tokens);
+        match Rotor3::deserialize_in_place(&mut de, &mut deserialized_val) {
+            Ok(()) => {
+                assert_eq!(deserialized_val.s, value.s);
+                assert_eq!(deserialized_val.bv.xy, value.bv.xy);
+                assert_eq!(deserialized_val.bv.xz, value.bv.xz);
+                assert_eq!(deserialized_val.bv.yz, value.bv.yz);
+            }
+            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
+        }
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+    }
+
+    #[test]
+    fn rotor3() {
+        let rotor3 = Rotor3::new(1., Bivec3::new(0.78, 0.36, 0.63));
+
+        assert_ser_tokens(
+            &rotor3,
+            &[
+                Token::Struct {
+                    name: "Rotor3",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec3",
+                    len: 3,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::Str("xz"),
+                Token::F32(0.36),
+                Token::Str("yz"),
+                Token::F32(0.63),
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens_rotor3(
+            &rotor3,
+            &[
+                Token::Struct {
+                    name: "Rotor3",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec3",
+                    len: 3,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::Str("xz"),
+                Token::F32(0.36),
+                Token::Str("yz"),
+                Token::F32(0.63),
+                Token::StructEnd,
                 Token::StructEnd,
             ],
         );
