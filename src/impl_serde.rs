@@ -1101,13 +1101,12 @@ impl<'de> Deserialize<'de> for Bivec3 {
 #[cfg(test)]
 mod bivec_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
-    use serde_test::{assert_ser_tokens, Token, Deserializer};
     use serde::Deserialize;
+    use serde_test::{assert_ser_tokens, Deserializer, Token};
 
     // This is a workarround for testing despite the fact that `Bivec2` does not implement
     // PartialEq. The code is copied and paste from the serde_test library.
-    pub fn assert_de_tokens_bivec2<'de>(value: &Bivec2, tokens: &'de [Token])
-    {
+    pub fn assert_de_tokens_bivec2<'de>(value: &Bivec2, tokens: &'de [Token]) {
         let mut de = Deserializer::new(tokens);
         let mut deserialized_val = match Bivec2::deserialize(&mut de) {
             Ok(v) => {
@@ -1166,8 +1165,7 @@ mod bivec_serde_tests {
         );
     }
 
-    pub fn assert_de_tokens_bivec3<'de>(value: &Bivec3, tokens: &'de [Token])
-    {
+    pub fn assert_de_tokens_bivec3<'de>(value: &Bivec3, tokens: &'de [Token]) {
         let mut de = Deserializer::new(tokens);
         let mut deserialized_val = match Bivec3::deserialize(&mut de) {
             Ok(v) => {
@@ -1459,13 +1457,12 @@ impl<'de> Deserialize<'de> for Rotor3 {
 mod rotor_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
     use crate::rotor::{Rotor2, Rotor3};
-    use serde_test::{assert_ser_tokens, Token, Deserializer};
     use serde::Deserialize;
+    use serde_test::{assert_ser_tokens, Deserializer, Token};
 
     // This is a workarround for testing despite the fact that `Rotor2` does not implement
     // PartialEq. The code is copied and paste from the serde_test library.
-    pub fn assert_de_tokens_rotor2<'de>(value: &Rotor2, tokens: &'de [Token])
-    {
+    pub fn assert_de_tokens_rotor2<'de>(value: &Rotor2, tokens: &'de [Token]) {
         let mut de = Deserializer::new(tokens);
         let mut deserialized_val = match Rotor2::deserialize(&mut de) {
             Ok(v) => {
@@ -1542,8 +1539,7 @@ mod rotor_serde_tests {
         );
     }
 
-    pub fn assert_de_tokens_rotor3<'de>(value: &Rotor3, tokens: &'de [Token])
-    {
+    pub fn assert_de_tokens_rotor3<'de>(value: &Rotor3, tokens: &'de [Token]) {
         let mut de = Deserializer::new(tokens);
         let mut deserialized_val = match Rotor3::deserialize(&mut de) {
             Ok(v) => {
