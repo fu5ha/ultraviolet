@@ -339,6 +339,12 @@ rotor2s!(
     Rotor2x8 => (Mat2x8, Vec2x8, Bivec2x8, f32x8)
 );
 
+impl std::cmp::PartialEq for Rotor2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.s == other.s && self.bv == other.bv
+    }
+}
+
 #[cfg(feature = "f64")]
 rotor2s!(
     DRotor2 => (DMat2, DVec2, DBivec2, f64),
@@ -758,6 +764,12 @@ rotor3s!(
     Rotor3x4 => (Mat3x4, Vec3x4, Bivec3x4, f32x4),
     Rotor3x8 => (Mat3x8, Vec3x8, Bivec3x8, f32x8)
 );
+
+impl std::cmp::PartialEq for Rotor3 {
+    fn eq(&self, other: &Self) -> bool {
+        self.s == other.s && self.bv == other.bv
+    }
+}
 
 #[cfg(feature = "f64")]
 rotor3s!(

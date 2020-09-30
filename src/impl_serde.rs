@@ -1102,43 +1102,13 @@ impl<'de> Deserialize<'de> for Bivec3 {
 mod bivec_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
     use serde::Deserialize;
-    use serde_test::{assert_ser_tokens, Deserializer, Token};
-
-    // This is a workarround for testing despite the fact that `Bivec2` does not implement
-    // PartialEq. The code is copied and paste from the serde_test library.
-    pub fn assert_de_tokens_bivec2<'de>(value: &Bivec2, tokens: &'de [Token]) {
-        let mut de = Deserializer::new(tokens);
-        let mut deserialized_val = match Bivec2::deserialize(&mut de) {
-            Ok(v) => {
-                assert_eq!(v.xy, value.xy);
-                v
-            }
-            Err(e) => panic!("tokens failed to deserialize: {}", e),
-        };
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-
-        // Do the same thing for deserialize_in_place. This isn't *great* because a
-        // no-op impl of deserialize_in_place can technically succeed here. Still,
-        // this should catch a lot of junk.
-        let mut de = Deserializer::new(tokens);
-        match Bivec2::deserialize_in_place(&mut de, &mut deserialized_val) {
-            Ok(()) => {
-                assert_eq!(deserialized_val.xy, value.xy);
-            }
-            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
-        }
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-    }
+    use serde_test::{assert_tokens, Deserializer, Token};
 
     #[test]
     fn bivec2() {
         let bivec2 = Bivec2::new(0.78);
 
-        assert_ser_tokens(
+        assert_tokens(
             &bivec2,
             &[
                 Token::Struct {
@@ -1150,75 +1120,13 @@ mod bivec_serde_tests {
                 Token::StructEnd,
             ],
         );
-
-        assert_de_tokens_bivec2(
-            &bivec2,
-            &[
-                Token::Struct {
-                    name: "Bivec2",
-                    len: 1,
-                },
-                Token::Str("xy"),
-                Token::F32(0.78),
-                Token::StructEnd,
-            ],
-        );
-    }
-
-    pub fn assert_de_tokens_bivec3<'de>(value: &Bivec3, tokens: &'de [Token]) {
-        let mut de = Deserializer::new(tokens);
-        let mut deserialized_val = match Bivec3::deserialize(&mut de) {
-            Ok(v) => {
-                assert_eq!(v.xy, value.xy);
-                assert_eq!(v.xz, value.xz);
-                assert_eq!(v.yz, value.yz);
-                v
-            }
-            Err(e) => panic!("tokens failed to deserialize: {}", e),
-        };
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-
-        // Do the same thing for deserialize_in_place. This isn't *great* because a
-        // no-op impl of deserialize_in_place can technically succeed here. Still,
-        // this should catch a lot of junk.
-        let mut de = Deserializer::new(tokens);
-        match Bivec3::deserialize_in_place(&mut de, &mut deserialized_val) {
-            Ok(()) => {
-                assert_eq!(deserialized_val.xy, value.xy);
-                assert_eq!(deserialized_val.xz, value.xz);
-                assert_eq!(deserialized_val.yz, value.yz);
-            }
-            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
-        }
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
     }
 
     #[test]
     fn bivec3() {
         let bivec3 = Bivec3::new(0.78, 0.36, 0.63);
 
-        assert_ser_tokens(
-            &bivec3,
-            &[
-                Token::Struct {
-                    name: "Bivec3",
-                    len: 3,
-                },
-                Token::Str("xy"),
-                Token::F32(0.78),
-                Token::Str("xz"),
-                Token::F32(0.36),
-                Token::Str("yz"),
-                Token::F32(0.63),
-                Token::StructEnd,
-            ],
-        );
-
-        assert_de_tokens_bivec3(
+        assert_tokens(
             &bivec3,
             &[
                 Token::Struct {
@@ -1458,45 +1366,13 @@ mod rotor_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
     use crate::rotor::{Rotor2, Rotor3};
     use serde::Deserialize;
-    use serde_test::{assert_ser_tokens, Deserializer, Token};
-
-    // This is a workarround for testing despite the fact that `Rotor2` does not implement
-    // PartialEq. The code is copied and paste from the serde_test library.
-    pub fn assert_de_tokens_rotor2<'de>(value: &Rotor2, tokens: &'de [Token]) {
-        let mut de = Deserializer::new(tokens);
-        let mut deserialized_val = match Rotor2::deserialize(&mut de) {
-            Ok(v) => {
-                assert_eq!(v.s, value.s);
-                assert_eq!(v.bv.xy, value.bv.xy);
-                v
-            }
-            Err(e) => panic!("tokens failed to deserialize: {}", e),
-        };
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-
-        // Do the same thing for deserialize_in_place. This isn't *great* because a
-        // no-op impl of deserialize_in_place can technically succeed here. Still,
-        // this should catch a lot of junk.
-        let mut de = Deserializer::new(tokens);
-        match Rotor2::deserialize_in_place(&mut de, &mut deserialized_val) {
-            Ok(()) => {
-                assert_eq!(deserialized_val.s, value.s);
-                assert_eq!(deserialized_val.bv.xy, value.bv.xy);
-            }
-            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
-        }
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-    }
+    use serde_test::{assert_tokens, Deserializer, Token};
 
     #[test]
     fn bivec2() {
         let rotor2 = Rotor2::new(1., Bivec2::new(0.78));
 
-        assert_ser_tokens(
+        assert_tokens(
             &rotor2,
             &[
                 Token::Struct {
@@ -1516,93 +1392,13 @@ mod rotor_serde_tests {
                 Token::StructEnd,
             ],
         );
-
-        assert_de_tokens_rotor2(
-            &rotor2,
-            &[
-                Token::Struct {
-                    name: "Rotor2",
-                    len: 2,
-                },
-                Token::Str("s"),
-                Token::F32(1.),
-                Token::Str("bv"),
-                Token::Struct {
-                    name: "Bivec2",
-                    len: 1,
-                },
-                Token::Str("xy"),
-                Token::F32(0.78),
-                Token::StructEnd,
-                Token::StructEnd,
-            ],
-        );
-    }
-
-    pub fn assert_de_tokens_rotor3<'de>(value: &Rotor3, tokens: &'de [Token]) {
-        let mut de = Deserializer::new(tokens);
-        let mut deserialized_val = match Rotor3::deserialize(&mut de) {
-            Ok(v) => {
-                assert_eq!(v.s, value.s);
-                assert_eq!(v.bv.xy, value.bv.xy);
-                assert_eq!(v.bv.xz, value.bv.xz);
-                assert_eq!(v.bv.yz, value.bv.yz);
-                v
-            }
-            Err(e) => panic!("tokens failed to deserialize: {}", e),
-        };
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
-
-        // Do the same thing for deserialize_in_place. This isn't *great* because a
-        // no-op impl of deserialize_in_place can technically succeed here. Still,
-        // this should catch a lot of junk.
-        let mut de = Deserializer::new(tokens);
-        match Rotor3::deserialize_in_place(&mut de, &mut deserialized_val) {
-            Ok(()) => {
-                assert_eq!(deserialized_val.s, value.s);
-                assert_eq!(deserialized_val.bv.xy, value.bv.xy);
-                assert_eq!(deserialized_val.bv.xz, value.bv.xz);
-                assert_eq!(deserialized_val.bv.yz, value.bv.yz);
-            }
-            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
-        }
-        if de.remaining() > 0 {
-            panic!("{} remaining tokens", de.remaining());
-        }
     }
 
     #[test]
     fn rotor3() {
         let rotor3 = Rotor3::new(1., Bivec3::new(0.78, 0.36, 0.63));
 
-        assert_ser_tokens(
-            &rotor3,
-            &[
-                Token::Struct {
-                    name: "Rotor3",
-                    len: 2,
-                },
-                Token::Str("s"),
-                Token::F32(1.),
-                Token::Str("bv"),
-                Token::Struct {
-                    name: "Bivec3",
-                    len: 3,
-                },
-                Token::Str("xy"),
-                Token::F32(0.78),
-                Token::Str("xz"),
-                Token::F32(0.36),
-                Token::Str("yz"),
-                Token::F32(0.63),
-                Token::StructEnd,
-                Token::StructEnd,
-            ],
-        );
-
-        assert_de_tokens_rotor3(
+        assert_tokens(
             &rotor3,
             &[
                 Token::Struct {
