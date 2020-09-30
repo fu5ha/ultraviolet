@@ -881,3 +881,358 @@ mod mat_serde_tests {
         );
     }
 }
+
+impl Serialize for Bivec2 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Bivec2", 1)?;
+        state.serialize_field("xy", &self.xy)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Bivec2 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            Xy,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`xy`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "xy" => Ok(Field::Xy),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Bivec2Visitor;
+
+        impl<'de> Visitor<'de> for Bivec2Visitor {
+            type Value = Bivec2;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Bivec2")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Bivec2, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let xy = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                Ok(Bivec2::new(xy))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Bivec2, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut xy = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Xy => {
+                            if xy.is_some() {
+                                return Err(serde::de::Error::duplicate_field("xy"));
+                            }
+                            xy = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let xy = xy.ok_or_else(|| serde::de::Error::missing_field("xy"))?;
+                Ok(Bivec2::new(xy))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["xy"];
+
+        deserializer.deserialize_struct("Bivec2", FIELDS, Bivec2Visitor)
+    }
+}
+
+impl Serialize for Bivec3 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Bivec3", 3)?;
+        state.serialize_field("xy", &self.xy)?;
+        state.serialize_field("xz", &self.xz)?;
+        state.serialize_field("yz", &self.yz)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Bivec3 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            Xy,
+            Xz,
+            Yz,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`xy` or `xz` or `yz`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "xy" => Ok(Field::Xy),
+                            "xz" => Ok(Field::Xz),
+                            "yz" => Ok(Field::Yz),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Bivec3Visitor;
+
+        impl<'de> Visitor<'de> for Bivec3Visitor {
+            type Value = Bivec3;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Bivec3")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Bivec3, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let xy = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let xz = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                let yz = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
+                Ok(Bivec3::new(xy, xz, yz))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Bivec3, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut xy = None;
+                let mut xz = None;
+                let mut yz = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Xy => {
+                            if xy.is_some() {
+                                return Err(serde::de::Error::duplicate_field("xy"));
+                            }
+                            xy = Some(map.next_value()?);
+                        }
+                        Field::Xz => {
+                            if xz.is_some() {
+                                return Err(serde::de::Error::duplicate_field("xz"));
+                            }
+                            xz = Some(map.next_value()?);
+                        }
+                        Field::Yz => {
+                            if yz.is_some() {
+                                return Err(serde::de::Error::duplicate_field("yz"));
+                            }
+                            yz = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let xy = xy.ok_or_else(|| serde::de::Error::missing_field("xy"))?;
+                let xz = xz.ok_or_else(|| serde::de::Error::missing_field("xz"))?;
+                let yz = yz.ok_or_else(|| serde::de::Error::missing_field("yz"))?;
+                Ok(Bivec3::new(xy, xz, yz))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["xy", "xz", "yz"];
+
+        deserializer.deserialize_struct("Bivec3", FIELDS, Bivec3Visitor)
+    }
+}
+
+#[cfg(test)]
+mod bivec_serde_tests {
+    use crate::bivec::{Bivec2, Bivec3};
+    use serde_test::{assert_ser_tokens, Token, Deserializer};
+    use serde::Deserialize;
+
+    pub fn assert_de_tokens_bivec2<'de>(value: &Bivec2, tokens: &'de [Token])
+    {
+        let mut de = Deserializer::new(tokens);
+        let mut deserialized_val = match Bivec2::deserialize(&mut de) {
+            Ok(v) => {
+                assert_eq!(v.xy, value.xy);
+                v
+            }
+            Err(e) => panic!("tokens failed to deserialize: {}", e),
+        };
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+
+        // Do the same thing for deserialize_in_place. This isn't *great* because a
+        // no-op impl of deserialize_in_place can technically succeed here. Still,
+        // this should catch a lot of junk.
+        let mut de = Deserializer::new(tokens);
+        match Bivec2::deserialize_in_place(&mut de, &mut deserialized_val) {
+            Ok(()) => {
+                assert_eq!(deserialized_val.xy, value.xy);
+            }
+            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
+        }
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+    }
+
+    #[test]
+    fn bivec2() {
+        let bivec2 = Bivec2::new(0.78);
+
+        assert_ser_tokens(
+            &bivec2,
+            &[
+                Token::Struct {
+                    name: "Bivec2",
+                    len: 1,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens_bivec2(
+            &bivec2,
+            &[
+                Token::Struct {
+                    name: "Bivec2",
+                    len: 1,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    pub fn assert_de_tokens_bivec3<'de>(value: &Bivec3, tokens: &'de [Token])
+    {
+        let mut de = Deserializer::new(tokens);
+        let mut deserialized_val = match Bivec3::deserialize(&mut de) {
+            Ok(v) => {
+                assert_eq!(v.xy, value.xy);
+                assert_eq!(v.xz, value.xz);
+                assert_eq!(v.yz, value.yz);
+                v
+            }
+            Err(e) => panic!("tokens failed to deserialize: {}", e),
+        };
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+
+        // Do the same thing for deserialize_in_place. This isn't *great* because a
+        // no-op impl of deserialize_in_place can technically succeed here. Still,
+        // this should catch a lot of junk.
+        let mut de = Deserializer::new(tokens);
+        match Bivec3::deserialize_in_place(&mut de, &mut deserialized_val) {
+            Ok(()) => {
+                assert_eq!(deserialized_val.xy, value.xy);
+                assert_eq!(deserialized_val.xz, value.xz);
+                assert_eq!(deserialized_val.yz, value.yz);
+            }
+            Err(e) => panic!("tokens failed to deserialize_in_place: {}", e),
+        }
+        if de.remaining() > 0 {
+            panic!("{} remaining tokens", de.remaining());
+        }
+    }
+
+    #[test]
+    fn bivec3() {
+        let bivec3 = Bivec3::new(0.78, 0.36, 0.63);
+
+        assert_ser_tokens(
+            &bivec3,
+            &[
+                Token::Struct {
+                    name: "Bivec3",
+                    len: 3,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::Str("xz"),
+                Token::F32(0.36),
+                Token::Str("yz"),
+                Token::F32(0.63),
+                Token::StructEnd,
+            ],
+        );
+
+        assert_de_tokens_bivec3(
+            &bivec3,
+            &[
+                Token::Struct {
+                    name: "Bivec3",
+                    len: 3,
+                },
+                Token::Str("xy"),
+                Token::F32(0.78),
+                Token::Str("xz"),
+                Token::F32(0.36),
+                Token::Str("yz"),
+                Token::F32(0.63),
+                Token::StructEnd,
+            ],
+        );
+    }
+}
