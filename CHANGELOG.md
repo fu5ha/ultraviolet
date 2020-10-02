@@ -1,5 +1,6 @@
 <!-- next-header -->
 ## Unreleased
+- Implement Serialize and Deserialize for bivectors and rotors (under `serde` feature flag)
 
 ## 0.7.1
 - Fix typo in `Mat3::inverse` implementation which made it transpose instead
