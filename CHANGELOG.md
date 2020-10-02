@@ -1,5 +1,7 @@
 <!-- next-header -->
 ## Unreleased
+
+## 0.7.2
 - Implement Serialize and Deserialize for bivectors and rotors (under `serde` feature flag)
 
 ## 0.7.1
