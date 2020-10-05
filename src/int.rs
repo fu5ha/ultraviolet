@@ -1342,7 +1342,7 @@ macro_rules! IVec4 {
 
         impl std::iter::Sum<$n> for $n {
             fn sum<I>(iter: I) -> Self where I: Iterator<Item = Self> {
-                iter.fold($n::zero(), Add:add)
+                iter.fold($n::zero(), Add::add)
             }
         }
         )+
