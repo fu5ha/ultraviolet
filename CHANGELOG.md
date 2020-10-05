@@ -1,5 +1,7 @@
 <!-- next-header -->
 ## Unreleased
+
+## 0.7.3
 - Fix integer types not compiling properly.
 
 ## 0.7.2
