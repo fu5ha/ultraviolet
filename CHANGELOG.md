@@ -1,5 +1,6 @@
 <!-- next-header -->
 ## Unreleased
+- Fix integer types not compiling properly.
 
 ## 0.7.2
 - Implement Serialize and Deserialize for bivectors and rotors (under `serde` feature flag)
