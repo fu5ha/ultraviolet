@@ -105,6 +105,11 @@ mod impl_mint;
 #[cfg(feature = "mint")]
 pub use impl_mint::*;
 
+#[cfg(feature = "bytemuck")]
+mod impl_bytemuck;
+#[cfg(feature = "bytemuck")]
+pub use impl_bytemuck::*;
+
 pub use bivec::*;
 #[cfg(feature = "int")]
 pub use int::*;
