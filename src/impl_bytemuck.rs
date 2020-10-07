@@ -34,27 +34,19 @@ unsafe impl Zeroable for Mat3 {}
 unsafe impl Pod for Mat4 {}
 unsafe impl Zeroable for Mat4 {}
 
-#[cfg(feature = "transform")]
 unsafe impl Pod for Isometry2 {}
-#[cfg(feature = "transform")]
 unsafe impl Zeroable for Isometry2 {}
 
-#[cfg(feature = "transform")]
 unsafe impl Pod for Isometry3 {}
-#[cfg(feature = "transform")]
 unsafe impl Zeroable for Isometry3 {}
 
-#[cfg(feature = "transform")]
 unsafe impl Pod for Similarity2 {}
-#[cfg(feature = "transform")]
 unsafe impl Zeroable for Similarity2 {}
 
-#[cfg(feature = "transform")]
 unsafe impl Pod for Similarity3 {}
-#[cfg(feature = "transform")]
 unsafe impl Zeroable for Similarity3 {}
 
-// ---
+// ...
 
 #[cfg(feature = "f64")]
 unsafe impl Pod for DVec2 {}
@@ -106,27 +98,27 @@ unsafe impl Pod for DMat4 {}
 #[cfg(feature = "f64")]
 unsafe impl Zeroable for DMat4 {}
 
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Pod for DIsometry2 {}
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Zeroable for DIsometry2 {}
 
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Pod for DIsometry3 {}
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Zeroable for DIsometry3 {}
 
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Pod for DSimilarity2 {}
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Zeroable for DSimilarity2 {}
 
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Pod for DSimilarity3 {}
-#[cfg(all(feature = "transform", feature = "f64"))]
+#[cfg(feature = "f64")]
 unsafe impl Zeroable for DSimilarity3 {}
 
-// ---
+// ...
 
 #[cfg(feature = "int")]
 unsafe impl Pod for IVec2 {}
