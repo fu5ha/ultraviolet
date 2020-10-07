@@ -1,5 +1,6 @@
 <!-- next-header -->
 ## Unreleased
+- Add optional bytemuck support
 
 ## 0.7.3
 - Fix integer types not compiling properly.
