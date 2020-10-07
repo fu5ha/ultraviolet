@@ -49,6 +49,7 @@ Will enable the `f64` and `int` features. Here's a list of the available feature
 * `int` - Enable integer vector types.
 * `serde` - Enable Serialize and Deserialize implementations for many scalar types.
 * `mint` - Enable interoperation with other math libraries through the `mint` interface
+* `bytemuck` - Enable casting scalar types to byte arrays, for use with graphics APIs.
 
 ## Crate Features
 
