@@ -1,5 +1,7 @@
 <!-- next-header -->
 ## Unreleased
+
+## 0.7.4
 - Add optional bytemuck support
 
 ## 0.7.3
