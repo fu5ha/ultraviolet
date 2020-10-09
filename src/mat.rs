@@ -970,7 +970,7 @@ impl_mat3_wide!(DMat3x2 => f64x2, DRotor3x2, DBivec3x2,
                 DMat3x4 => f64x4, DRotor3x4, DBivec3x4);
 
 macro_rules! mat4s {
-    ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $t:ident),+) => {
+    ($($n:ident => $rt:ident, $bt:ident, $vt:ident, $v3t:ident, $m3t:ident, $i3t:ident, $t:ident),+) => {
         $(/// A 4x4 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 4d vectors,
@@ -1356,6 +1356,40 @@ macro_rules! mat4s {
                 (*self * point.into_homogeneous_point()).normalized_homogeneous_point().truncated()
             }
 
+            /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
+            /// `T` is a translation and `R` a rotation), return the `translation` field of the
+            /// isometry.
+            ///
+            /// If `self` does not represent an isometry, the returned value has undefined
+            /// properties.
+            #[inline]
+            pub fn extract_translation(&self) -> $v3t {
+                self.cols[3].truncated()
+            }
+
+            /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
+            /// `T` is a translation and `R` a rotation), return the `rotation` field of the
+            /// isometry.
+            ///
+            /// If `self` does not represent an isometry, the returned value has undefined
+            /// properties.
+            pub fn extract_rotation(&self) -> $rt {
+                $m3t::new(
+                    self.cols[0].truncated(),
+                    self.cols[1].truncated(),
+                    self.cols[2].truncated(),
+                ).into_rotor3()
+            }
+
+            /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
+            /// `T` is a translation and `R` a rotation), return the isometry
+            ///
+            /// If `self` does not represent an isometry, the returned value has undefined
+            /// properties.
+            pub fn into_isometry(&self) -> $i3t {
+                $i3t::new(self.extract_translation(), self.extract_rotation())
+            }
+
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
@@ -1618,16 +1652,16 @@ macro_rules! mat4s {
 }
 
 mat4s!(
-    Mat4 => Rotor3, Bivec3, Vec4, Vec3, f32,
-    Mat4x4 => Rotor3x4, Bivec3x4, Vec4x4, Vec3x4, f32x4,
-    Mat4x8 => Rotor3x8, Bivec3x8, Vec4x8, Vec3x8, f32x8
+    Mat4 => Rotor3, Bivec3, Vec4, Vec3, Mat3, Isometry3, f32,
+    Mat4x4 => Rotor3x4, Bivec3x4, Vec4x4, Vec3x4, Mat3x4, Isometry3x4, f32x4,
+    Mat4x8 => Rotor3x8, Bivec3x8, Vec4x8, Vec3x8, Mat3x8, Isometry3x8, f32x8
 );
 
 #[cfg(feature = "f64")]
 mat4s!(
-    DMat4 => DRotor3, DBivec3, DVec4, DVec3, f64,
-    DMat4x2 => DRotor3x2, DBivec3x2, DVec4x2, DVec3x2, f64x2,
-    DMat4x4 => DRotor3x4, DBivec3x4, DVec4x4, DVec3x4, f64x4
+    DMat4 => DRotor3, DBivec3, DVec4, DVec3, DMat3, DIsometry3, f64,
+    DMat4x2 => DRotor3x2, DBivec3x2, DVec4x2, DVec3x2, DMat3x2, DIsometry3x2, f64x2,
+    DMat4x4 => DRotor3x4, DBivec3x4, DVec4x4, DVec3x4, DMat3x4, DIsometry3x4, f64x4
 );
 
 macro_rules! impl_partialeq_mat4 {
@@ -1648,66 +1682,77 @@ impl_partialeq_mat4!(Mat4);
 #[cfg(feature = "f64")]
 impl_partialeq_mat4!(DMat4);
 
-/* TODO:
-Re-enable these. The current way that Matrix3::into_rotor() works sometimes fails these
-edge cases based on rounding error accumulated from the round trip due to the way it uses
-copysign()
-
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::util::*;
-    use std::f32::consts::PI;
     use std::f32::consts::FRAC_PI_2;
+    use std::f32::consts::PI;
 
+    /* TODO:
+    Re-enable these. The current way that Matrix3::into_rotor() works sometimes fails these
+    edge cases based on rounding error accumulated from the round trip due to the way it uses
+    copysign()
+        #[test]
+        pub fn mat3_to_rotor_corner_cases(){
+            for i in 0..64 {
+                let alpha = {
+                    match i % 4 {
+                        0 => -FRAC_PI_2,
+                        1 => 0.,
+                        2 => FRAC_PI_2,
+                        3 => PI,
+                        _ => unreachable!()
+                    }
+                };
+                let beta = {
+                    match (i / 4) % 4 {
+                        0 => -FRAC_PI_2,
+                        1 => 0.,
+                        2 => FRAC_PI_2,
+                        3 => PI,
+                        _ => unreachable!()
+                    }
+                };
+                let gamma = {
+                    match (i / 16) % 4 {
+                        0 => -FRAC_PI_2,
+                        1 => 0.,
+                        2 => FRAC_PI_2,
+                        3 => PI,
+                        _ => unreachable!()
+                    }
+                };
+                println!("roll {}, pitch {}, yaw {}", alpha, beta, gamma);
+                let rotor = Rotor3::from_euler_angles(alpha, beta, gamma);
+                let mat = rotor.into_matrix();
+                let rotor2 = mat.into_rotor3();
+                assert!(rotor.eq_eps(rotor2));
+                let xr = Vec3::unit_x().rotated_by(rotor);
+                let xr2 = Vec3::unit_x().rotated_by(rotor2);
+                assert!(xr.eq_eps(xr2));
+
+                let yr = Vec3::unit_y().rotated_by(rotor);
+                let yr2 = Vec3::unit_y().rotated_by(rotor2);
+                assert!(yr.eq_eps(yr2));
+
+                let zr = Vec3::unit_z().rotated_by(rotor);
+                let zr2 = Vec3::unit_z().rotated_by(rotor2);
+                assert!(zr.eq_eps(zr2));
+            }
+
+
+        }*/
     #[test]
-    pub fn mat3_to_rotor_corner_cases(){
-        for i in 0..64 {
-            let alpha = {
-                match i % 4 {
-                    0 => -FRAC_PI_2,
-                    1 => 0.,
-                    2 => FRAC_PI_2,
-                    3 => PI,
-                    _ => unreachable!()
-                }
-            };
-            let beta = {
-                match (i / 4) % 4 {
-                    0 => -FRAC_PI_2,
-                    1 => 0.,
-                    2 => FRAC_PI_2,
-                    3 => PI,
-                    _ => unreachable!()
-                }
-            };
-            let gamma = {
-                match (i / 16) % 4 {
-                    0 => -FRAC_PI_2,
-                    1 => 0.,
-                    2 => FRAC_PI_2,
-                    3 => PI,
-                    _ => unreachable!()
-                }
-            };
-            println!("roll {}, pitch {}, yaw {}", alpha, beta, gamma);
-            let rotor = Rotor3::from_euler_angles(alpha, beta, gamma);
-            let mat = rotor.into_matrix();
-            let rotor2 = mat.into_rotor3();
-            assert!(rotor.eq_eps(rotor2));
-            let xr = Vec3::unit_x().rotated_by(rotor);
-            let xr2 = Vec3::unit_x().rotated_by(rotor2);
-            assert!(xr.eq_eps(xr2));
-
-            let yr = Vec3::unit_y().rotated_by(rotor);
-            let yr2 = Vec3::unit_y().rotated_by(rotor2);
-            assert!(yr.eq_eps(yr2));
-
-            let zr = Vec3::unit_z().rotated_by(rotor);
-            let zr2 = Vec3::unit_z().rotated_by(rotor2);
-            assert!(zr.eq_eps(zr2));
-        }
-
+    pub fn isometry_roundtrip() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let r_ab = Rotor3::from_rotation_between(a, b);
+        let iso = Isometry3::new(c, r_ab);
+        let iso_mat4 = iso.into_homogeneous_matrix();
+        let iso_ = iso_mat4.into_isometry();
+        assert!(iso_.translation.eq_eps(c));
+        assert!(iso_.rotation.eq_eps(r_ab));
     }
 }
-*/
