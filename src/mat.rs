@@ -1364,7 +1364,7 @@ macro_rules! mat4s {
             }
 
             /// If the 3x3 left upper block of `self` is a rotation, return the corresponding
-            /// vector. Otherwise, the returned value is a `Rotor3` with undefined properties.
+            /// rotor. Otherwise, the returned value is a `Rotor3` with undefined properties.
             pub fn extract_rotation(&self) -> $rt {
                 $m3t::new(
                     self.cols[0].truncated(),
