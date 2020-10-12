@@ -1356,23 +1356,15 @@ macro_rules! mat4s {
                 (*self * point.into_homogeneous_point()).normalized_homogeneous_point().truncated()
             }
 
-            /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
-            /// `T` is a translation and `R` a rotation), return the `translation` field of the
-            /// isometry.
-            ///
-            /// If `self` does not represent an isometry, the returned value has undefined
-            /// properties.
+            /// If `self` represents an affine transformation, return its translation components.
+            /// Otherwise, the returned value has undefined properties.
             #[inline]
             pub fn extract_translation(&self) -> $v3t {
                 self.cols[3].truncated()
             }
 
-            /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
-            /// `T` is a translation and `R` a rotation), return the `rotation` field of the
-            /// isometry.
-            ///
-            /// If `self` does not represent an isometry, the returned value has undefined
-            /// properties.
+            /// If the 3x3 left upper block of `self` is a rotation, return the corresponding
+            /// vector. Otherwise, the returned value is a `Rotor3` with undefined properties.
             pub fn extract_rotation(&self) -> $rt {
                 $m3t::new(
                     self.cols[0].truncated(),

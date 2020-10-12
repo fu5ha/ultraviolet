@@ -1,5 +1,6 @@
 <!-- next-header -->
 ## Unreleased
+- Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
 
 ## 0.7.4
 - Add optional bytemuck support
