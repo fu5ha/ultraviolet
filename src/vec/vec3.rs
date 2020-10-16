@@ -11,7 +11,7 @@ macro_rules! vec3s {
         /// Generally this distinction between a point and vector is more of a pain than it is worth
         /// to distinguish on a type level, however when converting to and from homogeneous
         /// coordinates it is quite important.
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq)]
         #[repr(C)]
         pub struct $n {
             pub x: $t,
@@ -596,12 +596,6 @@ macro_rules! impl_scalar_vec3s {
                 } else {
                     i * eta - (eta * ndi + k.sqrt()) * n
                 }
-            }
-        }
-
-        impl PartialEq for $vt {
-            fn eq(&self, other: &Self) -> bool {
-                self.x == other.x && self.y == other.y && self.z == other.z
             }
         }
 

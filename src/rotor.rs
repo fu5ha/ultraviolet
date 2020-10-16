@@ -62,7 +62,7 @@ macro_rules! rotor2s {
         /// A Rotor in 2d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,
@@ -339,12 +339,6 @@ rotor2s!(
     Rotor2x8 => (Mat2x8, Vec2x8, Bivec2x8, f32x8)
 );
 
-impl std::cmp::PartialEq for Rotor2 {
-    fn eq(&self, other: &Self) -> bool {
-        self.s == other.s && self.bv == other.bv
-    }
-}
-
 #[cfg(feature = "f64")]
 rotor2s!(
     DRotor2 => (DMat2, DVec2, DBivec2, f64),
@@ -358,7 +352,7 @@ macro_rules! rotor3s {
         /// A Rotor in 3d space.
         ///
         /// Please see the module level documentation for more information on rotors!
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $rn {
             pub s: $t,
@@ -765,12 +759,6 @@ rotor3s!(
     Rotor3x8 => (Mat3x8, Vec3x8, Bivec3x8, f32x8)
 );
 
-impl std::cmp::PartialEq for Rotor3 {
-    fn eq(&self, other: &Self) -> bool {
-        self.s == other.s && self.bv == other.bv
-    }
-}
-
 #[cfg(feature = "f64")]
 rotor3s!(
     DRotor3 => (DMat3, DVec3, DBivec3, f64),
@@ -833,5 +821,20 @@ mod test {
 
         println!("{:#?} ::: {:#?}", i, interp);
         assert!(interp.eq_eps(i))
+    }
+
+    #[test]
+    pub fn rotor_equality() {
+        let i = Rotor3::identity();
+        assert_eq!(i, i);
+    }
+
+    // This test exists because Rotor3 used to implement PartialEq without DRotor3 getting the same
+    // impl. Use `cargo test --all-features` to run
+    #[cfg(feature = "f64")]
+    #[test]
+    pub fn drotor_equality() {
+        let i = DRotor3::identity();
+        assert_eq!(i, i);
     }
 }

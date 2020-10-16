@@ -17,7 +17,7 @@ macro_rules! isometries {
         /// You may want to us this type over the corresponding type of
         /// homogeneous transformation matrix because it will be faster in most operations,
         /// especially composition and inverse.
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $ison {
             pub translation: $vt,
@@ -190,7 +190,7 @@ macro_rules! similarities {
         /// You may want to us this type over the corresponding type of
         /// homogeneous transformation matrix because it will be faster in most operations,
         /// especially composition and inverse.
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $sn {
             pub translation: $vt,

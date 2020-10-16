@@ -47,7 +47,7 @@ macro_rules! bivec2s {
         /// has only one component.
         ///
         /// Please see the module level documentation for more information on bivectors generally!
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq)]
         #[repr(C)]
         pub struct $bn {
             pub xy: $t
@@ -302,7 +302,7 @@ macro_rules! bivec3s {
         /// 3d vectors quite a lot.
         ///
         /// Please see the module level documentation for more information on bivectors generally!
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq)]
         #[repr(C)]
         pub struct $bn {
             pub xy: $t,
@@ -585,12 +585,6 @@ bivec2s!(
     (Bivec2x8) => f32x8
 );
 
-impl std::cmp::PartialEq for Bivec2 {
-    fn eq(&self, other: &Self) -> bool {
-        self.xy == other.xy
-    }
-}
-
 #[cfg(feature = "f64")]
 bivec2s!(
     (DBivec2) => f64,
@@ -603,12 +597,6 @@ bivec3s!(
     Bivec3x4 => (Vec3x4, f32x4),
     Bivec3x8 => (Vec3x8, f32x8)
 );
-
-impl std::cmp::PartialEq for Bivec3 {
-    fn eq(&self, other: &Self) -> bool {
-        self.xy == other.xy && self.xz == other.xz && self.yz == other.yz
-    }
-}
 
 #[cfg(feature = "f64")]
 bivec3s!(
