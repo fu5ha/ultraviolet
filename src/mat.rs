@@ -8,7 +8,7 @@ macro_rules! mat2s {
         $(/// A 2x2 square matrix.
         ///
         /// Useful for performing linear transformations (rotation, scaling) on 2d vectors.
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 2],
@@ -336,21 +336,6 @@ mat2s!(
     DMat2x4 => DMat3x4, DVec3x4, DVec2x4, f64x4
 );
 
-macro_rules! impl_partialeq_mat2 {
-    ($($mt:ident),+) => {
-        $(impl PartialEq for $mt {
-            fn eq(&self, other: &Self) -> bool {
-                self.cols[0] == other.cols[0] && self.cols[1] == other.cols[1]
-            }
-        })+
-    }
-}
-
-impl_partialeq_mat2!(Mat2);
-
-#[cfg(feature = "f64")]
-impl_partialeq_mat2!(DMat2);
-
 macro_rules! mat3s {
     ($($n:ident => $rt:ident, $bt:ident, $m4t:ident, $v4t:ident, $v2t:ident, $vt:ident, $t:ident),+) => {
         $(/// A 3x3 square matrix.
@@ -358,7 +343,7 @@ macro_rules! mat3s {
         /// Useful for performing linear transformations (rotation, scaling) on 3d vectors,
         /// or for performing arbitrary transformations (linear +   translation, projection, etc)
         /// on homogeneous 2d vectors
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 3],
@@ -874,23 +859,6 @@ mat3s!(
     DMat3x4 => DRotor3x4, DBivec3x4, DMat4x4, DVec4x4, DVec2x4, DVec3x4, f64x4
 );
 
-macro_rules! impl_partialeq_mat3 {
-    ($($mt:ident),+) => {
-        $(impl PartialEq for $mt {
-            fn eq(&self, other: &Self) -> bool {
-                self.cols[0] == other.cols[0]
-                    && self.cols[1] == other.cols[1]
-                    && self.cols[2] == other.cols[2]
-            }
-        })+
-    }
-}
-
-impl_partialeq_mat3!(Mat3);
-
-#[cfg(feature = "f64")]
-impl_partialeq_mat3!(DMat3);
-
 macro_rules! impl_mat3 {
     ($($mt:ident, $t:ident, $rt:ident, $bt:ident),+) => {
         $(impl $mt {
@@ -979,7 +947,7 @@ macro_rules! mat4s {
         ///
         /// Note that most constructors assume that the matrix will be used as a homogeneous 3d
         /// transformation matrix.
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         #[repr(C)]
         pub struct $n {
             pub cols: [$vt; 4],
@@ -1655,24 +1623,6 @@ mat4s!(
     DMat4x2 => DRotor3x2, DBivec3x2, DVec4x2, DVec3x2, DMat3x2, DIsometry3x2, f64x2,
     DMat4x4 => DRotor3x4, DBivec3x4, DVec4x4, DVec3x4, DMat3x4, DIsometry3x4, f64x4
 );
-
-macro_rules! impl_partialeq_mat4 {
-    ($($mt:ident),+) => {
-        $(impl PartialEq for $mt {
-            fn eq(&self, other: &Self) -> bool {
-                self.cols[0] == other.cols[0]
-                    && self.cols[1] == other.cols[1]
-                    && self.cols[2] == other.cols[2]
-                    && self.cols[3] == other.cols[3]
-            }
-        })+
-    };
-}
-
-impl_partialeq_mat4!(Mat4);
-
-#[cfg(feature = "f64")]
-impl_partialeq_mat4!(DMat4);
 
 #[cfg(test)]
 mod test {
