@@ -190,11 +190,13 @@ macro_rules! rotor2s {
             /// `self` *must* be normalized!
             #[inline]
             pub fn rotate_vec(self, vec: &mut $vt) {
-                let fx = self.s * vec.x + self.bv.xy * vec.y;
-                let fy = self.s * vec.y - (self.bv.xy * vec.x);
+                let s2_minus_bxy2 = self.s * self.s - self.bv.xy * self.bv.xy;
+                let two_s_bxy = $t::splat(2.0) * self.s * self.bv.xy;
 
-                vec.x = self.s * fx - (self.bv.xy * fy);
-                vec.y = self.s * fy + self.bv.xy * fx;
+                *vec = $vt {
+                    x: vec.x * s2_minus_bxy2 - vec.y * two_s_bxy,
+                    y: vec.x * two_s_bxy + vec.y * s2_minus_bxy2
+                }
             }
 
             #[inline]
