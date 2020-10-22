@@ -194,8 +194,8 @@ macro_rules! rotor2s {
                 let two_s_bxy = $t::splat(2.0) * self.s * self.bv.xy;
 
                 *vec = $vt {
-                    x: vec.x * s2_minus_bxy2 - vec.y * two_s_bxy,
-                    y: vec.x * two_s_bxy + vec.y * s2_minus_bxy2
+                    x: vec.x * s2_minus_bxy2 + vec.y * two_s_bxy,
+                    y: vec.x * -two_s_bxy + vec.y * s2_minus_bxy2
                 }
             }
 
