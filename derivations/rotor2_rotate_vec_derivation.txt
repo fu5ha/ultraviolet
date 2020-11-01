@@ -34,10 +34,10 @@ ab v ba = (ab v)(S - BxyE1E2)
 =(FxE1 + FyE2)(S - BxyE1E2)
 
 = SFxE1 + SFyE2
-+ BxyFxE1E1E2 + BxyFyE2E1E2
+- BxyFxE1E1E2 - BxyFyE2E1E2
 
-= (SFx - BxyFy)E1
-+ (SFy + BxyFx)E2
+= (SFx + BxyFy)E1
++ (SFy - BxyFx)E2
 
 non-factored version (for conversion from rotor to mat3)
 -------------

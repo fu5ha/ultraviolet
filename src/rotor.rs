@@ -193,8 +193,8 @@ macro_rules! rotor2s {
                 let fx = self.s * vec.x + self.bv.xy * vec.y;
                 let fy = self.s * vec.y - (self.bv.xy * vec.x);
 
-                vec.x = self.s * fx - (self.bv.xy * fy);
-                vec.y = self.s * fy + self.bv.xy * fx;
+                vec.x = self.s * fx + self.bv.xy * fy;
+                vec.y = self.s * fy - (self.bv.xy * fx);
             }
 
             #[inline]
