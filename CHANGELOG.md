@@ -1,5 +1,7 @@
 <!-- next-header -->
 ## Unreleased
+
+## 0.7.5
 - Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
 - Add missing `PartialEq` implementations for all matrices, transformations, vectors, bivectors and rotors, including
   SIMD and `f64` variants
