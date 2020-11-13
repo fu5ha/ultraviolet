@@ -130,3 +130,5 @@ pub use wide::f32x4 as m32x4;
 pub use wide::f32x8 as m32x8;
 pub use wide::f64x2 as m64x2;
 pub use wide::f64x4 as m64x4;
+
+pub(crate) use wide::{CmpGe, CmpLt};

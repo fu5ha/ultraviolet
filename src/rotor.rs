@@ -399,6 +399,17 @@ macro_rules! rotor3s {
                 Self::new(cos, plane * -sin)
             }
 
+            /// Return the angle and the normalized plane of the rotation represented by self.
+            /// The value of the returned angle is between 0 and PI.
+            #[inline]
+            pub fn into_angle_plane(self) -> ($t, $bt) {
+                let cos_half_angle = self.s;
+                let sin_half_angle = self.bv.mag();
+                let half_angle = sin_half_angle.atan2(cos_half_angle);
+                (half_angle * 2., -self.bv.normalized())
+
+            }
+
             /// Create new Rotor from a rotation in the xy plane (also known as
             /// "around the z axis").
             #[inline]
@@ -827,6 +838,20 @@ mod test {
     pub fn rotor_equality() {
         let i = Rotor3::identity();
         assert_eq!(i, i);
+    }
+
+    #[test]
+    pub fn angle_plane_roundtrip() {
+        let angle = 0.32;
+        let plane = Bivec3::new(0.2, 0.4, 0.7).normalized();
+        let rotor = Rotor3::from_angle_plane(angle, plane);
+        let (angle_, plane_) = rotor.into_angle_plane();
+        assert!(Rotor3::from_angle_plane(angle_, plane_).eq_eps(rotor));
+        let angle = -0.32;
+        let plane = Bivec3::new(0.2, 0.4, 0.7).normalized();
+        let rotor = Rotor3::from_angle_plane(angle, plane);
+        let (angle_, plane_) = rotor.into_angle_plane();
+        assert!(Rotor3::from_angle_plane(angle_, plane_).eq_eps(rotor));
     }
 
     // This test exists because Rotor3 used to implement PartialEq without DRotor3 getting the same
