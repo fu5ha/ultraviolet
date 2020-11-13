@@ -1,6 +1,9 @@
 <!-- next-header -->
 ## Unreleased
 
+- Update `wide` to `0.6.x`
+- Add `Rotor3::into_angle_plane()`
+
 ## 0.7.5
 - Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
 - Add missing `PartialEq` implementations for all matrices, transformations, vectors, bivectors and rotors, including
