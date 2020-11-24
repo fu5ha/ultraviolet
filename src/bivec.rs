@@ -333,7 +333,7 @@ macro_rules! bivec3s {
             /// normalized 'axis vector'
             #[inline]
             pub fn from_normalized_axis(v: $vt) -> Self {
-                Self::new(v.z, v.y, v.x)
+                Self::new(v.z, -v.y, v.x)
             }
 
             #[inline]
