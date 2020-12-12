@@ -28,11 +28,6 @@ impl<'de> Deserialize<'de> for Vec2 {
             Y,
         };
 
-        // This part could also be generated independently by:
-        //
-        //    #[derive(Deserialize)]
-        //    #[serde(field_identifier, rename_all = "lowercase")]
-        //    enum Field { Secs, Nanos }
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
             where
@@ -1422,5 +1417,225 @@ mod rotor_serde_tests {
                 Token::StructEnd,
             ],
         );
+    }
+}
+
+impl Serialize for Isometry2 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Isometry2", 2)?;
+        state.serialize_field("translation", &self.translation)?;
+        state.serialize_field("rotation", &self.rotation)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Isometry2 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            Translation,
+            Rotation,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`translation` or `rotation`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "translation" => Ok(Field::Translation),
+                            "rotation" => Ok(Field::Rotation),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Isometry2Visitor;
+
+        impl<'de> Visitor<'de> for Isometry2Visitor {
+            type Value = Isometry2;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Isometry2")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Isometry2, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let translation = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let rotation = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Isometry2::new(translation, rotation))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Isometry2, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut translation = None;
+                let mut rotation = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Translation => {
+                            if translation.is_some() {
+                                return Err(serde::de::Error::duplicate_field("translation"));
+                            }
+                            translation = Some(map.next_value()?);
+                        }
+                        Field::Rotation => {
+                            if rotation.is_some() {
+                                return Err(serde::de::Error::duplicate_field("rotation"));
+                            }
+                            rotation = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let translation =
+                    translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
+                let rotation =
+                    rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
+                Ok(Isometry2::new(translation, rotation))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+
+        deserializer.deserialize_struct("Isometry2", FIELDS, Isometry2Visitor)
+    }
+}
+
+impl Serialize for Isometry3 {
+    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+    where
+        T: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Isometry3", 2)?;
+        state.serialize_field("translation", &self.translation)?;
+        state.serialize_field("rotation", &self.rotation)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Isometry3 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            Translation,
+            Rotation,
+        };
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("`translation` or `rotation`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "translation" => Ok(Field::Translation),
+                            "rotation" => Ok(Field::Rotation),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct Isometry3Visitor;
+
+        impl<'de> Visitor<'de> for Isometry3Visitor {
+            type Value = Isometry3;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("struct Isometry3")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Isometry3, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let translation = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                let rotation = seq
+                    .next_element()?
+                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                Ok(Isometry3::new(translation, rotation))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Isometry3, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut translation = None;
+                let mut rotation = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Translation => {
+                            if translation.is_some() {
+                                return Err(serde::de::Error::duplicate_field("translation"));
+                            }
+                            translation = Some(map.next_value()?);
+                        }
+                        Field::Rotation => {
+                            if rotation.is_some() {
+                                return Err(serde::de::Error::duplicate_field("rotation"));
+                            }
+                            rotation = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let translation =
+                    translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
+                let rotation =
+                    rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
+                Ok(Isometry3::new(translation, rotation))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+
+        deserializer.deserialize_struct("Isometry3", FIELDS, Isometry3Visitor)
     }
 }
