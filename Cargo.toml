@@ -1,6 +1,6 @@
 [package]
 name = "ultraviolet"
-version = "0.7.6-alpha.0"
+version = "0.8.0-alpha.0"
 authors = ["Gray Olson <gray@grayolson.com>"]
 edition = "2018"
 description = "A crate to do linear algebra, fast."
@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
 # wide = { path = "../wide", optional = true }
-wide = { version = "~0.5.2" }
+wide = { version = "~0.6.3" }
 serde = { version = "1.0", features = [], optional = true }
 mint = { version = "0.5", optional = true }
 bytemuck = { version = "1.4", optional = true }
