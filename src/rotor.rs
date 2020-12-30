@@ -873,7 +873,10 @@ mod test {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
         let rotor = Rotor3::from_rotation_between(a, b);
-        assert_eq!(rotor, Rotor3::from_quaternion_array(rotor.into_quaternion_array()));
+        assert_eq!(
+            rotor,
+            Rotor3::from_quaternion_array(rotor.into_quaternion_array())
+        );
     }
 
     // This test exists because Rotor3 used to implement PartialEq without DRotor3 getting the same
