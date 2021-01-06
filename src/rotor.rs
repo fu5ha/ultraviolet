@@ -636,6 +636,20 @@ macro_rules! rotor3s {
                 )
             }
 
+            /// Convert this rotor into an array that represents a quaternion. This is in the form
+            /// `[vector, scalar]`.
+            #[inline]
+            pub fn into_quaternion_array(self) -> [$t; 4] {
+                [-self.bv.yz, self.bv.xz, -self.bv.xy, self.s]
+            }
+
+            /// Convert an array that represents a quaternion in the form `[vector, scalar]` into a
+            /// rotor.
+            #[inline]
+            pub fn from_quaternion_array(array: [$t; 4]) -> Self {
+                Self::new(array[3], $bt::new(-array[2], array[1], -array[0]))
+            }
+
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
@@ -852,6 +866,17 @@ mod test {
         let rotor = Rotor3::from_angle_plane(angle, plane);
         let (angle_, plane_) = rotor.into_angle_plane();
         assert!(Rotor3::from_angle_plane(angle_, plane_).eq_eps(rotor));
+    }
+
+    #[test]
+    pub fn quaternion_convertion_roundtrip() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let rotor = Rotor3::from_rotation_between(a, b);
+        assert_eq!(
+            rotor,
+            Rotor3::from_quaternion_array(rotor.into_quaternion_array())
+        );
     }
 
     // This test exists because Rotor3 used to implement PartialEq without DRotor3 getting the same
