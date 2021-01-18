@@ -927,8 +927,8 @@ macro_rules! IVec4 {
 
         impl $n {
             #[inline]
-            pub const fn new<T: Into<$t>>(x: T, y: T, z: T, w: T) -> Self {
-                $n { x: x.into(), y: y.into(), z: z.into(), w: w.into() }
+            pub const fn new(x: $t, y: $t, z: $t, w: $t) -> Self {
+                $n { x, y, z, w }
             }
 
             #[inline]
