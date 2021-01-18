@@ -932,7 +932,7 @@ macro_rules! IVec4 {
             }
 
             #[inline]
-            pub fn broadcast<T: Into<$t> + Copy>(val: T) -> Self {
+            pub fn broadcast(val: $t) -> Self {
                 Self::new(val, val, val, val)
             }
 
