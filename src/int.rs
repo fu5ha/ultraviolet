@@ -43,7 +43,7 @@ macro_rules! IVec2 {
 
         impl $n {
             #[inline]
-            pub fn new(x: $t, y: $t) -> Self {
+            pub const fn new(x: $t, y: $t) -> Self {
                 $n { x, y }
             }
 
@@ -466,7 +466,7 @@ macro_rules! IVec3 {
 
         impl $n {
             #[inline]
-            pub fn new(x: $t, y: $t, z: $t) -> Self {
+            pub const fn new(x: $t, y: $t, z: $t) -> Self {
                 $n { x, y, z }
             }
 
@@ -927,7 +927,7 @@ macro_rules! IVec4 {
 
         impl $n {
             #[inline]
-            pub fn new<T: Into<$t>>(x: T, y: T, z: T, w: T) -> Self {
+            pub const fn new<T: Into<$t>>(x: T, y: T, z: T, w: T) -> Self {
                 $n { x: x.into(), y: y.into(), z: z.into(), w: w.into() }
             }
 
