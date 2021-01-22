@@ -23,3 +23,6 @@ int = []
 
 [dev-dependencies]
 serde_test = "1.0"
+
+[package.metadata.docs.rs]
+features = ["f64", "int", "serde", "mint", "bytemuck"]

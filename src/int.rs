@@ -122,7 +122,7 @@ macro_rules! IVec2 {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y)
+                Self::new(self.x.abs(), self.y.abs())
             }
 
             #[inline]
@@ -316,6 +316,13 @@ macro_rules! IVec2 {
             #[inline]
             fn from(v: $n) -> Self {
                 (v.x, v.y)
+            }
+        }
+
+        impl From<$n> for Vec2 {
+            #[inline]
+            fn from(v: $n) -> Self {
+                Self::new(v.x as f32, v.y as f32)
             }
         }
 
@@ -568,7 +575,7 @@ macro_rules! IVec3 {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y, self.z)
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs())
             }
 
             #[inline]
@@ -768,6 +775,13 @@ macro_rules! IVec3 {
             #[inline]
             fn from(v: $n) -> Self {
                 (v.x, v.y, v.z)
+            }
+        }
+
+        impl From<$n> for Vec3 {
+            #[inline]
+            fn from(v: $n) -> Self {
+                Self::new(v.x as f32, v.y as f32, v.z as f32)
             }
         }
 
@@ -1195,6 +1209,13 @@ macro_rules! IVec4 {
             #[inline]
             fn from(v: $n) -> Self {
                 (v.x, v.y, v.z, v.w)
+            }
+        }
+
+        impl From<$n> for Vec4 {
+            #[inline]
+            fn from(v: $n) -> Self {
+                Self::new(v.x as f32, v.y as f32, v.z as f32, v.w as f32)
             }
         }
 
