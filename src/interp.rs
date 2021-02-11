@@ -8,7 +8,7 @@ use crate::*;
 /// ```rs
 /// let interpolated_rotor = rotor1.lerp(rotor2, 0.5).normalized();
 /// ```
-/// For most cases (especially where perfomrance is the primary concern, like in
+/// For most cases (especially where performance is the primary concern, like in
 /// animation interpolation for games, this 'normalized lerp' or 'nlerp' is probably
 /// what you want to use. However, there are situations in which you really want
 /// the interpolation between two `Rotor`s to be of constant angular velocity. In this
@@ -28,7 +28,7 @@ macro_rules! impl_lerp {
             /// ```rs
             /// let interpolated_rotor = rotor1.lerp(rotor2, 0.5).normalized();
             /// ```
-            /// For most cases (especially where perfomrance is the primary concern, like in
+            /// For most cases (especially where performance is the primary concern, like in
             /// animation interpolation for games, this 'normalized lerp' or 'nlerp' is probably
             /// what you want to use. However, there are situations in which you really want
             /// the interpolation between two `Rotor`s to be of constant angular velocity. In this
