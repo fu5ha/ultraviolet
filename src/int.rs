@@ -122,7 +122,7 @@ macro_rules! IVec2 {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y)
+                Self::new(self.x.abs(), self.y.abs())
             }
 
             #[inline]
@@ -568,7 +568,7 @@ macro_rules! IVec3 {
 
             #[inline]
             pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y, self.z)
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs())
             }
 
             #[inline]
@@ -1005,6 +1005,11 @@ macro_rules! IVec4 {
             pub fn clamped(mut self, min: Self, max: Self) -> Self {
                 self.clamp(min, max);
                 self
+            }
+
+            #[inline]
+            pub fn abs(&self) -> Self {
+                Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
             }
 
             #[inline]
