@@ -1423,12 +1423,12 @@ impl TryFrom<IVec3> for UVec3 {
     }
 }
 
-// A macro to implement abs for unsigned and signed IVecs
-// the attributes (x, y, z etc.) must be given in the correct order.
-// example macro use:
-// impl_abs!(IVec2 => [x, y]);
-// or for unsigned
-// impl_abs!(UVec2 => [x, y] nosign);
+/// A macro to implement abs for unsigned and signed IVecs
+/// the attributes (x, y, z etc.) must be given in the correct order.
+/// example macro use:
+/// impl_abs!(IVec2 => [x, y]);
+/// or for unsigned
+/// impl_abs!(UVec2 => [x, y] nosign);
 macro_rules! impl_abs {
     ($n:ident => [$($var:ident),*]) => {
         impl $n {
