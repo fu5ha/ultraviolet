@@ -121,11 +121,6 @@ macro_rules! IVec2 {
             }
 
             #[inline]
-            pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y)
-            }
-
-            #[inline]
             pub fn clamp(&mut self, min: Self, max: Self) {
                 self.x = self.x.max(min.x).min(max.x);
                 self.y = self.y.max(min.y).min(max.y);
@@ -564,11 +559,6 @@ macro_rules! IVec3 {
                     self.y.mul_add(mul.y, add.y),
                     self.z.mul_add(mul.z, add.z),
                 )
-            }
-
-            #[inline]
-            pub fn abs(&self) -> Self {
-                Self::new(self.x, self.y, self.z)
             }
 
             #[inline]
@@ -1433,6 +1423,31 @@ impl TryFrom<IVec3> for UVec3 {
     }
 }
 
+/// A macro to implement abs for unsigned and signed IVecs
+/// the attributes (x, y, z etc.) must be given in the correct order.
+/// example macro use:
+/// impl_abs!(IVec2 => [x, y]);
+/// or for unsigned
+/// impl_abs!(UVec2 => [x, y] nosign);
+macro_rules! impl_abs {
+    ($n:ident => [$($var:ident),*]) => {
+        impl $n {
+            #[inline]
+            fn abs(&self) -> Self {
+                Self::new($(self.$var.abs(),)* )
+            }
+        }
+    };
+    ($n:ident => [$($var:ident),*] nosign) => {
+        impl $n {
+            #[inline]
+            fn abs(&self) -> Self {
+                Self::new($(self.$var,)* )
+            }
+        }
+    }
+}
+
 IVec2!((UVec2, UVec3, UVec4) => u32);
 IVec2!((IVec2, IVec3, IVec4) => i32);
 
@@ -1441,3 +1456,10 @@ IVec3!((IVec2, IVec3, IVec4) => i32);
 
 IVec4!(UVec4, UVec2, UVec3 => u32);
 IVec4!(IVec4, IVec2, IVec3 => i32);
+
+impl_abs!(IVec2 => [x, y]);
+impl_abs!(IVec3 => [x, y, z]);
+impl_abs!(IVec4 => [x, y, z, w]);
+impl_abs!(UVec2 => [x, y] nosign);
+impl_abs!(UVec3 => [x, y, z] nosign);
+impl_abs!(UVec4 => [x, y, z, w] nosign);
