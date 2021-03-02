@@ -1433,7 +1433,7 @@ macro_rules! impl_abs {
     ($n:ident => [$($var:ident),*]) => {
         impl $n {
             #[inline]
-            fn abs(&self) -> Self {
+            pub fn abs(&self) -> Self {
                 Self::new($(self.$var.abs(),)* )
             }
         }
@@ -1441,7 +1441,7 @@ macro_rules! impl_abs {
     ($n:ident => [$($var:ident),*] nosign) => {
         impl $n {
             #[inline]
-            fn abs(&self) -> Self {
+            pub fn abs(&self) -> Self {
                 Self::new($(self.$var,)* )
             }
         }
