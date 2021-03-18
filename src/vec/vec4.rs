@@ -295,12 +295,6 @@ macro_rules! vec4s {
             }
         }
 
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
-            }
-        }
-
         impl Into<[$t; 4]> for $n {
             #[inline]
             fn into(self) -> [$t; 4] {
@@ -543,6 +537,23 @@ macro_rules! impl_scalar_vec4s {
             }
         }
 
+        impl EqualsEps for $vt {
+            fn eq_eps(self, other: Self) -> bool {
+                let diff_sq = (self - other).mag_sq();
+                let eps = 0.01;
+
+                if diff_sq <= eps * eps {
+                    true
+                } else {
+                    println!(
+                        "{:?} should equal {:?} with epsilon 0.01 but doesn't.",
+                        self, other
+                    );
+                    false
+                }
+            }
+        }
+
         impl From<$v3t> for $vt {
             #[inline]
             fn from(vec: $v3t) -> Self {
@@ -595,6 +606,12 @@ macro_rules! impl_wide_vec4s {
                     z: mask.blend(tru.z, fals.z),
                     w: mask.blend(tru.w, fals.w),
                 }
+            }
+        }
+
+        impl EqualsEps for $vt {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z) && self.w.eq_eps(other.w)
             }
         }
 

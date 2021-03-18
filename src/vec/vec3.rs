@@ -359,12 +359,6 @@ macro_rules! vec3s {
             }
         }
 
-        impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z)
-            }
-        }
-
         impl Into<[$t; 3]> for $n {
             #[inline]
             fn into(self) -> [$t; 3] {
@@ -599,6 +593,23 @@ macro_rules! impl_scalar_vec3s {
             }
         }
 
+        impl EqualsEps for $vt {
+            fn eq_eps(self, other: Self) -> bool {
+                let diff_sq = (self - other).mag_sq();
+                let eps = 0.01;
+
+                if diff_sq <= eps * eps {
+                    true
+                } else {
+                    println!(
+                        "{:?} should equal {:?} with epsilon 0.01 but doesn't.",
+                        self, other
+                    );
+                    false
+                }
+            }
+        }
+
         impl From<$v2t> for $vt {
             #[inline]
             fn from(vec: $v2t) -> Self {
@@ -678,6 +689,12 @@ macro_rules! impl_wide_vec3s {
                 let out = i.mul_add(Self::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
 
                 Self::blend(mask, Self::zero(), out)
+            }
+        }
+
+        impl EqualsEps for $vt {
+            fn eq_eps(self, other: Self) -> bool {
+                self.x.eq_eps(other.x) && self.y.eq_eps(other.y) && self.z.eq_eps(other.z)
             }
         }
 
