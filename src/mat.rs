@@ -1334,11 +1334,7 @@ macro_rules! mat4s {
             /// If the 3x3 left upper block of `self` is a rotation, return the corresponding
             /// rotor. Otherwise, the returned value is a `Rotor3` with undefined properties.
             pub fn extract_rotation(&self) -> $rt {
-                $m3t::new(
-                    self.cols[0].truncated(),
-                    self.cols[1].truncated(),
-                    self.cols[2].truncated(),
-                ).into_rotor3()
+                self.truncate().into_rotor3()
             }
 
             /// If self represents an `Isometry3` (i.e. self is a product of the from `T * R` where
@@ -1348,6 +1344,16 @@ macro_rules! mat4s {
             /// properties.
             pub fn into_isometry(&self) -> $i3t {
                 $i3t::new(self.extract_translation(), self.extract_rotation())
+            }
+
+            /// Truncate `self` to a matrix consisting of the 3x3 left upper block.
+            /// If you need a rotation, consider using [`Self::extract_rotation()`] instead.
+            pub fn truncate(&self) -> $m3t {
+                $m3t::new(
+                    self.cols[0].truncated(),
+                    self.cols[1].truncated(),
+                    self.cols[2].truncated(),
+                )
             }
 
             #[inline]
