@@ -1,4 +1,7 @@
+# Changelog
+
 <!-- next-header -->
+
 ## Unreleased
 
 - Update `wide` to `0.6.x`
@@ -8,24 +11,30 @@
 - Added `const` to `new` functions for integer vectors.
 
 ## 0.7.5
+
 - Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
 - Add missing `PartialEq` implementations for all matrices, transformations, vectors, bivectors and rotors, including
   SIMD and `f64` variants
 - Fix `Rotor2::rotate_vec` and corresponding derivation.
 
 ## 0.7.4
+
 - Add optional bytemuck support
 
 ## 0.7.3
+
 - Fix integer types not compiling properly.
 
 ## 0.7.2
+
 - Implement Serialize and Deserialize for bivectors and rotors (under `serde` feature flag)
 
 ## 0.7.1
+
 - Fix typo in `Mat3::inverse` implementation which made it transpose instead
 
 ## 0.7.0
+
 - Add Mat3 into Rotor3 conversion for rotation matrices
 - Remove heavy reliance on `mul_add` due to negligible performance benefit and in many cases performance detriment.
 - Slightly optimize Vector `normalize`.
@@ -34,9 +43,11 @@
 - `Mat3::from_nonuniform_scale_homogeneous()` now takes a `Vec2` instead of a `Vec3`.
 
 ## 0.6.1
+
 - Add scalar multiplication and componentwise addition for `MatN`
 
 ## 0.6
+
 - Significantly improve performance of Rotors and transform types (Isometry, Similarity)
 - Add `Rotor3::rotate_vecs()` for improved performance on rotating multiple vecs with the same rotor
 - Add support for f64/double precision floats under `f64` feature. Naming convention is `D[TypeName]` for the f64 versions.
