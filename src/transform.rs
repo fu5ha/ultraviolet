@@ -138,6 +138,16 @@ macro_rules! isometries {
             }
         }
 
+        impl Mul<$t> for $ison {
+            type Output = Self;
+            #[inline]
+            fn mul(mut self, scalar: $t) -> $ison {
+                self.translation *= scalar;
+                self.rotation *= scalar;
+                self
+            }
+        }
+
         impl Mul<$vt> for $ison {
             type Output = $vt;
             #[inline]
@@ -153,6 +163,16 @@ macro_rules! isometries {
                 let trans = self.transform_vec(base.translation);
                 let rot = self.rotation * base.rotation;
                 $ison::new(trans, rot)
+            }
+        }
+
+        impl Add<$ison> for $ison {
+            type Output = Self;
+            #[inline]
+            fn add(mut self, other: $ison) -> $ison {
+                self.translation += other.translation;
+                self.rotation += other.rotation;
+                self
             }
         }
         )+
@@ -337,6 +357,17 @@ macro_rules! similarities {
             }
         }
 
+        impl Mul<$t> for $sn {
+            type Output = Self;
+            #[inline]
+            fn mul(mut self, scalar: $t) -> $sn {
+                self.translation *= scalar;
+                self.rotation *= scalar;
+                self.scale *= scalar;
+                self
+            }
+        }
+
         impl Mul<$vt> for $sn {
             type Output = $vt;
             #[inline]
@@ -353,6 +384,17 @@ macro_rules! similarities {
                 let rot = self.rotation * base.rotation;
                 let scale = self.scale * base.scale;
                 $sn::new(trans, rot, scale)
+            }
+        }
+
+        impl Add<$sn> for $sn {
+            type Output = Self;
+            #[inline]
+            fn add(mut self, other: $sn) -> $sn {
+                self.translation += other.translation;
+                self.rotation += other.rotation;
+                self.scale += other.scale;
+                self
             }
         }
         )+
