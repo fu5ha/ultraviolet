@@ -6,6 +6,7 @@
 - Add `Rotor3::into_quaternion_array` and `Rotor3::from_quaternion_array`
 - Implement Serialize and Deserialize for `Isometry2` and `Isometry3` (under `serde` feature flag)
 - Added `const` to `new` functions for integer vectors.
+- Add `Mat4::truncate()`
 
 ## 0.7.5
 - Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
