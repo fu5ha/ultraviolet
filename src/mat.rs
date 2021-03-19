@@ -1628,12 +1628,14 @@ mat4s!(
 mod test {
     use super::*;
     use crate::util::*;
-    use std::f32::consts::FRAC_PI_2;
-    use std::f32::consts::PI;
 
     /* TODO:
     Re-enable these. The current way that Matrix3::into_rotor() works sometimes fails these
     edge cases based on rounding error accumulated from the round trip due to the way it uses
+
+    use std::f32::consts::FRAC_PI_2;
+    use std::f32::consts::PI;
+
     copysign()
         #[test]
         pub fn mat3_to_rotor_corner_cases(){
@@ -1685,6 +1687,7 @@ mod test {
 
 
         }*/
+
     #[test]
     pub fn isometry_roundtrip() {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
