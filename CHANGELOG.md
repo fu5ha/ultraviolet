@@ -9,6 +9,7 @@
 - Add `Rotor3::into_quaternion_array` and `Rotor3::from_quaternion_array`
 - Implement Serialize and Deserialize for `Isometry2` and `Isometry3` (under `serde` feature flag)
 - Added `const` to `new` functions for integer vectors.
+- Add `Mul<Scalar>` and `Add<Self>` for isometries and similarities
 
 ## 0.7.5
 
