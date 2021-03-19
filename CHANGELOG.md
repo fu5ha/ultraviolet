@@ -7,6 +7,7 @@
 - Implement Serialize and Deserialize for `Isometry2` and `Isometry3` (under `serde` feature flag)
 - Added `const` to `new` functions for integer vectors.
 - Add `Mat4::truncate()`
+- Add `Mul<Scalar>` and `Add<Self>` for isometries and similarities
 
 ## 0.7.5
 - Add `Mat4::extract_translation`, `Mat4::extract_rotation` and `Mat4::into_isometry`.
