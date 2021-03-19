@@ -1096,8 +1096,7 @@ impl<'de> Deserialize<'de> for Bivec3 {
 #[cfg(test)]
 mod bivec_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
-    use serde::Deserialize;
-    use serde_test::{assert_tokens, Deserializer, Token};
+    use serde_test::{assert_tokens, Token};
 
     #[test]
     fn bivec2() {
@@ -1360,8 +1359,7 @@ impl<'de> Deserialize<'de> for Rotor3 {
 mod rotor_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
     use crate::rotor::{Rotor2, Rotor3};
-    use serde::Deserialize;
-    use serde_test::{assert_tokens, Deserializer, Token};
+    use serde_test::{assert_tokens, Token};
 
     #[test]
     fn bivec2() {
