@@ -1,8 +1,10 @@
 # Changelog
 
 <!-- next-header -->
-
 ## Unreleased
+
+
+## 0.8.0
 
 - Update `wide` to `0.6.x`
 - Add `Rotor3::into_angle_plane()`
