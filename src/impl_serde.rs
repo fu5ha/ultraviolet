@@ -1141,7 +1141,7 @@ impl<'de> Deserialize<'de> for Bivec2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["xy"];
+        const FIELDS: &[&str] = &["xy"];
 
         deserializer.deserialize_struct("Bivec2", FIELDS, Bivec2Visitor)
     }
@@ -1263,7 +1263,7 @@ impl<'de> Deserialize<'de> for Bivec3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["xy", "xz", "yz"];
+        const FIELDS: &[&str] = &["xy", "xz", "yz"];
 
         deserializer.deserialize_struct("Bivec3", FIELDS, Bivec3Visitor)
     }
@@ -1417,7 +1417,7 @@ impl<'de> Deserialize<'de> for Rotor2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["s", "bv"];
+        const FIELDS: &[&str] = &["s", "bv"];
 
         deserializer.deserialize_struct("Rotor2", FIELDS, Rotor2Visitor)
     }
@@ -1525,7 +1525,7 @@ impl<'de> Deserialize<'de> for Rotor3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["s", "bv"];
+        const FIELDS: &[&str] = &["s", "bv"];
 
         deserializer.deserialize_struct("Rotor3", FIELDS, Rotor3Visitor)
     }
@@ -1698,7 +1698,7 @@ impl<'de> Deserialize<'de> for Isometry2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+        const FIELDS: &[&str] = &["rotation", "translation"];
 
         deserializer.deserialize_struct("Isometry2", FIELDS, Isometry2Visitor)
     }
@@ -1808,7 +1808,7 @@ impl<'de> Deserialize<'de> for Isometry3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+        const FIELDS: &[&str] = &["rotation", "translation"];
 
         deserializer.deserialize_struct("Isometry3", FIELDS, Isometry3Visitor)
     }

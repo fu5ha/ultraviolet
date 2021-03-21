@@ -1342,6 +1342,7 @@ macro_rules! mat4s {
             ///
             /// If `self` does not represent an isometry, the returned value has undefined
             /// properties.
+            #[allow(clippy::wrong_self_convention)]
             pub fn into_isometry(&self) -> $i3t {
                 $i3t::new(self.extract_translation(), self.extract_rotation())
             }
