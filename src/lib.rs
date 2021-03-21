@@ -119,8 +119,6 @@ pub use rotor::*;
 pub use transform::*;
 pub use vec::*;
 
-pub(crate) use wide;
-
 pub use wide::f32x4;
 pub use wide::f32x8;
 pub use wide::f64x2;

@@ -6,371 +6,408 @@ use serde::{
     Deserialize, Deserializer, Serialize, Serializer,
 };
 
-impl Serialize for Vec2 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec2", 2)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.end()
-    }
-}
+macro_rules! impl_serde_vec2 {
+    ($t:ident, $n:expr) => {
+        impl Serialize for $t {
+            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+            where
+                T: Serializer,
+            {
+                let mut state = serializer.serialize_struct($n, 2)?;
+                state.serialize_field("x", &self.x)?;
+                state.serialize_field("y", &self.y)?;
+                state.end()
+            }
+        }
 
-impl<'de> Deserialize<'de> for Vec2 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-        };
-
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+        impl<'de> Deserialize<'de> for $t {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct FieldVisitor;
+                enum Field {
+                    X,
+                    Y,
+                };
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
+                impl<'de> Deserialize<'de> for Field {
+                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+                    where
+                        D: Deserializer<'de>,
+                    {
+                        struct FieldVisitor;
+
+                        impl<'de> Visitor<'de> for FieldVisitor {
+                            type Value = Field;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut std::fmt::Formatter,
+                            ) -> std::fmt::Result {
+                                formatter.write_str("`x` or `y`")
+                            }
+
+                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                            where
+                                E: serde::de::Error,
+                            {
+                                match value {
+                                    "x" => Ok(Field::X),
+                                    "y" => Ok(Field::Y),
+                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                                }
+                            }
+                        }
+
+                        deserializer.deserialize_identifier(FieldVisitor)
+                    }
+                }
+
+                struct TVisitor;
+
+                impl<'de> Visitor<'de> for TVisitor {
+                    type Value = $t;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y`")
+                        formatter.write_str(&["struct ", $n].concat())
                     }
 
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
                     where
-                        E: serde::de::Error,
+                        V: SeqAccess<'de>,
                     {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        let x = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        let y = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                        Ok($t::new(x, y))
+                    }
+
+                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    where
+                        V: MapAccess<'de>,
+                    {
+                        let mut x = None;
+                        let mut y = None;
+                        while let Some(key) = map.next_key()? {
+                            match key {
+                                Field::X => {
+                                    if x.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("x"));
+                                    }
+                                    x = Some(map.next_value()?);
+                                }
+                                Field::Y => {
+                                    if y.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("y"));
+                                    }
+                                    y = Some(map.next_value()?);
+                                }
+                            }
                         }
+                        let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
+                        let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
+                        Ok($t::new(x, y))
                     }
                 }
 
-                deserializer.deserialize_identifier(FieldVisitor)
+                const FIELDS: &'static [&'static str] = &["x", "y"];
+
+                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+            }
+        }
+    };
+}
+macro_rules! impl_serde_vec3 {
+    ($t:ident, $n:expr) => {
+        impl Serialize for $t {
+            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+            where
+                T: Serializer,
+            {
+                let mut state = serializer.serialize_struct($n, 3)?;
+                state.serialize_field("x", &self.x)?;
+                state.serialize_field("y", &self.y)?;
+                state.serialize_field("z", &self.z)?;
+                state.end()
             }
         }
 
-        struct Vec2Visitor;
-
-        impl<'de> Visitor<'de> for Vec2Visitor {
-            type Value = Vec2;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec2")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec2, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                Ok(Vec2::new(x, y))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec2, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                    }
-                }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                Ok(Vec2::new(x, y))
-            }
-        }
-
-        const FIELDS: &'static [&'static str] = &["x", "y"];
-
-        deserializer.deserialize_struct("Vec2", FIELDS, Vec2Visitor)
-    }
-}
-
-impl Serialize for Vec3 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec3", 3)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.serialize_field("z", &self.z)?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Vec3 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-            Z,
-        };
-
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+        impl<'de> Deserialize<'de> for $t {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct FieldVisitor;
+                enum Field {
+                    X,
+                    Y,
+                    Z,
+                };
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
+                impl<'de> Deserialize<'de> for Field {
+                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+                    where
+                        D: Deserializer<'de>,
+                    {
+                        struct FieldVisitor;
+
+                        impl<'de> Visitor<'de> for FieldVisitor {
+                            type Value = Field;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut std::fmt::Formatter,
+                            ) -> std::fmt::Result {
+                                formatter.write_str("`x` or `y` or `z`")
+                            }
+
+                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                            where
+                                E: serde::de::Error,
+                            {
+                                match value {
+                                    "x" => Ok(Field::X),
+                                    "y" => Ok(Field::Y),
+                                    "z" => Ok(Field::Z),
+                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                                }
+                            }
+                        }
+
+                        deserializer.deserialize_identifier(FieldVisitor)
+                    }
+                }
+
+                struct TVisitor;
+
+                impl<'de> Visitor<'de> for TVisitor {
+                    type Value = $t;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y` or `z`")
+                        formatter.write_str(&["struct ", $n].concat())
                     }
 
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
                     where
-                        E: serde::de::Error,
+                        V: SeqAccess<'de>,
                     {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            "z" => Ok(Field::Z),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        let x = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        let y = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                        let z = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
+                        Ok($t::new(x, y, z))
+                    }
+
+                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    where
+                        V: MapAccess<'de>,
+                    {
+                        let mut x = None;
+                        let mut y = None;
+                        let mut z = None;
+                        while let Some(key) = map.next_key()? {
+                            match key {
+                                Field::X => {
+                                    if x.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("x"));
+                                    }
+                                    x = Some(map.next_value()?);
+                                }
+                                Field::Y => {
+                                    if y.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("y"));
+                                    }
+                                    y = Some(map.next_value()?);
+                                }
+                                Field::Z => {
+                                    if z.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("z"));
+                                    }
+                                    z = Some(map.next_value()?);
+                                }
+                            }
                         }
+                        let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
+                        let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
+                        let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
+                        Ok($t::new(x, y, z))
                     }
                 }
 
-                deserializer.deserialize_identifier(FieldVisitor)
+                const FIELDS: &'static [&'static str] = &["x", "y", "z"];
+
+                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+            }
+        }
+    };
+}
+macro_rules! impl_serde_vec4 {
+    ($t:ident, $n:expr) => {
+        impl Serialize for $t {
+            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+            where
+                T: Serializer,
+            {
+                let mut state = serializer.serialize_struct($n, 4)?;
+                state.serialize_field("x", &self.x)?;
+                state.serialize_field("y", &self.y)?;
+                state.serialize_field("z", &self.z)?;
+                state.serialize_field("w", &self.w)?;
+                state.end()
             }
         }
 
-        struct Vec3Visitor;
-
-        impl<'de> Visitor<'de> for Vec3Visitor {
-            type Value = Vec3;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec3")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec3, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                let z = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                Ok(Vec3::new(x, y, z))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec3, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                let mut z = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                        Field::Z => {
-                            if z.is_some() {
-                                return Err(serde::de::Error::duplicate_field("z"));
-                            }
-                            z = Some(map.next_value()?);
-                        }
-                    }
-                }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
-                Ok(Vec3::new(x, y, z))
-            }
-        }
-
-        const FIELDS: &'static [&'static str] = &["x", "y", "z"];
-
-        deserializer.deserialize_struct("Vec3", FIELDS, Vec3Visitor)
-    }
-}
-
-impl Serialize for Vec4 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Vec4", 4)?;
-        state.serialize_field("x", &self.x)?;
-        state.serialize_field("y", &self.y)?;
-        state.serialize_field("z", &self.z)?;
-        state.serialize_field("w", &self.w)?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Vec4 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            X,
-            Y,
-            Z,
-            W,
-        };
-
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+        impl<'de> Deserialize<'de> for $t {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct FieldVisitor;
+                enum Field {
+                    X,
+                    Y,
+                    Z,
+                    W,
+                };
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
+                impl<'de> Deserialize<'de> for Field {
+                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+                    where
+                        D: Deserializer<'de>,
+                    {
+                        struct FieldVisitor;
+
+                        impl<'de> Visitor<'de> for FieldVisitor {
+                            type Value = Field;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut std::fmt::Formatter,
+                            ) -> std::fmt::Result {
+                                formatter.write_str("`x` or `y` or `z` or `w`")
+                            }
+
+                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                            where
+                                E: serde::de::Error,
+                            {
+                                match value {
+                                    "x" => Ok(Field::X),
+                                    "y" => Ok(Field::Y),
+                                    "z" => Ok(Field::Z),
+                                    "w" => Ok(Field::W),
+                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                                }
+                            }
+                        }
+
+                        deserializer.deserialize_identifier(FieldVisitor)
+                    }
+                }
+
+                struct TVisitor;
+
+                impl<'de> Visitor<'de> for TVisitor {
+                    type Value = $t;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                        formatter.write_str("`x` or `y` or `z` or `w`")
+                        formatter.write_str(&["struct ", $n].concat())
                     }
 
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
                     where
-                        E: serde::de::Error,
+                        V: SeqAccess<'de>,
                     {
-                        match value {
-                            "x" => Ok(Field::X),
-                            "y" => Ok(Field::Y),
-                            "z" => Ok(Field::Z),
-                            "w" => Ok(Field::W),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        let x = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        let y = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                        let z = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
+                        let w = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
+                        Ok($t::new(x, y, z, w))
+                    }
+
+                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    where
+                        V: MapAccess<'de>,
+                    {
+                        let mut x = None;
+                        let mut y = None;
+                        let mut z = None;
+                        let mut w = None;
+                        while let Some(key) = map.next_key()? {
+                            match key {
+                                Field::X => {
+                                    if x.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("x"));
+                                    }
+                                    x = Some(map.next_value()?);
+                                }
+                                Field::Y => {
+                                    if y.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("y"));
+                                    }
+                                    y = Some(map.next_value()?);
+                                }
+                                Field::Z => {
+                                    if z.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("z"));
+                                    }
+                                    z = Some(map.next_value()?);
+                                }
+                                Field::W => {
+                                    if w.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("w"));
+                                    }
+                                    w = Some(map.next_value()?);
+                                }
+                            }
                         }
+                        let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
+                        let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
+                        let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
+                        let w = w.ok_or_else(|| serde::de::Error::missing_field("w"))?;
+                        Ok($t::new(x, y, z, w))
                     }
                 }
 
-                deserializer.deserialize_identifier(FieldVisitor)
+                const FIELDS: &'static [&'static str] = &["x", "y", "z", "w"];
+
+                deserializer.deserialize_struct($n, FIELDS, TVisitor)
             }
         }
-
-        struct Vec4Visitor;
-
-        impl<'de> Visitor<'de> for Vec4Visitor {
-            type Value = Vec4;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("struct Vec4")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Vec4, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let x = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let y = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                let z = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                let w: f32 = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
-                Ok(Vec4::new(x, y, z, w))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Vec4, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut x = None;
-                let mut y = None;
-                let mut z = None;
-                let mut w = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::X => {
-                            if x.is_some() {
-                                return Err(serde::de::Error::duplicate_field("x"));
-                            }
-                            x = Some(map.next_value()?);
-                        }
-                        Field::Y => {
-                            if y.is_some() {
-                                return Err(serde::de::Error::duplicate_field("y"));
-                            }
-                            y = Some(map.next_value()?);
-                        }
-                        Field::Z => {
-                            if z.is_some() {
-                                return Err(serde::de::Error::duplicate_field("z"));
-                            }
-                            z = Some(map.next_value()?);
-                        }
-                        Field::W => {
-                            if w.is_some() {
-                                return Err(serde::de::Error::duplicate_field("w"));
-                            }
-                            w = Some(map.next_value()?);
-                        }
-                    }
-                }
-                let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
-                let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
-                let w: f32 = w.ok_or_else(|| serde::de::Error::missing_field("w"))?;
-                Ok(Vec4::new(x, y, z, w))
-            }
-        }
-
-        const FIELDS: &'static [&'static str] = &["x", "y", "z", "w"];
-
-        deserializer.deserialize_struct("Vec4", FIELDS, Vec4Visitor)
-    }
+    };
 }
+
+impl_serde_vec2!(Vec2, "Vec2");
+#[cfg(feature = "int")]
+impl_serde_vec2!(UVec2, "UVec2");
+#[cfg(feature = "int")]
+impl_serde_vec2!(IVec2, "IVec2");
+
+impl_serde_vec3!(Vec3, "Vec3");
+#[cfg(feature = "int")]
+impl_serde_vec3!(UVec3, "UVec3");
+#[cfg(feature = "int")]
+impl_serde_vec3!(IVec3, "IVec3");
+
+impl_serde_vec4!(Vec4, "Vec4");
+#[cfg(feature = "int")]
+impl_serde_vec4!(UVec4, "UVec4");
+#[cfg(feature = "int")]
+impl_serde_vec4!(IVec4, "IVec4");
 
 #[cfg(test)]
 mod vec_serde_tests {
@@ -438,6 +475,145 @@ mod vec_serde_tests {
                 Token::F32(3.0),
                 Token::Str("w"),
                 Token::F32(4.0),
+                Token::StructEnd,
+            ],
+        );
+    }
+}
+
+#[cfg(feature = "int")]
+#[cfg(test)]
+mod int_vec_serde_tests {
+    use crate::{IVec2, IVec3, IVec4, UVec2, UVec3, UVec4};
+    use serde_test::{assert_tokens, Token};
+
+    #[test]
+    fn uvec2() {
+        let vec2 = UVec2::new(1, 2);
+
+        assert_tokens(
+            &vec2,
+            &[
+                Token::Struct {
+                    name: "UVec2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::U32(1),
+                Token::Str("y"),
+                Token::U32(2),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn uvec3() {
+        let vec3 = UVec3::new(1, 2, 3);
+
+        assert_tokens(
+            &vec3,
+            &[
+                Token::Struct {
+                    name: "UVec3",
+                    len: 3,
+                },
+                Token::Str("x"),
+                Token::U32(1),
+                Token::Str("y"),
+                Token::U32(2),
+                Token::Str("z"),
+                Token::U32(3),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn uvec4() {
+        let vec4 = UVec4::new(1, 2, 3, 4);
+
+        assert_tokens(
+            &vec4,
+            &[
+                Token::Struct {
+                    name: "UVec4",
+                    len: 4,
+                },
+                Token::Str("x"),
+                Token::U32(1),
+                Token::Str("y"),
+                Token::U32(2),
+                Token::Str("z"),
+                Token::U32(3),
+                Token::Str("w"),
+                Token::U32(4),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn ivec2() {
+        let vec2 = IVec2::new(1, 2);
+
+        assert_tokens(
+            &vec2,
+            &[
+                Token::Struct {
+                    name: "IVec2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::I32(1),
+                Token::Str("y"),
+                Token::I32(2),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn ivec3() {
+        let vec3 = IVec3::new(1, 2, 3);
+
+        assert_tokens(
+            &vec3,
+            &[
+                Token::Struct {
+                    name: "IVec3",
+                    len: 3,
+                },
+                Token::Str("x"),
+                Token::I32(1),
+                Token::Str("y"),
+                Token::I32(2),
+                Token::Str("z"),
+                Token::I32(3),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn ivec4() {
+        let vec4 = IVec4::new(1, 2, 3, 4);
+
+        assert_tokens(
+            &vec4,
+            &[
+                Token::Struct {
+                    name: "IVec4",
+                    len: 4,
+                },
+                Token::Str("x"),
+                Token::I32(1),
+                Token::Str("y"),
+                Token::I32(2),
+                Token::Str("z"),
+                Token::I32(3),
+                Token::Str("w"),
+                Token::I32(4),
                 Token::StructEnd,
             ],
         );
@@ -965,7 +1141,7 @@ impl<'de> Deserialize<'de> for Bivec2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["xy"];
+        const FIELDS: &[&str] = &["xy"];
 
         deserializer.deserialize_struct("Bivec2", FIELDS, Bivec2Visitor)
     }
@@ -1087,7 +1263,7 @@ impl<'de> Deserialize<'de> for Bivec3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["xy", "xz", "yz"];
+        const FIELDS: &[&str] = &["xy", "xz", "yz"];
 
         deserializer.deserialize_struct("Bivec3", FIELDS, Bivec3Visitor)
     }
@@ -1241,7 +1417,7 @@ impl<'de> Deserialize<'de> for Rotor2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["s", "bv"];
+        const FIELDS: &[&str] = &["s", "bv"];
 
         deserializer.deserialize_struct("Rotor2", FIELDS, Rotor2Visitor)
     }
@@ -1349,7 +1525,7 @@ impl<'de> Deserialize<'de> for Rotor3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["s", "bv"];
+        const FIELDS: &[&str] = &["s", "bv"];
 
         deserializer.deserialize_struct("Rotor3", FIELDS, Rotor3Visitor)
     }
@@ -1522,7 +1698,7 @@ impl<'de> Deserialize<'de> for Isometry2 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+        const FIELDS: &[&str] = &["rotation", "translation"];
 
         deserializer.deserialize_struct("Isometry2", FIELDS, Isometry2Visitor)
     }
@@ -1632,7 +1808,7 @@ impl<'de> Deserialize<'de> for Isometry3 {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["rotation", "translation"];
+        const FIELDS: &[&str] = &["rotation", "translation"];
 
         deserializer.deserialize_struct("Isometry3", FIELDS, Isometry3Visitor)
     }
