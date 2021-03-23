@@ -89,6 +89,8 @@ macro_rules! rotor2s {
             }
 
             /// Construct a Rotor that rotates one vector to another.
+            ///
+            /// A rotation between antiparallel vectors is **undefined**!
             #[inline]
             pub fn from_rotation_between(from: $vt, to: $vt) -> Self {
                 Self::new(
