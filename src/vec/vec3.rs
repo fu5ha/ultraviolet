@@ -195,6 +195,15 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            pub fn mul_add(&self, mul: $n, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul.x, add.x),
+                    self.y.mul_add(mul.y, add.y),
+                    self.z.mul_add(mul.z, add.z),
+                )
+            }
+
+            #[inline]
             pub fn abs(&self) -> Self {
                 Self::new(self.x.abs(), self.y.abs(), self.z.abs())
             }
@@ -347,32 +356,6 @@ macro_rules! vec3s {
             #[inline]
             pub fn as_mut_ptr(&mut self) -> *mut $t {
                 self as *mut $n as *mut $t
-            }
-        }
-
-        impl MulAdd for $n {
-            type Output = Self;
-
-            #[inline]
-            fn mul_add(self, a: Self, b: Self) -> Self::Output {
-                $n::new(
-                    self.x.mul_add(a.x, b.x),
-                    self.y.mul_add(a.y, b.y),
-                    self.z.mul_add(a.z, b.z),
-                )
-            }
-        }
-
-        impl MulAdd<$t> for $n {
-            type Output = Self;
-
-            #[inline]
-            fn mul_add(self, a: $t, b: Self) -> Self::Output {
-                $n::new(
-                    self.x.mul_add(a, b.x),
-                    self.y.mul_add(a, b.y),
-                    self.z.mul_add(a, b.z),
-                )
             }
         }
 

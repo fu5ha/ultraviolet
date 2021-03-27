@@ -1,6 +1,13 @@
-use crate::MulAdd;
 use std::convert::{TryFrom, TryInto};
 use std::ops::*;
+
+pub trait MulAdd<A = Self, B = Self> {
+    /// The resulting type after applying the fused multiply-add.
+    type Output;
+
+    /// Performs the fused multiply-add operation.
+    fn mul_add(self, a: A, b: B) -> Self::Output;
+}
 
 impl MulAdd<u32, u32> for u32 {
     type Output = u32;
