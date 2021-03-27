@@ -121,6 +121,14 @@ macro_rules! IVec2 {
             }
 
             #[inline]
+            pub fn imul_add(&self, mul: $t, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul, add.x),
+                    self.y.mul_add(mul, add.y),
+                )
+            }
+
+            #[inline]
             pub fn clamp(&mut self, min: Self, max: Self) {
                 self.x = self.x.max(min.x).min(max.x);
                 self.y = self.y.max(min.y).min(max.y);
@@ -562,6 +570,15 @@ macro_rules! IVec3 {
             }
 
             #[inline]
+            pub fn imul_add(&self, mul: $t, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul, add.x),
+                    self.y.mul_add(mul, add.y),
+                    self.z.mul_add(mul, add.z),
+                )
+            }
+
+            #[inline]
             pub fn clamp(&mut self, min: Self, max: Self) {
                 self.x = self.x.max(min.x).min(max.x);
                 self.y = self.y.max(min.y).min(max.y);
@@ -980,6 +997,16 @@ macro_rules! IVec4 {
                     self.y.mul_add(mul.y, add.y),
                     self.z.mul_add(mul.z, add.z),
                     self.w.mul_add(mul.w, add.w),
+                )
+            }
+
+            #[inline]
+            pub fn imul_add(&self, mul: $t, add: $n) -> Self {
+                $n::new(
+                    self.x.mul_add(mul, add.x),
+                    self.y.mul_add(mul, add.y),
+                    self.z.mul_add(mul, add.z),
+                    self.w.mul_add(mul, add.w),
                 )
             }
 
