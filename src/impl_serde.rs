@@ -28,7 +28,7 @@ macro_rules! impl_serde_vec2 {
                 enum Field {
                     X,
                     Y,
-                };
+                }
 
                 impl<'de> Deserialize<'de> for Field {
                     fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -144,7 +144,7 @@ macro_rules! impl_serde_vec3 {
                     X,
                     Y,
                     Z,
-                };
+                }
 
                 impl<'de> Deserialize<'de> for Field {
                     fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -274,7 +274,7 @@ macro_rules! impl_serde_vec4 {
                     Y,
                     Z,
                     W,
-                };
+                }
 
                 impl<'de> Deserialize<'de> for Field {
                     fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1071,7 +1071,7 @@ impl<'de> Deserialize<'de> for Bivec2 {
     {
         enum Field {
             Xy,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1169,7 +1169,7 @@ impl<'de> Deserialize<'de> for Bivec3 {
             Xy,
             Xz,
             Yz,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1335,7 +1335,7 @@ impl<'de> Deserialize<'de> for Rotor2 {
         enum Field {
             S,
             Bv,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1443,7 +1443,7 @@ impl<'de> Deserialize<'de> for Rotor3 {
         enum Field {
             S,
             Bv,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1614,7 +1614,7 @@ impl<'de> Deserialize<'de> for Isometry2 {
         enum Field {
             Translation,
             Rotation,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -1724,7 +1724,7 @@ impl<'de> Deserialize<'de> for Isometry3 {
         enum Field {
             Translation,
             Rotation,
-        };
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>

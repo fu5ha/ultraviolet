@@ -446,11 +446,32 @@ macro_rules! mat3s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
-                let rotor = $rt::from_euler_angles(roll, pitch, yaw);
-                rotor.into_matrix()
+                let (sin_yaw, cos_yaw) = yaw.sin_cos();
+                let (sin_pitch, cos_pitch) = pitch.sin_cos();
+                let (sin_roll, cos_roll) = roll.sin_cos();
+
+                let sin_pitch_sin_roll = sin_pitch * sin_roll;
+                let sin_pitch_cos_roll = sin_pitch * cos_roll;
+
+                let m00 = cos_yaw * cos_pitch;
+                let m10 = sin_yaw * cos_pitch;
+                let m20 = -sin_pitch;
+                let m01 = cos_yaw.mul_add(sin_pitch_sin_roll, -sin_yaw * cos_roll);
+                let m11 = sin_yaw.mul_add(sin_pitch_sin_roll, cos_yaw * cos_roll);
+                let m21 = cos_pitch * sin_roll;
+                let m02 = cos_yaw.mul_add(sin_pitch_cos_roll, sin_yaw * sin_roll);
+                let m12 = sin_yaw.mul_add(sin_pitch_cos_roll, -cos_yaw * sin_roll);
+                let m22 = cos_pitch * cos_roll;
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(m00, m10, m20),
+                    $vt::new(m01, m11, m21),
+                    $vt::new(m02, m12, m22),
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the x axis". This is
+            /// Create a new rotation matrix from a rotation "around the x axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the yz plane*.
             ///
@@ -464,11 +485,19 @@ macro_rules! mat3s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles($t::splat(0.0), angle, $t::splat(0.0))
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(one, zero, zero),
+                    $vt::new(zero, cos, sin),
+                    $vt::new(zero, -sin, cos),
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the y axis". This is
+            /// Create a new rotation matrix from a rotation "around the y axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xz plane*.
             ///
@@ -482,11 +511,19 @@ macro_rules! mat3s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles($t::splat(0.0), $t::splat(0.0), angle)
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(cos, zero, -sin),
+                    $vt::new(zero, one, zero),
+                    $vt::new(sin, zero, cos),
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the z axis". This is
+            /// Create a new rotation matrix from a rotation "around the z axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xy plane*.
             ///
@@ -500,8 +537,58 @@ macro_rules! mat3s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::splat(0.0), $t::splat(0.0))
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(cos, sin, zero),
+                    $vt::new(-sin, cos, zero),
+                    $vt::new(zero, zero, one),
+                )
+            }
+
+            /// Create a new rotation matrix from a rotation around the given axis.
+            /// This is here as a convenience function for users coming from other libraries.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
+            #[inline]
+            pub fn from_rotation_around(axis: $vt, angle: $t) -> Self {
+                let (sin, cos) = angle.sin_cos();
+                let mul = $t::splat(1.0) - cos;
+
+                let x_sin = axis.x * sin;
+                let y_sin = axis.y * sin;
+                let z_sin = axis.z * sin;
+
+                let xy_mul = axis.x * axis.y * mul;
+                let xz_mul = axis.x * axis.z * mul;
+                let yz_mul = axis.y * axis.z * mul;
+
+                let m00 = (axis.x * axis.x).mul_add(mul, cos);
+                let m10 = xy_mul + z_sin;
+                let m20 = xz_mul - y_sin;
+                let m01 = xy_mul - z_sin;
+                let m11 = (axis.y * axis.y).mul_add(mul, cos);
+                let m21 = yz_mul + x_sin;
+                let m02 = xz_mul + y_sin;
+                let m12 = yz_mul - x_sin;
+                let m22 = (axis.z * axis.z).mul_add(mul, cos);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(m00, m10, m20),
+                    $vt::new(m01, m11, m21),
+                    $vt::new(m02, m12, m22),
+                )
             }
 
             /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
@@ -1048,11 +1135,35 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
-                let rotor = $rt::from_euler_angles(roll, pitch, yaw);
-                rotor.into_matrix().into_homogeneous()
+                let (sin_yaw, cos_yaw) = yaw.sin_cos();
+                let (sin_pitch, cos_pitch) = pitch.sin_cos();
+                let (sin_roll, cos_roll) = roll.sin_cos();
+
+                let sin_pitch_sin_roll = sin_pitch * sin_roll;
+                let sin_pitch_cos_roll = sin_pitch * cos_roll;
+
+                let zero = $t::splat(0.0);
+
+                let m00 = cos_yaw * cos_pitch;
+                let m10 = sin_yaw * cos_pitch;
+                let m20 = -sin_pitch;
+                let m01 = cos_yaw.mul_add(sin_pitch_sin_roll, -sin_yaw * cos_roll);
+                let m11 = sin_yaw.mul_add(sin_pitch_sin_roll, cos_yaw * cos_roll);
+                let m21 = cos_pitch * sin_roll;
+                let m02 = cos_yaw.mul_add(sin_pitch_cos_roll, sin_yaw * sin_roll);
+                let m12 = sin_yaw.mul_add(sin_pitch_cos_roll, -cos_yaw * sin_roll);
+                let m22 = cos_pitch * cos_roll;
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(m00, m10, m20, zero),
+                    $vt::new(m01, m11, m21, zero),
+                    $vt::new(m02, m12, m22, zero),
+                    $vt::new(zero, zero, zero, $t::splat(1.0))
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the x axis". This is
+            /// Create a new rotation matrix from a rotation "around the x axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the yz plane*.
             ///
@@ -1068,11 +1179,20 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles($t::splat(0.0), angle, $t::splat(0.0))
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(one, zero, zero, zero),
+                    $vt::new(zero, cos, sin, zero),
+                    $vt::new(zero, -sin, cos, zero),
+                    $vt::new(zero, zero, zero, one),
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the y axis". This is
+            /// Create a new rotation matrix from a rotation "around the y axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xz plane*.
             ///
@@ -1088,10 +1208,20 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
-                Self::from_euler_angles($t::splat(0.0), $t::splat(0.0), angle)
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(cos, zero, -sin, zero),
+                    $vt::new(zero, one, zero, zero),
+                    $vt::new(sin, zero, cos, zero),
+                    $vt::new(zero, zero, zero, one),
+                )
             }
 
-            /// Create a new rotation matrix from a rotation "about the z axis". This is
+            /// Create a new rotation matrix from a rotation "around the z axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xy plane*.
             ///
@@ -1107,8 +1237,64 @@ macro_rules! mat4s {
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
-                // TODO: Easy optimization target.
-                Self::from_euler_angles(angle, $t::splat(0.0), $t::splat(0.0))
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(cos, sin, zero, zero),
+                    $vt::new(-sin, cos, zero, zero),
+                    $vt::new(zero, zero, one, zero),
+                    $vt::new(zero, zero, zero, one),
+                )
+            }
+
+            /// Create a new rotation matrix from a rotation around the given axis.
+            /// The axis will be interpreted as a 3d vector.
+            /// This is here as a convenience function for users coming from other libraries.
+            ///
+            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
+            /// * +X axis points *right*
+            /// * +Y axis points *up*
+            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
+            ///
+            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
+            /// as they use a different coordinate system. You should use the appropriate
+            /// projection matrix in ```projection``` module to fit your use case to remedy this.
+            #[inline]
+            pub fn from_rotation_around(axis: $vt, angle: $t) -> Self {
+                let (sin, cos) = angle.sin_cos();
+                let zero = $t::splat(0.0);
+                let one = $t::splat(1.0);
+                let mul = one - cos;
+
+
+                let x_sin = axis.x * sin;
+                let y_sin = axis.y * sin;
+                let z_sin = axis.z * sin;
+
+                let xy_mul = axis.x * axis.y * mul;
+                let xz_mul = axis.x * axis.z * mul;
+                let yz_mul = axis.y * axis.z * mul;
+
+                let m00 = (axis.x * axis.x).mul_add(mul, cos);
+                let m10 = xy_mul + z_sin;
+                let m20 = xz_mul - y_sin;
+                let m01 = xy_mul - z_sin;
+                let m11 = (axis.y * axis.y).mul_add(mul, cos);
+                let m21 = yz_mul + x_sin;
+                let m02 = xz_mul + y_sin;
+                let m12 = yz_mul - x_sin;
+                let m22 = (axis.z * axis.z).mul_add(mul, cos);
+
+                // think transposed as arguments are columns
+                Self::new(
+                    $vt::new(m00, m10, m20, zero),
+                    $vt::new(m01, m11, m21, zero),
+                    $vt::new(m02, m12, m22, zero),
+                    $vt::new(zero, zero, zero, one),
+                )
             }
 
             /// Construct a rotation matrix given a bivector which defines a plane and rotation orientation,
