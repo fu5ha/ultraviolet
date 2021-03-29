@@ -135,16 +135,6 @@ macro_rules! vec4s {
             }
 
             #[inline]
-            pub fn fmul_add(&self, mul: $t, add: $n) -> Self {
-                $n::new(
-                    self.x.mul_add(mul, add.x),
-                    self.y.mul_add(mul, add.y),
-                    self.z.mul_add(mul, add.z),
-                    self.w.mul_add(mul, add.w),
-                )
-            }
-
-            #[inline]
             pub fn abs(&self) -> Self {
                 Self::new(self.x.abs(), self.y.abs(), self.z.abs(), self.w.abs())
             }
