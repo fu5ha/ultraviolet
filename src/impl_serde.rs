@@ -661,8 +661,8 @@ macro_rules! impl_serde_mat2 {
 
                     #[inline]
                     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-                        where
-                            A: SeqAccess<'de>,
+                    where
+                        A: SeqAccess<'de>,
                     {
                         use serde::de::Error;
 
@@ -717,9 +717,9 @@ macro_rules! impl_serde_mat3 {
                 T: Serializer,
             {
                 use serde::ser::SerializeSeq;
-        
+
                 let mut seq = serializer.serialize_seq(Some(9))?;
-        
+
                 seq.serialize_element(&self.cols[0].x)?;
                 seq.serialize_element(&self.cols[0].y)?;
                 seq.serialize_element(&self.cols[0].z)?;
@@ -732,28 +732,28 @@ macro_rules! impl_serde_mat3 {
                 seq.end()
             }
         }
-        
+
         impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
                 struct Mat3Visitor;
-        
+
                 impl<'de> serde::de::Visitor<'de> for Mat3Visitor {
                     type Value = $name;
-        
+
                     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
                         formatter.write_str($expecting)
                     }
-        
+
                     #[inline]
                     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-                        where
-                            A: SeqAccess<'de>,
+                    where
+                        A: SeqAccess<'de>,
                     {
                         use serde::de::Error;
-        
+
                         Ok(Self::Value {
                             cols: [
                                 $vec::new(
@@ -802,10 +802,10 @@ macro_rules! impl_serde_mat3 {
                         })
                     }
                 }
-                
+
                 deserializer.deserialize_tuple(9, Mat3Visitor)
             }
-        
+
             //    @TODO I understand how to implement it in the context of arrays but not matrices
             //    fn deserialize_in_place<D>(
             //        deserializer: D,
@@ -827,9 +827,9 @@ macro_rules! impl_serde_mat4 {
                 T: Serializer,
             {
                 use serde::ser::SerializeSeq;
-        
+
                 let mut seq = serializer.serialize_seq(Some(16))?;
-        
+
                 seq.serialize_element(&self.cols[0].x)?;
                 seq.serialize_element(&self.cols[0].y)?;
                 seq.serialize_element(&self.cols[0].z)?;
@@ -849,28 +849,28 @@ macro_rules! impl_serde_mat4 {
                 seq.end()
             }
         }
-        
+
         impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
                 struct Mat4Visitor;
-        
+
                 impl<'de> serde::de::Visitor<'de> for Mat4Visitor {
                     type Value = $name;
-        
+
                     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
                         formatter.write_str($expecting)
                     }
-        
+
                     #[inline]
                     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-                        where
-                            A: SeqAccess<'de>,
+                    where
+                        A: SeqAccess<'de>,
                     {
                         use serde::de::Error;
-        
+
                         Ok(Self::Value {
                             cols: [
                                 $vec::new(
@@ -949,10 +949,10 @@ macro_rules! impl_serde_mat4 {
                         })
                     }
                 }
-                
+
                 deserializer.deserialize_tuple(16, Mat4Visitor)
             }
-        
+
             //    @TODO I understand how to implement it in the context of arrays but not matrices
             //    fn deserialize_in_place<D>(
             //        deserializer: D,
