@@ -4,7 +4,8 @@
 
 ## Unreleased
 
-- Implement Serialize and Deserialize for all `UVec` and `IVec` types (under `serde` and `int` feature flags)
+- Implement Serialize and Deserialize for all `UVec`,`IVec`, `DVec`, `DMat` types
+  (under `serde`, `int` and `f64` feature flags)
 
 ## 0.8.0
 
