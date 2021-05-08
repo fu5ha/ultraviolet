@@ -25,7 +25,7 @@ impl MulAdd<i32, i32> for i32 {
     }
 }
 
-macro_rules! IVec2 {
+macro_rules! ivec2s {
     ($(($n:ident, $v3t:ident, $v4t:ident) => $t:ident),+) => {
         $(
         /// A set of two coordinates which may be interpreted as a vector or point in 2d space.
@@ -444,7 +444,7 @@ macro_rules! IVec2 {
     };
 }
 
-macro_rules! IVec3 {
+macro_rules! ivec3s {
     ($(($v2t:ident, $n:ident, $v4t:ident) => $t:ident),+) => {
         /// A set of three coordinates which may be interpreted as a point or vector in 3d space,
         /// or as a homogeneous 2d vector or point.
@@ -900,7 +900,7 @@ macro_rules! IVec3 {
     }
 }
 
-macro_rules! IVec4 {
+macro_rules! ivec4s {
     ($($n:ident, $v2t:ident, $v3t:ident => $t:ident),+) => {
         /// A set of four coordinates which may be interpreted as a point or vector in 4d space,
         /// or as a homogeneous 3d vector or point.
@@ -1451,14 +1451,14 @@ macro_rules! impl_abs {
     }
 }
 
-IVec2!((UVec2, UVec3, UVec4) => u32);
-IVec2!((IVec2, IVec3, IVec4) => i32);
+ivec2s!((UVec2, UVec3, UVec4) => u32);
+ivec2s!((IVec2, IVec3, IVec4) => i32);
 
-IVec3!((UVec2, UVec3, UVec4) => u32);
-IVec3!((IVec2, IVec3, IVec4) => i32);
+ivec3s!((UVec2, UVec3, UVec4) => u32);
+ivec3s!((IVec2, IVec3, IVec4) => i32);
 
-IVec4!(UVec4, UVec2, UVec3 => u32);
-IVec4!(IVec4, IVec2, IVec3 => i32);
+ivec4s!(UVec4, UVec2, UVec3 => u32);
+ivec4s!(IVec4, IVec2, IVec3 => i32);
 
 impl_abs!(IVec2 => [x, y]);
 impl_abs!(IVec3 => [x, y, z]);
