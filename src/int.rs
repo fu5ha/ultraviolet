@@ -272,10 +272,11 @@ macro_rules! IVec2 {
                 Self::new(comps[0], comps[1])
             }
         }
-        impl Into<[$t; 2]> for $n {
+
+        impl From<$n> for [$t; 2] {
             #[inline]
-            fn into(self) -> [$t; 2] {
-                [self.x, self.y]
+            fn from(v: $n) -> Self {
+                [v.x, v.y]
             }
         }
 
@@ -719,10 +720,11 @@ macro_rules! IVec3 {
                 Self::new(comps[0], comps[1], comps[2])
             }
         }
-        impl Into<[$t; 3]> for $n {
+
+        impl From<$n> for [$t; 3] {
             #[inline]
-            fn into(self) -> [$t; 3] {
-                [self.x, self.y, self.z]
+            fn from(v: $n) -> Self {
+                [v.x, v.y, v.z]
             }
         }
 
@@ -1146,10 +1148,11 @@ macro_rules! IVec4 {
                 Self::new(comps[0], comps[1], comps[2], comps[3])
             }
         }
-        impl Into<[$t; 4]> for $n {
+
+        impl From<$n> for [$t; 4] {
             #[inline]
-            fn into(self) -> [$t; 4] {
-                [self.x, self.y, self.z, self.w]
+            fn from(v: $n) -> Self {
+                [v.x, v.y, v.z, v.w]
             }
         }
 

@@ -308,10 +308,10 @@ macro_rules! vec2s {
             }
         }
 
-        impl Into<[$t; 2]> for $n {
+        impl From<$n> for [$t; 2] {
             #[inline]
-            fn into(self) -> [$t; 2] {
-                [self.x, self.y]
+            fn from(v: $n) -> Self {
+                [v.x, v.y]
             }
         }
 
@@ -620,11 +620,11 @@ macro_rules! impl_wide_vec2s {
     }
 }
 
-impl Into<[Vec2; 4]> for Vec2x4 {
+impl From<Vec2x4> for [Vec2; 4] {
     #[inline]
-    fn into(self) -> [Vec2; 4] {
-        let xs: [f32; 4] = self.x.into();
-        let ys: [f32; 4] = self.y.into();
+    fn from(v: Vec2x4) -> Self {
+        let xs: [f32; 4] = v.x.into();
+        let ys: [f32; 4] = v.y.into();
         [
             Vec2::new(xs[0], ys[0]),
             Vec2::new(xs[1], ys[1]),
@@ -644,11 +644,11 @@ impl From<[Vec2; 4]> for Vec2x4 {
     }
 }
 
-impl Into<[Vec2; 8]> for Vec2x8 {
+impl From<Vec2x8> for [Vec2; 8] {
     #[inline]
-    fn into(self) -> [Vec2; 8] {
-        let xs: [f32; 8] = self.x.into();
-        let ys: [f32; 8] = self.y.into();
+    fn from(v: Vec2x8) -> Self {
+        let xs: [f32; 8] = v.x.into();
+        let ys: [f32; 8] = v.y.into();
         [
             Vec2::new(xs[0], ys[0]),
             Vec2::new(xs[1], ys[1]),
@@ -679,11 +679,11 @@ impl From<[Vec2; 8]> for Vec2x8 {
 }
 
 #[cfg(feature = "f64")]
-impl Into<[DVec2; 2]> for DVec2x2 {
+impl From<DVec2x2> for [DVec2; 2] {
     #[inline]
-    fn into(self) -> [DVec2; 2] {
-        let xs: [f64; 2] = self.x.into();
-        let ys: [f64; 2] = self.y.into();
+    fn from(v: DVec2x2) -> Self {
+        let xs: [f64; 2] = v.x.into();
+        let ys: [f64; 2] = v.y.into();
         [DVec2::new(xs[0], ys[0]), DVec2::new(xs[1], ys[1])]
     }
 }
@@ -700,11 +700,11 @@ impl From<[DVec2; 2]> for DVec2x2 {
 }
 
 #[cfg(feature = "f64")]
-impl Into<[DVec2; 4]> for DVec2x4 {
+impl From<DVec2x4> for [DVec2; 4] {
     #[inline]
-    fn into(self) -> [DVec2; 4] {
-        let xs: [f64; 4] = self.x.into();
-        let ys: [f64; 4] = self.y.into();
+    fn from(v: DVec2x4) -> Self {
+        let xs: [f64; 4] = v.x.into();
+        let ys: [f64; 4] = v.y.into();
         [
             DVec2::new(xs[0], ys[0]),
             DVec2::new(xs[1], ys[1]),
