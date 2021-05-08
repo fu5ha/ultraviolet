@@ -301,10 +301,10 @@ macro_rules! vec4s {
             }
         }
 
-        impl Into<[$t; 4]> for $n {
+        impl From<$n> for [$t; 4] {
             #[inline]
-            fn into(self) -> [$t; 4] {
-                [self.x, self.y, self.z, self.w]
+            fn from(v: $n) -> Self {
+                [v.x, v.y, v.z, v.w]
             }
         }
 
@@ -619,13 +619,13 @@ macro_rules! impl_wide_vec4s {
     };
 }
 
-impl Into<[Vec4; 4]> for Vec4x4 {
+impl From<Vec4x4> for [Vec4; 4] {
     #[inline]
-    fn into(self) -> [Vec4; 4] {
-        let xs: [f32; 4] = self.x.into();
-        let ys: [f32; 4] = self.y.into();
-        let zs: [f32; 4] = self.z.into();
-        let ws: [f32; 4] = self.w.into();
+    fn from(v: Vec4x4) -> [Vec4; 4] {
+        let xs: [f32; 4] = v.x.into();
+        let ys: [f32; 4] = v.y.into();
+        let zs: [f32; 4] = v.z.into();
+        let ws: [f32; 4] = v.w.into();
         [
             Vec4::new(xs[0], ys[0], zs[0], ws[0]),
             Vec4::new(xs[1], ys[1], zs[1], ws[1]),
@@ -647,13 +647,13 @@ impl From<[Vec4; 4]> for Vec4x4 {
     }
 }
 
-impl Into<[Vec4; 8]> for Vec4x8 {
+impl From<Vec4x8> for [Vec4; 8] {
     #[inline]
-    fn into(self) -> [Vec4; 8] {
-        let xs: [f32; 8] = self.x.into();
-        let ys: [f32; 8] = self.y.into();
-        let zs: [f32; 8] = self.z.into();
-        let ws: [f32; 8] = self.w.into();
+    fn from(v: Vec4x8) -> [Vec4; 8] {
+        let xs: [f32; 8] = v.x.into();
+        let ys: [f32; 8] = v.y.into();
+        let zs: [f32; 8] = v.z.into();
+        let ws: [f32; 8] = v.w.into();
         [
             Vec4::new(xs[0], ys[0], zs[0], ws[0]),
             Vec4::new(xs[1], ys[1], zs[1], ws[1]),
@@ -692,13 +692,13 @@ impl From<[Vec4; 8]> for Vec4x8 {
 }
 
 #[cfg(feature = "f64")]
-impl Into<[DVec4; 2]> for DVec4x2 {
+impl From<DVec4x2> for [DVec4; 2] {
     #[inline]
-    fn into(self) -> [DVec4; 2] {
-        let xs: [f64; 2] = self.x.into();
-        let ys: [f64; 2] = self.y.into();
-        let zs: [f64; 2] = self.z.into();
-        let ws: [f64; 2] = self.w.into();
+    fn from(v: DVec4x2) -> Self {
+        let xs: [f64; 2] = v.x.into();
+        let ys: [f64; 2] = v.y.into();
+        let zs: [f64; 2] = v.z.into();
+        let ws: [f64; 2] = v.w.into();
         [
             DVec4::new(xs[0], ys[0], zs[0], ws[0]),
             DVec4::new(xs[1], ys[1], zs[1], ws[1]),
@@ -720,13 +720,13 @@ impl From<[DVec4; 2]> for DVec4x2 {
 }
 
 #[cfg(feature = "f64")]
-impl Into<[DVec4; 4]> for DVec4x4 {
+impl From<DVec4x4> for [DVec4; 4] {
     #[inline]
-    fn into(self) -> [DVec4; 4] {
-        let xs: [f64; 4] = self.x.into();
-        let ys: [f64; 4] = self.y.into();
-        let zs: [f64; 4] = self.z.into();
-        let ws: [f64; 4] = self.w.into();
+    fn from(v: DVec4x4) -> Self {
+        let xs: [f64; 4] = v.x.into();
+        let ys: [f64; 4] = v.y.into();
+        let zs: [f64; 4] = v.z.into();
+        let ws: [f64; 4] = v.w.into();
         [
             DVec4::new(xs[0], ys[0], zs[0], ws[0]),
             DVec4::new(xs[1], ys[1], zs[1], ws[1]),
