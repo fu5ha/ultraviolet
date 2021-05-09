@@ -183,7 +183,6 @@ impl_from_int_vec!(
     (UVec4 => DVec4, f64, [x, y, z, w])
 );
 
-
 // tests only for Vec2
 #[cfg(test)]
 mod tests {
@@ -274,7 +273,6 @@ mod tests {
     fn vec2_to_uvec2_neg_overflow() {
         let vec2 = Vec2::new(-1.0, 0.0);
         let uvec2 = UVec2::try_from(vec2);
-
 
         assert!(uvec2.is_err());
         assert_eq!(uvec2.err().unwrap(), FloatConversionError::neg_overflow());

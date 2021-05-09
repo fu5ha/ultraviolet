@@ -6,6 +6,7 @@
 
 - Implement Serialize and Deserialize for all `UVec`,`IVec`, `DVec`, `DMat` types
   (under `serde`, `int` and `f64` feature flags)
+- Implement conversions between integer and float vectors.
 
 ## 0.8.0
 
