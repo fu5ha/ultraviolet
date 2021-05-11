@@ -1,53 +1,45 @@
 use crate::*;
 use core::convert::TryFrom;
+use std::error::Error;
+use std::fmt;
 
+/// The error type that may happen when converting a `f32` or `f64` to any other numerical
+/// representation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum FloatErrorKind {
+pub enum FloatConversionError {
     NaN,
     Infinite,
     PosOverflow,
     NegOverflow,
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct FloatConversionError {
-    pub kind: FloatErrorKind,
-}
-
-impl FloatConversionError {
-    pub const fn nan() -> Self {
-        Self {
-            kind: FloatErrorKind::NaN,
-        }
-    }
-
-    pub const fn infinite() -> Self {
-        Self {
-            kind: FloatErrorKind::Infinite,
-        }
-    }
-
-    pub const fn pos_overflow() -> Self {
-        Self {
-            kind: FloatErrorKind::PosOverflow,
-        }
-    }
-
-    pub const fn neg_overflow() -> Self {
-        Self {
-            kind: FloatErrorKind::NegOverflow,
+impl fmt::Display for FloatConversionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FloatConversionError::NaN => f.write_str("NaN"),
+            FloatConversionError::Infinite => f.write_str("Infinite"),
+            FloatConversionError::PosOverflow => f.write_str("PosOverflow"),
+            FloatConversionError::NegOverflow => f.write_str("NegOverflow"),
         }
     }
 }
 
-// Not public to not leak outside.
+impl Error for FloatConversionError {}
+
+/// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
+///
+/// Note: If making public, resolve all `use crate::*` in all files as to not clash with te function
+///       name of `std::convert::TryFrom`
 trait TryFromExt<Source>: Sized {
     type Error;
 
     fn try_from(source: Source) -> Result<Self, Self::Error>;
 }
 
-// Not public to not leak outside.
+/// A simple trait extension to simulate `TryInto` for types that are not from this crate.
+///
+/// Note: If making public, resolve all `use crate::*` in all files as to not clash with te function
+///       name of `std::convert::TryFrom`
 trait TryIntoExt<Target> {
     type Error;
 
@@ -81,20 +73,20 @@ macro_rules! impl_try_from_float {
             #[inline]
             fn try_from(source: $source) -> Result<Self, Self::Error> {
                 if source.is_nan() {
-                    return Err(FloatConversionError::nan())
+                    return Err(FloatConversionError::NaN)
                 }
                 if source.is_infinite() {
-                    return Err(FloatConversionError::infinite())
+                    return Err(FloatConversionError::Infinite)
                 }
 
                 let min = Self::MIN as $source;
-                let max = Self::MAX as $source;
-
                 if source < min {
-                    return Err(FloatConversionError::neg_overflow())
+                    return Err(FloatConversionError::NegOverflow)
                 }
+
+                let max = Self::MAX as $source;
                 if source > max {
-                    return Err(FloatConversionError::pos_overflow())
+                    return Err(FloatConversionError::PosOverflow)
                 }
 
                 Ok(source as Self)
@@ -195,7 +187,6 @@ mod tests {
         let vec2 = Vec2::new(1.0, 2.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_ok());
         assert_eq!(ivec2.ok().unwrap(), IVec2::new(1, 2));
     }
 
@@ -205,7 +196,6 @@ mod tests {
         let vec2 = Vec2::new(1.99, 2.99);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_ok());
         assert_eq!(ivec2.ok().unwrap(), IVec2::new(1, 2));
     }
 
@@ -215,8 +205,7 @@ mod tests {
         let vec2 = Vec2::new(f32::NAN, 0.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_err());
-        assert_eq!(ivec2.err().unwrap(), FloatConversionError::nan());
+        assert_eq!(ivec2.err().unwrap(), FloatConversionError::NaN);
     }
 
     #[test]
@@ -225,8 +214,7 @@ mod tests {
         let vec2 = Vec2::new(f32::INFINITY, 0.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_err());
-        assert_eq!(ivec2.err().unwrap(), FloatConversionError::infinite());
+        assert_eq!(ivec2.err().unwrap(), FloatConversionError::Infinite);
     }
 
     #[test]
@@ -235,8 +223,7 @@ mod tests {
         let vec2 = Vec2::new(f32::NEG_INFINITY, 0.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_err());
-        assert_eq!(ivec2.err().unwrap(), FloatConversionError::infinite());
+        assert_eq!(ivec2.err().unwrap(), FloatConversionError::Infinite);
     }
 
     #[test]
@@ -245,8 +232,7 @@ mod tests {
         let vec2 = Vec2::new(f32::MAX, 0.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_err());
-        assert_eq!(ivec2.err().unwrap(), FloatConversionError::pos_overflow());
+        assert_eq!(ivec2.err().unwrap(), FloatConversionError::PosOverflow);
     }
 
     #[test]
@@ -255,8 +241,7 @@ mod tests {
         let vec2 = Vec2::new(f32::MIN, 0.0);
         let ivec2 = IVec2::try_from(vec2);
 
-        assert!(ivec2.is_err());
-        assert_eq!(ivec2.err().unwrap(), FloatConversionError::neg_overflow());
+        assert_eq!(ivec2.err().unwrap(), FloatConversionError::NegOverflow);
     }
 
     #[test]
@@ -274,7 +259,6 @@ mod tests {
         let vec2 = Vec2::new(-1.0, 0.0);
         let uvec2 = UVec2::try_from(vec2);
 
-        assert!(uvec2.is_err());
-        assert_eq!(uvec2.err().unwrap(), FloatConversionError::neg_overflow());
+        assert_eq!(uvec2.err().unwrap(), FloatConversionError::NegOverflow);
     }
 }

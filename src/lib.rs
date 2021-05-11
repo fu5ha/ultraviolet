@@ -86,6 +86,7 @@ mod util;
 pub(crate) use util::Splat;
 
 pub mod bivec;
+#[cfg(feature = "int")]
 pub mod conversion;
 #[cfg(feature = "int")]
 pub mod int;
@@ -113,6 +114,7 @@ mod impl_bytemuck;
 pub use impl_bytemuck::*;
 
 pub use bivec::*;
+#[cfg(feature = "int")]
 pub use conversion::*;
 #[cfg(feature = "int")]
 pub use int::*;
