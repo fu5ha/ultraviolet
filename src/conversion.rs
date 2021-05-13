@@ -1,7 +1,7 @@
 //! Contains implementations to convert between `UVec`/`IVec` and `Vec`/`DVec`.
 //!
-//! To realize such conversions we make use of [TryFromExt] and [TryIntoExt] to simulate the
-//! behaviour of the official [From] and [Into].
+//! To realize such conversions we make use of crate-private traits `TryFromExt` and `TryIntoExt` to
+//! simulate the behaviour of the official [From] and [Into].
 
 use crate::util::{TryFromExt, TryIntoExt};
 use crate::*;
