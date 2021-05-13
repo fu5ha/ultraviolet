@@ -1,6 +1,6 @@
 use std::ops::*;
 
-use crate::util::*;
+use crate::util::EqualsEps;
 use crate::*;
 
 macro_rules! vec3s {

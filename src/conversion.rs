@@ -1,3 +1,9 @@
+//! Contains implementations to convert between `UVec`/`IVec` and `Vec`/`DVec`.
+//!
+//! To realize such conversions we make use of [TryFromExt] and [TryIntoExt] to simulate the
+//! behaviour of the official [From] and [Into].
+
+use crate::util::{TryFromExt, TryIntoExt};
 use crate::*;
 use core::convert::TryFrom;
 use std::error::Error;
@@ -25,38 +31,6 @@ impl fmt::Display for FloatConversionError {
 }
 
 impl Error for FloatConversionError {}
-
-/// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
-///
-/// Note: If making public, resolve all `use crate::*` in all files as to not clash with te function
-///       name of `std::convert::TryFrom`
-trait TryFromExt<Source>: Sized {
-    type Error;
-
-    fn try_from(source: Source) -> Result<Self, Self::Error>;
-}
-
-/// A simple trait extension to simulate `TryInto` for types that are not from this crate.
-///
-/// Note: If making public, resolve all `use crate::*` in all files as to not clash with te function
-///       name of `std::convert::TryFrom`
-trait TryIntoExt<Target> {
-    type Error;
-
-    fn try_into(self) -> Result<Target, Self::Error>;
-}
-
-// Generic implementation
-impl<Source, Target, E> TryIntoExt<Target> for Source
-where
-    Target: TryFromExt<Source, Error = E>,
-{
-    type Error = E;
-
-    fn try_into(self) -> Result<Target, Self::Error> {
-        Target::try_from(self)
-    }
-}
 
 macro_rules! impl_try_from_float {
     ($source:ty => $($target:ident),*) => {$(
