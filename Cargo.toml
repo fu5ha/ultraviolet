@@ -9,6 +9,9 @@ readme = "README.md"
 keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]
 license = "MIT OR Apache-2.0 OR Zlib"
 
+[package.metadata.docs.rs]
+features = ["f64", "int", "serde", "mint", "bytemuck"]
+
 [dependencies]
 # wide = { path = "../wide", optional = true }
 wide = { version = "~0.6.3" }

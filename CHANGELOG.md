@@ -9,6 +9,7 @@
 - Implement conversions between integer and float vectors.
 - Add `#[must_use]` attributes on `.normalized` methods to help prevent silent logic bugs when
 `.normalize()` would have been more appropriate.
+- Build docs.rs docs with all features.
 
 ## 0.8.0
 
