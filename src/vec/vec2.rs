@@ -143,6 +143,7 @@ macro_rules! vec2s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut r = self.clone();
                 r.normalize();

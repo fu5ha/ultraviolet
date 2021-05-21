@@ -139,6 +139,7 @@ macro_rules! rotor2s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut s = *self;
                 s.normalize();
@@ -465,6 +466,7 @@ macro_rules! rotor3s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut s = *self;
                 s.normalize();

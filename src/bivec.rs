@@ -88,6 +88,7 @@ macro_rules! bivec2s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut r = self.clone();
                 r.normalize();
@@ -370,6 +371,7 @@ macro_rules! bivec3s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut r = self.clone();
                 r.normalize();

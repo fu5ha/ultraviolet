@@ -160,6 +160,7 @@ macro_rules! vec3s {
             }
 
             #[inline]
+            #[must_use = "Did you mean to use `.normalize()` to normalize `self` in place?"]
             pub fn normalized(&self) -> Self {
                 let mut r = self.clone();
                 r.normalize();
@@ -179,6 +180,7 @@ macro_rules! vec3s {
             /// Normalize `self` by interpreting it as a homogeneous point, i.e.
             /// scaling the vector to ensure the homogeneous component has length 1.
             #[inline]
+            #[must_use = "Did you mean to use `.normalize_homogeneous_point()` to normalize `self` in place?"]
             pub fn normalized_homogeneous_point(&self) -> Self {
                 let mut r = self.clone();
                 r.normalize_homogeneous_point();

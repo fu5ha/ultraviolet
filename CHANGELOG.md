@@ -7,6 +7,8 @@
 - Implement Serialize and Deserialize for all `UVec`,`IVec`, `DVec`, `DMat` types
   (under `serde`, `int` and `f64` feature flags)
 - Implement conversions between integer and float vectors.
+- Add `#[must_use]` attributes on `.normalized` methods to help prevent silent logic bugs when
+`.normalize()` would have been more appropriate.
 
 ## 0.8.0
 
