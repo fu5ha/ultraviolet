@@ -81,6 +81,7 @@ extern crate serde;
 #[cfg(all(test, feature = "serde"))]
 extern crate serde_test;
 
+#[macro_use]
 mod util;
 
 pub(crate) use util::Splat;

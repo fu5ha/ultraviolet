@@ -168,8 +168,8 @@ macro_rules! bivec2s {
         }
 
         impl EqualsEps for $bn {
-            fn eq_eps(self, other: Self) -> bool {
-                self.xy.eq_eps(other.xy)
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
+                self.xy.eq_eps(other.xy, eps)
             }
         }
 
@@ -312,8 +312,8 @@ macro_rules! bivec3s {
         }
 
         impl EqualsEps for $bn {
-            fn eq_eps(self, other: Self) -> bool {
-                self.xy.eq_eps(other.xy) && self.xz.eq_eps(other.xz) && self.yz.eq_eps(other.yz)
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
+                self.xy.eq_eps(other.xy, eps) && self.xz.eq_eps(other.xz, eps) && self.yz.eq_eps(other.yz, eps)
             }
         }
 

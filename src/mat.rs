@@ -1864,18 +1864,18 @@ mod test {
                 let rotor = Rotor3::from_euler_angles(alpha, beta, gamma);
                 let mat = rotor.into_matrix();
                 let rotor2 = mat.into_rotor3();
-                assert!(rotor.eq_eps(rotor2));
+                assert_eq_eps!(rotor, rotor2, 0.01);
                 let xr = Vec3::unit_x().rotated_by(rotor);
                 let xr2 = Vec3::unit_x().rotated_by(rotor2);
-                assert!(xr.eq_eps(xr2));
+                assert_eq_eps!(xr, xr2, 0.01);
 
                 let yr = Vec3::unit_y().rotated_by(rotor);
                 let yr2 = Vec3::unit_y().rotated_by(rotor2);
-                assert!(yr.eq_eps(yr2));
+                assert_eq_eps!(yr, yr2, 0.01);
 
                 let zr = Vec3::unit_z().rotated_by(rotor);
                 let zr2 = Vec3::unit_z().rotated_by(rotor2);
-                assert!(zr.eq_eps(zr2));
+                assert_eq_eps!(zr, zr2, 0.01);
             }
 
 
@@ -1890,7 +1890,7 @@ mod test {
         let iso = Isometry3::new(c, r_ab);
         let iso_mat4 = iso.into_homogeneous_matrix();
         let iso_ = iso_mat4.into_isometry();
-        assert!(iso_.translation.eq_eps(c));
-        assert!(iso_.rotation.eq_eps(r_ab));
+        assert_eq_eps!(iso_.translation, c, 0.01);
+        assert_eq_eps!(iso_.rotation, r_ab, 0.01);
     }
 }

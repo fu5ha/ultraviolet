@@ -359,8 +359,8 @@ macro_rules! vec2s {
         }
 
         impl EqualsEps for $n {
-            fn eq_eps(self, other: Self) -> bool {
-                self.x.eq_eps(other.x) && self.y.eq_eps(other.y)
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
+                self.x.eq_eps(other.x, eps) && self.y.eq_eps(other.y, eps)
             }
         }
 
