@@ -1165,7 +1165,7 @@ impl Serialize for Bivec3 {
     {
         let mut state = serializer.serialize_struct("Bivec3", 3)?;
         state.serialize_field("xy", &self.xy)?;
-        state.serialize_field("xz", &self.xz)?;
+        state.serialize_field("zx", &self.zx)?;
         state.serialize_field("yz", &self.yz)?;
         state.end()
     }
