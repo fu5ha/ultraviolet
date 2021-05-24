@@ -91,7 +91,7 @@ macro_rules! vec3s {
             pub fn wedge(&self, other: $n) -> $bn {
                 $bn::new(
                     (self.x * other.y) - (self.y * other.x),
-                    (self.x * other.z) - (self.z * other.x),
+                    (self.z * other.x) - (self.x * other.z),
                     (self.y * other.z) - (self.z * other.y),
                 )
             }

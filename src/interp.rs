@@ -100,7 +100,7 @@ macro_rules! impl_slerp_rotor3 {
 
                 n.s = (c * self.s) + (s * v2.s);
                 n.bv.xy = (c * self.bv.xy) + (s * v2.bv.xy);
-                n.bv.xz = (c * self.bv.xz) + (s * v2.bv.xz);
+                n.bv.zx = (c * self.bv.zx) + (s * v2.bv.zx);
                 n.bv.yz = (c * self.bv.yz) + (s * v2.bv.yz);
 
                 n
@@ -151,7 +151,7 @@ macro_rules! impl_slerp_rotor3_wide {
 
                 n.s = (c * self.s) + (s * v2.s);
                 n.bv.xy = (c * self.bv.xy) + (s * v2.bv.xy);
-                n.bv.xz = (c * self.bv.xz) + (s * v2.bv.xz);
+                n.bv.zx = (c * self.bv.zx) + (s * v2.bv.zx);
                 n.bv.yz = (c * self.bv.yz) + (s * v2.bv.yz);
 
                 n
@@ -218,3 +218,33 @@ impl_slerp_gen!(
     f64x2 => (DVec2x2, DVec3x2, DVec4x2, DBivec2x2, DBivec3x2, DRotor2x2),
     f64x4 => (DVec2x4, DVec3x4, DVec4x4, DBivec2x4, DBivec3x4, DRotor2x4)
 );
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::util::EqualsEps;
+    use std::f32::consts::*;
+    #[test]
+    pub fn slerp_in_xy_plane() {
+        let rotation = Rotor3::from_rotation_xy(2. * FRAC_PI_3);
+
+        // Expected to be a rotation by angle PI/6
+        let interpolated = Rotor3::identity().slerp(rotation, 1. / 4.);
+
+        let rotated = Vec3::unit_x().rotated_by(interpolated);
+        let expected = Vec3::new(3f32.sqrt() / 2., 0.5, 0.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn slerp_in_zx_plane() {
+        let rotation = Rotor3::from_rotation_zx(2. * FRAC_PI_3);
+
+        // Expected to be a rotation by angle PI/6
+        let interpolated = Rotor3::identity().slerp(rotation, 1. / 4.);
+
+        let rotated = Vec3::unit_z().rotated_by(interpolated);
+        let expected = Vec3::new(0.5, 0., 3f32.sqrt() / 2.);
+        assert!(rotated.eq_eps(expected))
+    }
+}
