@@ -923,6 +923,24 @@ mod test {
     }
 
     #[test]
+    pub fn rotate_vector_roundtrip_with_matrices() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let rotor_ab = Rotor3::from_rotation_between(a, b).into_matrix();
+        let rotor_bc = Rotor3::from_rotation_between(b, c).into_matrix();
+        let rot_ab = rotor_ab * a;
+        let rot_bc = rotor_bc * b;
+        let rot_abc = rotor_bc * (rotor_ab * a);
+        println!("{:?} = {:?}", rot_ab, b);
+        println!("{:?} = {:?}", rot_bc, c);
+        println!("{:?} = {:?}", rot_abc, c);
+        assert!(rot_ab.eq_eps(b));
+        assert!(rot_bc.eq_eps(c));
+        assert!(rot_abc.eq_eps(c));
+    }
+
+    #[test]
     pub fn rotate_rotor_trivial() {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
