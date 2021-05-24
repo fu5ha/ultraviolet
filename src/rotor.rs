@@ -585,14 +585,14 @@ macro_rules! rotor3s {
                 let bxy_bzx = self.bv.xy * self.bv.zx;
 
                 let xa = s2 - bxy2 - bzx2 + byz2;
-                let xb = -(s_bxy + bzx_byz);
+                let xb = s_bxy + bzx_byz;
                 let xc = -s_bzx + bxy_byz;
 
                 let ya = bzx_byz - s_bxy;
                 let yb = s2 - bxy2 + bzx2 - byz2;
-                let yc = -(s_byz + bxy_bzx);
+                let yc = s_byz + bxy_bzx;
 
-                let za = -(bxy_byz + s_bzx);
+                let za = bxy_byz + s_bzx;
                 let zb = bxy_bzx - s_byz;
                 let zc = s2 + bxy2 - bzx2 - byz2;
 
@@ -625,16 +625,16 @@ macro_rules! rotor3s {
                 $mt::new(
                     $vt::new(
                         s2 - bxy2 - bzx2 + byz2,
-                        -two * (bzx_byz + s_bxy),
-                        two * (bxy_byz - s_bzx)),
+                        two * (bzx_byz - s_bxy),
+                        two * (bxy_byz + s_bzx)),
                     $vt::new(
-                        two * (s_bxy - bzx_byz),
+                        two * (s_bxy + bzx_byz),
                         s2 - bxy2 + bzx2 - byz2,
-                        -two * (s_byz + bxy_bzx)
+                        two * (-s_byz + bxy_bzx)
                     ),
                     $vt::new(
-                        -two * (s_bzx + bxy_byz),
-                        two * (s_byz - bxy_bzx),
+                        two * (-s_bzx + bxy_byz),
+                        two * (s_byz  + bxy_bzx),
                         s2 + bxy2 - bzx2 - byz2
                     )
                 )
@@ -644,14 +644,14 @@ macro_rules! rotor3s {
             /// `[vector, scalar]`.
             #[inline]
             pub fn into_quaternion_array(self) -> [$t; 4] {
-                [-self.bv.yz, self.bv.zx, -self.bv.xy, self.s]
+                [-self.bv.yz, -self.bv.zx, -self.bv.xy, self.s]
             }
 
             /// Convert an array that represents a quaternion in the form `[vector, scalar]` into a
             /// rotor.
             #[inline]
             pub fn from_quaternion_array(array: [$t; 4]) -> Self {
-                Self::new(array[3], $bt::new(-array[2], array[1], -array[0]))
+                Self::new(array[3], $bt::new(-array[2], -array[1], -array[0]))
             }
 
             #[inline]
@@ -899,6 +899,27 @@ mod test {
         assert!(rot_ab.eq_eps(b));
         assert!(rot_bc.eq_eps(c));
         assert!(rot_abc.eq_eps(c));
+    }
+
+    #[test]
+    pub fn rotate_vector_roundtrip_with_rotate_vecs() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let rotor_ab = Rotor3::from_rotation_between(a, b);
+        let rotor_bc = Rotor3::from_rotation_between(b, c);
+        let mut arg_ab = vec![a.clone()];
+        rotor_ab.rotate_vecs(&mut arg_ab);
+        let mut arg_bc = vec![b.clone()];
+        rotor_bc.rotate_vecs(&mut arg_bc);
+        let mut arg_abc = vec![rotor_ab * a];
+        rotor_bc.rotate_vecs(&mut arg_abc);
+        println!("{:?} = {:?}", arg_ab[0], b);
+        println!("{:?} = {:?}", arg_bc[0], c);
+        println!("{:?} = {:?}", arg_abc[0], c);
+        assert!(arg_ab[0].eq_eps(b));
+        assert!(arg_bc[0].eq_eps(c));
+        assert!(arg_abc[0].eq_eps(c));
     }
 
     #[test]
