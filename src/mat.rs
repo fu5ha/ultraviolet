@@ -453,15 +453,15 @@ macro_rules! mat3s {
                 let sin_pitch_sin_roll = sin_pitch * sin_roll;
                 let sin_pitch_cos_roll = sin_pitch * cos_roll;
 
-                let m00 = cos_yaw * cos_pitch;
-                let m10 = sin_yaw * cos_pitch;
-                let m20 = -sin_pitch;
-                let m01 = cos_yaw.mul_add(sin_pitch_sin_roll, -sin_yaw * cos_roll);
-                let m11 = sin_yaw.mul_add(sin_pitch_sin_roll, cos_yaw * cos_roll);
-                let m21 = cos_pitch * sin_roll;
-                let m02 = cos_yaw.mul_add(sin_pitch_cos_roll, sin_yaw * sin_roll);
-                let m12 = sin_yaw.mul_add(sin_pitch_cos_roll, -cos_yaw * sin_roll);
-                let m22 = cos_pitch * cos_roll;
+                let m00 = cos_yaw * cos_roll + sin_pitch * sin_yaw* sin_roll;
+                let m10 = cos_pitch * sin_roll;
+                let m20 = -cos_roll * sin_yaw + cos_yaw * sin_pitch * sin_roll;
+                let m01 = cos_roll * sin_pitch * sin_yaw - cos_yaw * sin_roll;
+                let m11 = cos_pitch * cos_roll;
+                let m21 = cos_yaw * cos_roll * sin_pitch + sin_yaw * sin_roll;
+                let m02 = cos_pitch * sin_yaw;
+                let m12 = -sin_pitch;
+                let m22 = cos_pitch * cos_yaw;
 
                 // think transposed as arguments are columns
                 Self::new(
@@ -1892,5 +1892,19 @@ mod test {
         let iso_ = iso_mat4.into_isometry();
         assert!(iso_.translation.eq_eps(c));
         assert!(iso_.rotation.eq_eps(r_ab));
+    }
+
+    #[test]
+    pub fn test_euler_angle_conversion() {
+        let roll = 0.4;
+        let yaw = 0.3;
+        let pitch = 0.2;
+
+        let mat1 = Mat3::from_euler_angles(roll, pitch, yaw);
+        let mat2 =
+            Mat3::from_rotation_y(yaw) * Mat3::from_rotation_x(pitch) * Mat3::from_rotation_z(roll);
+        assert_eq!(mat1[0], mat2[0]);
+        assert_eq!(mat1[1], mat2[1]);
+        assert_eq!(mat1[2], mat2[2]);
     }
 }
