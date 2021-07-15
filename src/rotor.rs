@@ -413,6 +413,21 @@ macro_rules! rotor3s {
 
             }
 
+            /// Multiply the angle of the rotation represented by self by `scale`.
+            #[inline]
+            pub fn scale_by(&mut self, scale: $t) {
+                *self = self.scaled_by(scale)
+            }
+
+            /// Return a rotor representing the same rotatation as `self` but with an angle
+            /// multiplied by `scale`
+            #[inline]
+            #[must_use]
+            pub fn scaled_by(self, scale: $t) -> Self {
+                let (angle, plane) = self.into_angle_plane();
+                Self::from_angle_plane(angle * scale, plane)
+            }
+
             /// Create new Rotor from a rotation in the xy plane (also known as
             /// "around the z axis").
             #[inline]
@@ -881,6 +896,24 @@ mod test {
             rotor,
             Rotor3::from_quaternion_array(rotor.into_quaternion_array())
         );
+    }
+
+    #[test]
+    pub fn rotor_scaling() {
+        use std::f32::consts::PI;
+
+        let axis = Vec3::new(0.42, 0.123, 0.789).normalized(); //aribitrary rotation axis
+        let plane = Bivec3::from_normalized_axis(axis).normalized();
+        let angle = PI / 10.;
+
+        // rotation of angle pi/10 on the axis;
+        let rotation_1 = Rotor3::from_angle_plane(angle, plane);
+
+        let fraction = 1.234;
+
+        let scaled_rotor_1 = Rotor3::from_angle_plane(fraction * angle, plane);
+        let scaled_rotor_2 = rotation_1.scaled_by(fraction);
+        assert!(scaled_rotor_1.eq_eps(scaled_rotor_2));
     }
 
     // This test exists because Rotor3 used to implement PartialEq without DRotor3 getting the same

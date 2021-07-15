@@ -2,7 +2,7 @@
 
 <!-- next-header -->
 ## Unreleased
-
+- Add methods to scale `Rotor3`
 
 ## 0.8.1
 
