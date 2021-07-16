@@ -2,7 +2,9 @@
 
 <!-- next-header -->
 ## Unreleased
+
 - Add methods to scale `Rotor3`
+- Implement `Neg` for all `IVec` types
 
 ## 0.8.1
 
