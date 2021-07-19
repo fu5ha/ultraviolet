@@ -1346,6 +1346,7 @@ macro_rules! ivec4s {
 impl Neg for IVec2 {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Self {
             x: -self.x,
@@ -1357,6 +1358,7 @@ impl Neg for IVec2 {
 impl Neg for IVec3 {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Self {
             x: -self.x,
@@ -1369,6 +1371,7 @@ impl Neg for IVec3 {
 impl Neg for IVec4 {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Self {
             x: -self.x,
