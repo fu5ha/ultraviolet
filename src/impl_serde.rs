@@ -42,7 +42,7 @@ macro_rules! impl_serde_vec2 {
 
                             fn expecting(
                                 &self,
-                                formatter: &mut std::fmt::Formatter,
+                                formatter: &mut std::fmt::Formatter<'_>,
                             ) -> std::fmt::Result {
                                 formatter.write_str("`x` or `y`")
                             }
@@ -68,7 +68,10 @@ macro_rules! impl_serde_vec2 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $t;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", $n].concat())
                     }
 
@@ -158,7 +161,7 @@ macro_rules! impl_serde_vec3 {
 
                             fn expecting(
                                 &self,
-                                formatter: &mut std::fmt::Formatter,
+                                formatter: &mut std::fmt::Formatter<'_>,
                             ) -> std::fmt::Result {
                                 formatter.write_str("`x` or `y` or `z`")
                             }
@@ -185,7 +188,10 @@ macro_rules! impl_serde_vec3 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $t;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", $n].concat())
                     }
 
@@ -288,7 +294,7 @@ macro_rules! impl_serde_vec4 {
 
                             fn expecting(
                                 &self,
-                                formatter: &mut std::fmt::Formatter,
+                                formatter: &mut std::fmt::Formatter<'_>,
                             ) -> std::fmt::Result {
                                 formatter.write_str("`x` or `y` or `z` or `w`")
                             }
@@ -316,7 +322,10 @@ macro_rules! impl_serde_vec4 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $t;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", $n].concat())
                     }
 
@@ -655,7 +664,10 @@ macro_rules! impl_serde_mat2 {
                 impl<'de> serde::de::Visitor<'de> for Mat2Visitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str($expecting)
                     }
 
@@ -743,7 +755,10 @@ macro_rules! impl_serde_mat3 {
                 impl<'de> serde::de::Visitor<'de> for Mat3Visitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str($expecting)
                     }
 
@@ -860,7 +875,10 @@ macro_rules! impl_serde_mat4 {
                 impl<'de> serde::de::Visitor<'de> for Mat4Visitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str($expecting)
                     }
 
@@ -1094,7 +1112,10 @@ impl<'de> Deserialize<'de> for Bivec2 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`xy`")
                     }
 
@@ -1118,7 +1139,7 @@ impl<'de> Deserialize<'de> for Bivec2 {
         impl<'de> Visitor<'de> for Bivec2Visitor {
             type Value = Bivec2;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Bivec2")
             }
 
@@ -1192,7 +1213,10 @@ impl<'de> Deserialize<'de> for Bivec3 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`xy` or `xz` or `yz`")
                     }
 
@@ -1218,7 +1242,7 @@ impl<'de> Deserialize<'de> for Bivec3 {
         impl<'de> Visitor<'de> for Bivec3Visitor {
             type Value = Bivec3;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Bivec3")
             }
 
@@ -1358,7 +1382,10 @@ impl<'de> Deserialize<'de> for Rotor2 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`s` or `bv`")
                     }
 
@@ -1383,7 +1410,7 @@ impl<'de> Deserialize<'de> for Rotor2 {
         impl<'de> Visitor<'de> for Rotor2Visitor {
             type Value = Rotor2;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Rotor2")
             }
 
@@ -1466,7 +1493,10 @@ impl<'de> Deserialize<'de> for Rotor3 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`s` or `bv`")
                     }
 
@@ -1491,7 +1521,7 @@ impl<'de> Deserialize<'de> for Rotor3 {
         impl<'de> Visitor<'de> for Rotor3Visitor {
             type Value = Rotor3;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Rotor3")
             }
 
@@ -1637,7 +1667,10 @@ impl<'de> Deserialize<'de> for Isometry2 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`translation` or `rotation`")
                     }
 
@@ -1662,7 +1695,7 @@ impl<'de> Deserialize<'de> for Isometry2 {
         impl<'de> Visitor<'de> for Isometry2Visitor {
             type Value = Isometry2;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Isometry2")
             }
 
@@ -1747,7 +1780,10 @@ impl<'de> Deserialize<'de> for Isometry3 {
                 impl<'de> Visitor<'de> for FieldVisitor {
                     type Value = Field;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str("`translation` or `rotation`")
                     }
 
@@ -1772,7 +1808,7 @@ impl<'de> Deserialize<'de> for Isometry3 {
         impl<'de> Visitor<'de> for Isometry3Visitor {
             type Value = Isometry3;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("struct Isometry3")
             }
 

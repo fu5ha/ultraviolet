@@ -868,6 +868,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::eq_op)]
     pub fn rotor_equality() {
         let i = Rotor3::identity();
         assert_eq!(i, i);
@@ -920,6 +921,7 @@ mod test {
     // impl. Use `cargo test --all-features` to run
     #[cfg(feature = "f64")]
     #[test]
+    #[allow(clippy::eq_op)]
     pub fn drotor_equality() {
         let i = DRotor3::identity();
         assert_eq!(i, i);

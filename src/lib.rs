@@ -75,11 +75,18 @@
 //! If it's missing something you need it to do, bug me on the [GitHub issue tracker](https://github.com/termhn/ultraviolet/issues) and/or Rust community discord server
 //! (I'm Fusha there) and I'll try to add it for you, if I believe it fits with the vision of the lib :)
 
+#![deny(
+    rust_2018_compatibility,
+    rust_2018_idioms,
+    future_incompatible,
+    nonstandard_style,
+    unused,
+    clippy::all
+)]
+
 extern crate alloc;
 #[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(all(test, feature = "serde"))]
-extern crate serde_test;
 
 mod util;
 

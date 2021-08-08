@@ -445,6 +445,7 @@ macro_rules! mat3s {
             /// as they use a different coordinate system. You should use the appropriate
             /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
+            #[allow(unused_variables)]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
                 let (sin_yaw, cos_yaw) = yaw.sin_cos();
                 let (sin_pitch, cos_pitch) = pitch.sin_cos();
