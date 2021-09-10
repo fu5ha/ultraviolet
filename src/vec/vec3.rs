@@ -224,8 +224,8 @@ macro_rules! vec3s {
             }
 
             #[inline]
-            pub fn map<F>(&self, f: F) -> Self
-                where F: Fn($t) -> $t
+            pub fn map<F>(&self, mut f: F) -> Self
+                where F: FnMut($t) -> $t
             {
                 $n::new(
                     f(self.x),
@@ -235,8 +235,8 @@ macro_rules! vec3s {
             }
 
             #[inline]
-            pub fn apply<F>(&mut self, f: F)
-                where F: Fn($t) -> $t
+            pub fn apply<F>(&mut self, mut f: F)
+                where F: FnMut($t) -> $t
             {
                 self.x = f(self.x);
                 self.y = f(self.y);

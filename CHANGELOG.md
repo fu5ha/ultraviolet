@@ -5,6 +5,7 @@
 
 - Add methods to scale `Rotor3`
 - Implement `Neg` for all `IVec` types
+- Relax bound in `map` and `apply` from `Fn` to `FnMut`
 
 ## 0.8.1
 
