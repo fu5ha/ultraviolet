@@ -20,7 +20,7 @@ pub enum FloatConversionError {
 }
 
 impl fmt::Display for FloatConversionError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FloatConversionError::NaN => f.write_str("NaN"),
             FloatConversionError::Infinite => f.write_str("Infinite"),
