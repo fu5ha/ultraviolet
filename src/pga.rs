@@ -1,3 +1,5 @@
+//// Projective geometry algebry concerns about flattening or projecting vectors
+/// onto other vectors or planes.
 pub trait Project {
     /// Projects the vector self onto `other`.
     /// Assumes `other` is normalized.
@@ -30,14 +32,14 @@ macro_rules! impl_project {
 };
 }
 
-use crate::{Vec2, Vec3, Vec4};
+use crate::*;
 
-impl_project!([Vec2, Vec3, Vec4]);
+impl_project!([Vec2, Vec3, Vec4, Vec2x8, Vec3x8, Vec4x8, Vec2x4, Vec3x4, Vec4x4]);
 #[cfg(feature = "int")]
-mod int {
-    use crate::{IVec2, IVec3, IVec4, UVec2, UVec3, UVec4};
-    impl_project!([IVec2, IVec3, IVec4, UVec2, UVec3, UVec4]);
-}
+impl_project!([IVec2, IVec3, IVec4, UVec2, UVec3, UVec4]);
+
+#[cfg(feature = "f64")]
+impl_project!([DVec2, DVec3, DVec4, DVec2x2, DVec3x2, DVec4x2, DVec2x4, DVec3x4, DVec4x4]);
 
 #[cfg(test)]
 mod tests {
