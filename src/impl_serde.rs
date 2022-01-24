@@ -642,15 +642,15 @@ macro_rules! impl_serde_mat2 {
             where
                 T: Serializer,
             {
-                use serde::ser::SerializeSeq;
+                use serde::ser::SerializeTuple;
 
-                let mut seq = serializer.serialize_seq(Some(4))?;
+                let mut tuple = serializer.serialize_tuple(4)?;
 
-                seq.serialize_element(&self.cols[0].x)?;
-                seq.serialize_element(&self.cols[0].y)?;
-                seq.serialize_element(&self.cols[1].x)?;
-                seq.serialize_element(&self.cols[1].y)?;
-                seq.end()
+                tuple.serialize_element(&self.cols[0].x)?;
+                tuple.serialize_element(&self.cols[0].y)?;
+                tuple.serialize_element(&self.cols[1].x)?;
+                tuple.serialize_element(&self.cols[1].y)?;
+                tuple.end()
             }
         }
 
@@ -728,20 +728,20 @@ macro_rules! impl_serde_mat3 {
             where
                 T: Serializer,
             {
-                use serde::ser::SerializeSeq;
+                use serde::ser::SerializeTuple;
 
-                let mut seq = serializer.serialize_seq(Some(9))?;
+                let mut tuple = serializer.serialize_tuple(9)?;
 
-                seq.serialize_element(&self.cols[0].x)?;
-                seq.serialize_element(&self.cols[0].y)?;
-                seq.serialize_element(&self.cols[0].z)?;
-                seq.serialize_element(&self.cols[1].x)?;
-                seq.serialize_element(&self.cols[1].y)?;
-                seq.serialize_element(&self.cols[1].z)?;
-                seq.serialize_element(&self.cols[2].x)?;
-                seq.serialize_element(&self.cols[2].y)?;
-                seq.serialize_element(&self.cols[2].z)?;
-                seq.end()
+                tuple.serialize_element(&self.cols[0].x)?;
+                tuple.serialize_element(&self.cols[0].y)?;
+                tuple.serialize_element(&self.cols[0].z)?;
+                tuple.serialize_element(&self.cols[1].x)?;
+                tuple.serialize_element(&self.cols[1].y)?;
+                tuple.serialize_element(&self.cols[1].z)?;
+                tuple.serialize_element(&self.cols[2].x)?;
+                tuple.serialize_element(&self.cols[2].y)?;
+                tuple.serialize_element(&self.cols[2].z)?;
+                tuple.end()
             }
         }
 
@@ -841,27 +841,27 @@ macro_rules! impl_serde_mat4 {
             where
                 T: Serializer,
             {
-                use serde::ser::SerializeSeq;
+                use serde::ser::SerializeTuple;
 
-                let mut seq = serializer.serialize_seq(Some(16))?;
+                let mut tuple = serializer.serialize_tuple(16)?;
 
-                seq.serialize_element(&self.cols[0].x)?;
-                seq.serialize_element(&self.cols[0].y)?;
-                seq.serialize_element(&self.cols[0].z)?;
-                seq.serialize_element(&self.cols[0].w)?;
-                seq.serialize_element(&self.cols[1].x)?;
-                seq.serialize_element(&self.cols[1].y)?;
-                seq.serialize_element(&self.cols[1].z)?;
-                seq.serialize_element(&self.cols[1].w)?;
-                seq.serialize_element(&self.cols[2].x)?;
-                seq.serialize_element(&self.cols[2].y)?;
-                seq.serialize_element(&self.cols[2].z)?;
-                seq.serialize_element(&self.cols[2].w)?;
-                seq.serialize_element(&self.cols[3].x)?;
-                seq.serialize_element(&self.cols[3].y)?;
-                seq.serialize_element(&self.cols[3].z)?;
-                seq.serialize_element(&self.cols[3].w)?;
-                seq.end()
+                tuple.serialize_element(&self.cols[0].x)?;
+                tuple.serialize_element(&self.cols[0].y)?;
+                tuple.serialize_element(&self.cols[0].z)?;
+                tuple.serialize_element(&self.cols[0].w)?;
+                tuple.serialize_element(&self.cols[1].x)?;
+                tuple.serialize_element(&self.cols[1].y)?;
+                tuple.serialize_element(&self.cols[1].z)?;
+                tuple.serialize_element(&self.cols[1].w)?;
+                tuple.serialize_element(&self.cols[2].x)?;
+                tuple.serialize_element(&self.cols[2].y)?;
+                tuple.serialize_element(&self.cols[2].z)?;
+                tuple.serialize_element(&self.cols[2].w)?;
+                tuple.serialize_element(&self.cols[3].x)?;
+                tuple.serialize_element(&self.cols[3].y)?;
+                tuple.serialize_element(&self.cols[3].z)?;
+                tuple.serialize_element(&self.cols[3].w)?;
+                tuple.end()
             }
         }
 
@@ -986,17 +986,17 @@ macro_rules! impl_serde_mat4 {
 }
 
 // Allowing the $expected macro in case of extending to integer matrices
-impl_serde_mat2!(Mat2, Vec2, f32, "array of 4 floats");
+impl_serde_mat2!(Mat2, Vec2, f32, "tuple of 4 floats");
 #[cfg(feature = "f64")]
-impl_serde_mat2!(DMat2, DVec2, f64, "array of 4 floats");
+impl_serde_mat2!(DMat2, DVec2, f64, "tuple of 4 floats");
 
-impl_serde_mat3!(Mat3, Vec3, f32, "array of 9 floats");
+impl_serde_mat3!(Mat3, Vec3, f32, "tuple of 9 floats");
 #[cfg(feature = "f64")]
-impl_serde_mat3!(DMat3, DVec3, f64, "array of 9 floats");
+impl_serde_mat3!(DMat3, DVec3, f64, "tuple of 9 floats");
 
-impl_serde_mat4!(Mat4, Vec4, f32, "array of 16 floats");
+impl_serde_mat4!(Mat4, Vec4, f32, "tuple of 16 floats");
 #[cfg(feature = "f64")]
-impl_serde_mat4!(DMat4, DVec4, f64, "array of 16 floats");
+impl_serde_mat4!(DMat4, DVec4, f64, "tuple of 16 floats");
 
 #[cfg(test)]
 mod mat_serde_tests {
