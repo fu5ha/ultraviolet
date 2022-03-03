@@ -6,6 +6,8 @@
 - Add methods to scale `Rotor3`
 - Implement `Neg` for all `IVec` types
 - Relax bound in `map` and `apply` from `Fn` to `FnMut`
+- Make matrix serialization and deserialization implementations match
+- Update `wide` to `0.7.x`
 
 ## 0.8.1
 
