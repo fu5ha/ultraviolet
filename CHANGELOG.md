@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased
 
+## 0.9.0
+
 - Add methods to scale `Rotor3`
 - Implement `Neg` for all `IVec` types
 - Relax bound in `map` and `apply` from `Fn` to `FnMut`
