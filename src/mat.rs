@@ -397,7 +397,7 @@ macro_rules! mat3s {
                 let zero = $t::splat(0.0);
                 Self::new(
                     $vt::new(c, s, zero),
-                    $vt::new(s, -c, zero),
+                    $vt::new(-s, c, zero),
                     $vt::new(zero, zero, $t::splat(1.0)),
                 )
             }
