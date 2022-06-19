@@ -283,7 +283,7 @@ macro_rules! mat2s {
             #[inline]
             fn from(comps: [[$t; 2]; 2]) -> Self {
                 Self::new(
-                    $vt::new(comps[0][0], comps[1][0]),
+                    $vt::new(comps[0][0], comps[0][1]),
                     $vt::new(comps[1][0], comps[1][1])
                 )
             }
