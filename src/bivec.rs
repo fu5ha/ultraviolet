@@ -643,9 +643,9 @@ bivec3s!(
 
 #[cfg(feature = "f64")]
 bivec3s!(
-    DBivec3 => (DVec3, f64),
-    DBivec3x2 => (DVec3x2, f64x2),
-    DBivec3x4 => (DVec3x4, f64x4)
+    DBivec3 => (DVec3, DRotor3, f64),
+    DBivec3x2 => (DVec3x2, DRotor3x2, f64x2),
+    DBivec3x4 => (DVec3x4, DRotor3x4, f64x4)
 );
 
 #[cfg(test)]
