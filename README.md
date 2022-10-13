@@ -40,7 +40,7 @@ as well as f64 and integer types are disabled by default. In order to enable the
 
 ```toml
 [dependencies]
-ultraviolet = { version = "0.6", features = [ "f64", "int" ] }
+ultraviolet = { version = "0.9", features = [ "f64", "int" ] }
 ```
 
 Will enable the `f64` and `int` features. Here's a list of the available features:
