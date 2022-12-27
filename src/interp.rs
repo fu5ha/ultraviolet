@@ -80,8 +80,14 @@ macro_rules! impl_slerp_rotor3 {
             ///
             /// Note that you should often normalize the result returned by this operation, when working with `Rotor`s, etc!
             #[inline]
-            fn slerp(&self, end: Self, t: $tt) -> Self {
-                let dot = self.dot(end);
+            fn slerp(&self, mut end: Self, t: $tt) -> Self {
+                let mut dot = self.dot(end);
+
+                // make sure interpolation takes shortest path in case dot product is negative
+                if dot < 0.0 {
+                    end = end * -1.0;
+                    dot = -dot;
+                }
 
                 if dot > 0.9995 {
                     return self.lerp(end, t);
