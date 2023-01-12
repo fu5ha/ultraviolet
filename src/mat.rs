@@ -1140,20 +1140,17 @@ macro_rules! mat4s {
                 let (sin_pitch, cos_pitch) = pitch.sin_cos();
                 let (sin_roll, cos_roll) = roll.sin_cos();
 
-                let sin_pitch_sin_roll = sin_pitch * sin_roll;
-                let sin_pitch_cos_roll = sin_pitch * cos_roll;
-
                 let zero = $t::splat(0.0);
 
-                let m00 = cos_yaw * cos_pitch;
-                let m10 = sin_yaw * cos_pitch;
-                let m20 = -sin_pitch;
-                let m01 = cos_yaw.mul_add(sin_pitch_sin_roll, -sin_yaw * cos_roll);
-                let m11 = sin_yaw.mul_add(sin_pitch_sin_roll, cos_yaw * cos_roll);
-                let m21 = cos_pitch * sin_roll;
-                let m02 = cos_yaw.mul_add(sin_pitch_cos_roll, sin_yaw * sin_roll);
-                let m12 = sin_yaw.mul_add(sin_pitch_cos_roll, -cos_yaw * sin_roll);
-                let m22 = cos_pitch * cos_roll;
+                let m00 = cos_yaw * cos_roll + sin_pitch * sin_yaw * sin_roll;
+                let m10 = cos_pitch * sin_roll;
+                let m20 = -cos_roll * sin_yaw + cos_yaw * sin_pitch * sin_roll;
+                let m01 = cos_roll * sin_pitch * sin_yaw - cos_yaw * sin_roll;
+                let m11 = cos_pitch * cos_roll;
+                let m21 = cos_yaw * cos_roll * sin_pitch + sin_yaw * sin_roll;
+                let m02 = cos_pitch * sin_yaw;
+                let m12 = -sin_pitch;
+                let m22 = cos_pitch * cos_yaw;
 
                 // think transposed as arguments are columns
                 Self::new(
@@ -1907,5 +1904,13 @@ mod test {
         assert_eq!(mat1[0], mat2[0]);
         assert_eq!(mat1[1], mat2[1]);
         assert_eq!(mat1[2], mat2[2]);
+
+        let mat3 = Mat4::from_euler_angles(roll, pitch, yaw);
+        let mat4 =
+            Mat4::from_rotation_y(yaw) * Mat4::from_rotation_x(pitch) * Mat4::from_rotation_z(roll);
+        assert_eq!(mat3[0], mat4[0]);
+        assert_eq!(mat3[1], mat4[1]);
+        assert_eq!(mat3[2], mat4[2]);
+        assert_eq!(mat3[3], mat4[3]);
     }
 }
