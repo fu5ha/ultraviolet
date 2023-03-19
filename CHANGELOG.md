@@ -3,6 +3,11 @@
 <!-- next-header -->
 ## Unreleased
 
+- Fix `from_euler_angles` on `Mat4`
+- Update documentation on matrix rotation constructors
+- Update some documentation and improve implementation on
+`as_array` methods on various types
+
 ## 0.9.0
 
 - Add methods to scale `Rotor3`
