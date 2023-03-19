@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased
 
+## 0.9.1
+
 - Fix `from_euler_angles` on `Mat4`
 - Update documentation on matrix rotation constructors
 - Update some documentation and improve implementation on
