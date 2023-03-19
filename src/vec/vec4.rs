@@ -225,17 +225,27 @@ macro_rules! vec4s {
                 $v3t::new(self.x, self.y, self.z)
             }
 
+            /// Get the [`core::alloc::Layout`] of `Self`
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
+            /// Interpret `self` as a statically-sized array of its base numeric type
             #[inline]
             pub fn as_array(&self) -> &[$t; 4] {
-                use std::convert::TryInto;
-                self.as_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$t; 4];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically-sized array of its base numeric type
+            #[inline]
+            pub fn as_mut_array(&mut self) -> &mut [$t; 4] {
+                let ptr = self as *mut $n as *mut [$t; 4];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a slice of its base numeric type
             #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -245,21 +255,22 @@ macro_rules! vec4s {
                 }
             }
 
-            #[inline]
-            pub fn as_byte_slice(&self) -> &[u8] {
-                // This is safe because we are statically bounding our slices to the size of these
-                // vectors
-                unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
-                }
-            }
-
+            /// Interpret `self` as a slice of its base numeric type
             #[inline]
             pub fn as_mut_slice(&mut self) -> &mut [$t] {
                 // This is safe because we are statically bounding our slices to the size of these
                 // vectors
                 unsafe {
                     std::slice::from_raw_parts_mut(self as *mut $n as *mut $t, 4)
+                }
+            }
+
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
                 }
             }
 

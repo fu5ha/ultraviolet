@@ -99,23 +99,41 @@ macro_rules! mat2s {
                 inv_det * self.adjugate()
             }
 
+            /// Get the [`core::alloc::Layout`] of `Self`
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$vt>()).unwrap()
             }
 
+            /// Interpret `self` as a statically-sized array of its base numeric type
             #[inline]
             pub fn as_array(&self) -> &[$t; 4] {
-                use std::convert::TryInto;
-                self.as_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$t; 4];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically-sized array of its base numeric type
+            #[inline]
+            pub fn as_mut_array(&mut self) -> &mut [$t; 4] {
+                let ptr = self as *mut $n as *mut [$t; 4];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a statically-sized array of its component (column) vector type
             #[inline]
             pub fn as_component_array(&self) -> &[$vt; 2] {
-                use std::convert::TryInto;
-                self.as_component_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$vt; 2];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically-sized array of its component (column) vector type
+            #[inline]
+            pub fn as_mut_component_array(&mut self) -> &mut [$vt; 2] {
+                let ptr = self as *mut $n as *mut [$vt; 2];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a slice of its base numeric type
             #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -125,24 +143,7 @@ macro_rules! mat2s {
                 }
             }
 
-            #[inline]
-            pub fn as_component_slice(&self) -> &[$vt] {
-                // This is safe because we are statically bounding our slices to the size of these
-                // vectors
-                unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const $vt, 2)
-                }
-            }
-
-            #[inline]
-            pub fn as_byte_slice(&self) -> &[u8] {
-                // This is safe because we are statically bounding our slices to the size of these
-                // vectors
-                unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
-                }
-            }
-
+            /// Interpret `self` as a slice of its base numeric type
             #[inline]
             pub fn as_mut_slice(&mut self) -> &mut [$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -152,6 +153,17 @@ macro_rules! mat2s {
                 }
             }
 
+            /// Interpret `self` as a slice of its component (column) vector type
+            #[inline]
+            pub fn as_component_slice(&self) -> &[$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $n as *const $vt, 2)
+                }
+            }
+
+            /// Interpret `self` as a slice of its component (column) vector type
             #[inline]
             pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -161,6 +173,17 @@ macro_rules! mat2s {
                 }
             }
 
+            /// Interpret `self` as a slice of bytes
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 4 * std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Interpret `self` as a slice of bytes
             #[inline]
             pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -435,15 +458,6 @@ macro_rules! mat3s {
             /// - Yaw is rotation inside the xz plane ("around the y axis")
             /// - Pitch is rotation inside the yz plane ("around the x axis")
             /// - Roll is rotation inside the xy plane ("around the z axis")
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             #[allow(unused_variables)]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
@@ -475,15 +489,6 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "around the x axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the yz plane*.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -501,15 +506,6 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "around the y axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xz plane*.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -527,15 +523,6 @@ macro_rules! mat3s {
             /// Create a new rotation matrix from a rotation "around the z axis". This is
             /// here as a convenience function for users coming from other libraries; it is
             /// more proper to think of this as a rotation *in the xy plane*.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -552,15 +539,6 @@ macro_rules! mat3s {
 
             /// Create a new rotation matrix from a rotation around the given axis.
             /// This is here as a convenience function for users coming from other libraries.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_around(axis: $vt, angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -693,23 +671,41 @@ macro_rules! mat3s {
                 (*self * point.into_homogeneous_point()).normalized_homogeneous_point().truncated()
             }
 
+            /// Get the [`core::alloc::Layout`] of `Self`
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
+            /// Interpret `self` as a statically sized array of the base numeric type.
             #[inline]
             pub fn as_array(&self) -> &[$t; 9] {
-                use std::convert::TryInto;
-                self.as_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$t; 9];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically sized array of the base numeric type.
+            #[inline]
+            pub fn as_mut_array(&mut self) -> &mut [$t; 9] {
+                let ptr = self as *mut $n as *mut [$t; 9];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a statically sized array of the component (column) vectors.
             #[inline]
             pub fn as_component_array(&self) -> &[$vt; 3] {
-                use std::convert::TryInto;
-                self.as_component_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$vt; 3];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically sized array of the component (column) vectors.
+            #[inline]
+            pub fn as_mut_component_array(&mut self) -> &mut [$vt; 3] {
+                let ptr = self as *mut $n as *mut [$vt; 3];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a slice of the base numeric type.
             #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -719,6 +715,7 @@ macro_rules! mat3s {
                 }
             }
 
+            /// Interpret `self` as a slice of the component (column) vectors.
             #[inline]
             pub fn as_component_slice(&self) -> &[$vt] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -728,6 +725,7 @@ macro_rules! mat3s {
                 }
             }
 
+            /// Interpret `self` as a slice of bytes.
             #[inline]
             pub fn as_byte_slice(&self) -> &[u8] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -737,6 +735,7 @@ macro_rules! mat3s {
                 }
             }
 
+            /// Interpret `self` as a slice of the base numeric type.
             #[inline]
             pub fn as_mut_slice(&mut self) -> &mut [$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -746,6 +745,7 @@ macro_rules! mat3s {
                 }
             }
 
+            /// Interpret `self` as a slice of the component (column) vectors.
             #[inline]
             pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -755,6 +755,7 @@ macro_rules! mat3s {
                 }
             }
 
+            /// Interpret `self` as a slice of bytes.
             #[inline]
             pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -1166,15 +1167,6 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the yz plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_x(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -1195,15 +1187,6 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the xz plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_y(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -1224,15 +1207,6 @@ macro_rules! mat4s {
             /// more proper to think of this as a rotation *in the xy plane*.
             ///
             /// Assumes homogeneous 3d coordinates.
-            ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
             #[inline]
             pub fn from_rotation_z(angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -1252,14 +1226,7 @@ macro_rules! mat4s {
             /// The axis will be interpreted as a 3d vector.
             /// This is here as a convenience function for users coming from other libraries.
             ///
-            /// **Important: This function assumes a right-handed, y-up coordinate space** where:
-            /// * +X axis points *right*
-            /// * +Y axis points *up*
-            /// * +Z axis points *towards the viewer* (i.e. out of the screen)
-            ///
-            /// This means that you may see unexpected behavior when used with OpenGL or DirectX
-            /// as they use a different coordinate system. You should use the appropriate
-            /// projection matrix in ```projection``` module to fit your use case to remedy this.
+            /// Assumes homogeneous 3d coordinates.
             #[inline]
             pub fn from_rotation_around(axis: $vt, angle: $t) -> Self {
                 let (sin, cos) = angle.sin_cos();
@@ -1541,23 +1508,41 @@ macro_rules! mat4s {
                 )
             }
 
+            /// Get the [`core::alloc::Layout`] of `Self`
             #[inline]
             pub fn layout() -> alloc::alloc::Layout {
                 alloc::alloc::Layout::from_size_align(std::mem::size_of::<Self>(), std::mem::align_of::<$t>()).unwrap()
             }
 
+            /// Interpret `self` as a statically sized array of the base numeric type.
             #[inline]
             pub fn as_array(&self) -> &[$t; 16] {
-                use std::convert::TryInto;
-                self.as_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$t; 16];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically sized array of the base numeric type.
+            #[inline]
+            pub fn as_mut_array(&mut self) -> &[$t; 16] {
+                let ptr = self as *mut $n as *mut [$t; 16];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a statically sized array of its component (column) vectors.
             #[inline]
             pub fn as_component_array(&self) -> &[$vt; 4] {
-                use std::convert::TryInto;
-                self.as_component_slice().try_into().unwrap()
+                let ptr = self as *const $n as *const [$vt; 4];
+                unsafe { &*ptr }
             }
 
+            /// Interpret `self` as a statically sized array of its component (column) vectors.
+            #[inline]
+            pub fn as_mut_component_array(&mut self) -> &mut [$vt; 4] {
+                let ptr = self as *mut $n as *mut [$vt; 4];
+                unsafe { &mut *ptr }
+            }
+
+            /// Interpret `self` as a slice of the base numeric type.
             #[inline]
             pub fn as_slice(&self) -> &[$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -1567,24 +1552,7 @@ macro_rules! mat4s {
                 }
             }
 
-            #[inline]
-            pub fn as_component_slice(&self) -> &[$vt] {
-                // This is safe because we are statically bounding our slices to the size of these
-                // vectors
-                unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const $vt, 4)
-                }
-            }
-
-            #[inline]
-            pub fn as_byte_slice(&self) -> &[u8] {
-                // This is safe because we are statically bounding our slices to the size of these
-                // vectors
-                unsafe {
-                    std::slice::from_raw_parts(self as *const $n as *const u8, 16 * std::mem::size_of::<$t>())
-                }
-            }
-
+            /// Interpret `self` as a slice of the base numeric type.
             #[inline]
             pub fn as_mut_slice(&mut self) -> &mut [$t] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -1594,6 +1562,17 @@ macro_rules! mat4s {
                 }
             }
 
+            /// Interpret `self` as a slice of the component (column) vectors
+            #[inline]
+            pub fn as_component_slice(&self) -> &[$vt] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $n as *const $vt, 4)
+                }
+            }
+
+            /// Interpret `self` as a slice of the component (column) vectors
             #[inline]
             pub fn as_mut_component_slice(&mut self) -> &mut [$vt] {
                 // This is safe because we are statically bounding our slices to the size of these
@@ -1603,6 +1582,17 @@ macro_rules! mat4s {
                 }
             }
 
+            /// Interpret `self` as a slice of bytes
+            #[inline]
+            pub fn as_byte_slice(&self) -> &[u8] {
+                // This is safe because we are statically bounding our slices to the size of these
+                // vectors
+                unsafe {
+                    std::slice::from_raw_parts(self as *const $n as *const u8, 16 * std::mem::size_of::<$t>())
+                }
+            }
+
+            /// Interpret `self` as a slice of bytes
             #[inline]
             pub fn as_mut_byte_slice(&mut self) -> &mut [u8] {
                 // This is safe because we are statically bounding our slices to the size of these
