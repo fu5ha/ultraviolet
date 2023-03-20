@@ -85,7 +85,7 @@ macro_rules! impl_slerp_rotor3 {
 
                 // make sure interpolation takes shortest path in case dot product is negative
                 if dot < 0.0 {
-                    end = end * -1.0;
+                    end *= -1.0;
                     dot = -dot;
                 }
 

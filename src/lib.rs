@@ -42,10 +42,12 @@
 //!
 //! Will enable the `f64` and `int` features. Here's a list of the available features:
 //!
-//! * `f64` - Enable f64 bit wide floating point support. Naming convention is `D[Type]`, such as `DVec3x4` would be a collection of 4 3d vectors with f64 precision each.
-//! * `int` - Enable integer vector types.
-//! * `serde` - Enable Serialize and Deserialize implementations for many scalar types.
-//! * `mint` - Enable interoperation with other math libraries through the `mint` interface
+//! * `f64` – Enable `f64` bit wide floating point support. Naming convention is `D[Type]`, such as `DVec3x4` would be a collection of 4 3d vectors with `f64` precision each.
+//! * `int` – Enable integer vector types.
+//! * `bytemuck` – Enable casting of many types to byte arrays, for use with graphics APIs.
+//! * `mint` – Enable interoperation with other math crates through the `mint` interface.
+//! * `num-traits` – Enable [identity traits](https://docs.rs/num-traits/latest/num_traits/identities/index.html) for interoperation with other math crates.
+//! * `serde` – Enable `Serialize` and `Deserialize` implementations for many scalar types.
 //!
 //! ## Crate Features
 //!
