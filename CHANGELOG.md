@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased
 
+- Add `num_traits::identities` support behind a `num-traits` feature flag
+
 ## 0.9.1
 
 - Fix `from_euler_angles` on `Mat4`
