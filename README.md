@@ -1,4 +1,4 @@
-[![crates.io](http://meritbadge.herokuapp.com/ultraviolet)](https://crates.io/crates/ultraviolet)
+[![crates.io](https://img.shields.io/crates/v/ultraviolet.svg)](https://crates.io/crates/ultraviolet)
 [![docs.rs](https://docs.rs/ultraviolet/badge.svg)](https://docs.rs/ultraviolet)
 
 # `ultraviolet`
