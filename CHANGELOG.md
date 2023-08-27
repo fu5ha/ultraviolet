@@ -4,6 +4,7 @@
 ## Unreleased
 
 - Add `num_traits::identities` support behind a `num-traits` feature flag
+- Fix inverse for similarities
 
 ## 0.9.1
 
