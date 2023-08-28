@@ -313,8 +313,8 @@ macro_rules! similarities {
             #[inline]
             pub fn inverse(&mut self) {
                 self.rotation.reverse();
-                self.translation = self.rotation * (-self.translation);
                 self.scale = $t::splat(1.0) / self.scale;
+                self.translation = self.rotation * (-self.translation) * self.scale;
             }
 
             #[inline]
