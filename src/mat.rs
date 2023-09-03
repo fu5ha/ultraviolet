@@ -1523,7 +1523,7 @@ macro_rules! mat4s {
 
             /// Interpret `self` as a statically sized array of the base numeric type.
             #[inline]
-            pub fn as_mut_array(&mut self) -> &[$t; 16] {
+            pub fn as_mut_array(&mut self) -> &mut [$t; 16] {
                 let ptr = self as *mut $n as *mut [$t; 16];
                 unsafe { &mut *ptr }
             }
