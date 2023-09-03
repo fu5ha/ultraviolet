@@ -5,6 +5,7 @@
 
 - Add `num_traits::identities` support behind a `num-traits` feature flag
 - Fix inverse for similarities
+- Fix missing `mut` in `Mat4::as_mut_array` result
 
 ## 0.9.1
 
