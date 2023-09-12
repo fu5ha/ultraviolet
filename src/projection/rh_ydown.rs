@@ -138,7 +138,7 @@ pub fn perspective_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, -1.0),
+        Vec4::new(0.0, 0.0, -z_far / nmf, 1.0),
         Vec4::new(0.0, 0.0, z_near * z_far / nmf, 0.0),
     )
 }
@@ -190,7 +190,7 @@ pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, -1.0, -1.0),
+        Vec4::new(0.0, 0.0, 1.0, 1.0),
         Vec4::new(0.0, 0.0, -z_near, 0.0),
     )
 }
@@ -283,7 +283,7 @@ pub fn perspective_reversed_z_vk(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, -1.0),
+        Vec4::new(0.0, 0.0, z_near / nmf, 1.0),
         Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
     )
 }
@@ -358,7 +358,94 @@ pub fn perspective_reversed_infinite_z_vk(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, 0.0, -1.0),
+        Vec4::new(0.0, 0.0, 0.0, 1.0),
         Vec4::new(0.0, 0.0, z_near, 0.0),
     )
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::f32::consts::FRAC_PI_2;
+
+    use crate::util::EqualsEps;
+
+    fn vk_corners() -> [(f32, f32, f32); 4] {
+        [
+            (-1.0, -1.0, 0.0),
+            (1.0, 1.0, 0.0),
+            (-1.0, 1.0, 1.0),
+            (1.0, -1.0, 1.0),
+        ]
+    }
+
+    fn assert_projected_points_eq(
+        projection: Mat4,
+        points: &[(f32, f32, f32)],
+        expected: &[(f32, f32, f32)],
+    ) {
+        for (point, &expected) in points.iter().zip(expected.iter()) {
+            let actual = Vec3::from_homogeneous_point(
+                projection * Vec3::from(point).into_homogeneous_point(),
+            );
+            let expected = Vec3::from(expected);
+            assert_eq_eps!(actual, expected, 0.01);
+        }
+    }
+
+    fn assert_eq_vk_corners(perspective: Mat4, corners: [(f32, f32, f32); 4]) {
+        assert_projected_points_eq(perspective, &corners, &vk_corners());
+    }
+
+    #[test]
+    pub fn sanity_check_perspective_vk() {
+        assert_eq_vk_corners(
+            perspective_vk(FRAC_PI_2, 2.0, 3.0, 10.0),
+            [
+                (-6.0, -3.0, 3.0),
+                (6.0, 3.0, 3.0),
+                (-20.0, 10.0, 10.0),
+                (20.0, -10.0, 10.0),
+            ],
+        );
+    }
+
+    #[test]
+    pub fn sanity_check_perspective_infinite_z_vk() {
+        assert_eq_vk_corners(
+            perspective_infinite_z_vk(FRAC_PI_2, 2.0, 3.0),
+            [
+                (-6.0, -3.0, 3.0),
+                (6.0, 3.0, 3.0),
+                (-2000.0, 1000.0, 1000.0),
+                (2000.0, -1000.0, 1000.0),
+            ],
+        );
+    }
+
+    #[test]
+    pub fn sanity_check_perspective_reversed_z_vk() {
+        assert_eq_vk_corners(
+            perspective_reversed_z_vk(FRAC_PI_2, 2.0, 3.0, 10.0),
+            [
+                (-20.0, -10.0, 10.0),
+                (20.0, 10.0, 10.0),
+                (-6.0, 3.0, 3.0),
+                (6.0, -3.0, 3.0),
+            ],
+        );
+    }
+
+    #[test]
+    pub fn sanity_check_perspective_reversed_infinite_z_vk() {
+        assert_eq_vk_corners(
+            perspective_reversed_infinite_z_vk(FRAC_PI_2, 2.0, 3.0),
+            [
+                (-2000.0, -1000.0, 1000.0),
+                (2000.0, 1000.0, 1000.0),
+                (-6.0, 3.0, 3.0),
+                (6.0, -3.0, 3.0),
+            ],
+        );
+    }
 }

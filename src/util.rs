@@ -18,16 +18,37 @@ impl Splat<f64> for f64 {
     }
 }
 
+#[cfg(test)]
+macro_rules! assert_eq_eps {
+    ($left:expr, $right:expr, $eps:expr) => {{
+        match (&($left), &($right)) {
+            (left_val, right_val) => {
+                if !(left_val.eq_eps(*right_val, $eps)) {
+                    // The reborrows below are intentional. Without them, the stack slot for the
+                    // borrow is initialized even before the values are compared, leading to a
+                    // noticeable slow down.
+                    panic!(
+                        r#"assertion failed: `(left ~= right with epsilon {})`
+ left: `{:?}`,
+ right: `{:?}`"#,
+                        $eps, &*left_val, &*right_val
+                    )
+                }
+            }
+        }
+    }};
+}
+
 pub trait EqualsEps {
-    fn eq_eps(self, other: Self) -> bool;
+    fn eq_eps(self, other: Self, eps: f32) -> bool;
 }
 
 macro_rules! impl_eq_eps_wide {
     ($($t:ident),+) => {
         $(impl EqualsEps for $t {
-            fn eq_eps(self, other: Self) -> bool {
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
                 let r = (self - other).abs();
-                let eps = $t::splat(0.01);
+                let eps = $t::splat(eps as _);
 
                 r.cmp_ge(eps).none()
             }
@@ -38,32 +59,14 @@ macro_rules! impl_eq_eps_wide {
 impl_eq_eps_wide!(f32x4, f32x8, f64x2, f64x4);
 
 impl EqualsEps for f32 {
-    fn eq_eps(self, other: Self) -> bool {
-        let diff = (self - other).abs();
-        if diff <= 0.01 {
-            true
-        } else {
-            println!(
-                "{} should equal {} with epsilon 0.01 but doesn't.",
-                self, other
-            );
-            false
-        }
+    fn eq_eps(self, other: Self, eps: f32) -> bool {
+        (self - other).abs() <= eps
     }
 }
 
 impl EqualsEps for f64 {
-    fn eq_eps(self, other: Self) -> bool {
-        let diff = (self - other).abs();
-        if diff <= 0.01 {
-            true
-        } else {
-            println!(
-                "{} should equal {} with epsilon 0.01 but doesn't.",
-                self, other
-            );
-            false
-        }
+    fn eq_eps(self, other: Self, eps: f32) -> bool {
+        (self - other).abs() <= eps as f64
     }
 }
 

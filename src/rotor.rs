@@ -228,8 +228,8 @@ macro_rules! rotor2s {
         }
 
         impl EqualsEps for $rn {
-            fn eq_eps(self, other: Self) -> bool {
-                self.s.eq_eps(other.s) && self.bv.eq_eps(other.bv)
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
+                self.s.eq_eps(other.s, eps) && self.bv.eq_eps(other.bv, eps)
             }
         }
 
@@ -684,8 +684,8 @@ macro_rules! rotor3s {
 
         impl EqualsEps for $rn {
             #[inline]
-            fn eq_eps(self, other: Self) -> bool {
-                self.s.eq_eps(other.s) && self.bv.eq_eps(other.bv)
+            fn eq_eps(self, other: Self, eps: f32) -> bool {
+                self.s.eq_eps(other.s, eps) && self.bv.eq_eps(other.bv, eps)
             }
         }
 
@@ -827,9 +827,9 @@ mod test {
         println!("{:?} = {:?}", rot_ab, b);
         println!("{:?} = {:?}", rot_bc, c);
         println!("{:?} = {:?}", rot_abc, c);
-        assert!(rot_ab.eq_eps(b));
-        assert!(rot_bc.eq_eps(c));
-        assert!(rot_abc.eq_eps(c));
+        assert_eq_eps!(rot_ab, b, 0.01);
+        assert_eq_eps!(rot_bc, c, 0.01);
+        assert_eq_eps!(rot_abc, c, 0.01);
     }
 
     #[test]
@@ -841,7 +841,7 @@ mod test {
         let r_bc = Rotor3::from_rotation_between(b, c);
         let res = r_ab.rotated_by(r_bc).rotated_by(r_bc.reversed());
         println!("{:?} {:?}", r_ab, res);
-        assert!(r_ab.eq_eps(res));
+        assert_eq_eps!(r_ab, res, 0.01);
     }
 
     #[test]
@@ -854,7 +854,7 @@ mod test {
         let rotor_abbc = rotor_bc * rotor_ab;
         let res = rotor_abbc * a;
         println!("{:#?} {:#?}", rotor_abbc, res);
-        assert!(c.eq_eps(res));
+        assert_eq_eps!(c, res, 0.01);
     }
 
     #[test]
@@ -864,7 +864,7 @@ mod test {
         let interp = i.lerp(i, 0.5);
 
         println!("{:#?} ::: {:#?}", i, interp);
-        assert!(interp.eq_eps(i))
+        assert_eq_eps!(interp, i, 0.01);
     }
 
     #[test]
@@ -880,12 +880,12 @@ mod test {
         let plane = Bivec3::new(0.2, 0.4, 0.7).normalized();
         let rotor = Rotor3::from_angle_plane(angle, plane);
         let (angle_, plane_) = rotor.into_angle_plane();
-        assert!(Rotor3::from_angle_plane(angle_, plane_).eq_eps(rotor));
+        assert_eq_eps!(Rotor3::from_angle_plane(angle_, plane_), rotor, 0.01);
         let angle = -0.32;
         let plane = Bivec3::new(0.2, 0.4, 0.7).normalized();
         let rotor = Rotor3::from_angle_plane(angle, plane);
         let (angle_, plane_) = rotor.into_angle_plane();
-        assert!(Rotor3::from_angle_plane(angle_, plane_).eq_eps(rotor));
+        assert_eq_eps!(Rotor3::from_angle_plane(angle_, plane_), rotor, 0.01);
     }
 
     #[test]
