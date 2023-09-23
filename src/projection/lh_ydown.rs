@@ -78,4 +78,3 @@ pub fn orthographic_wgpu_dx(
         Vec4::new(-(rpl / rml), -(tpb / tmb), -(near / fmn), 1.0),
     )
 }
-

@@ -369,4 +369,3 @@ pub fn perspective_reversed_infinite_z_vk(
         Vec4::new(0.0, 0.0, z_near, 0.0),
     )
 }
-
