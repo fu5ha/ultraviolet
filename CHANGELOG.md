@@ -3,6 +3,9 @@
 <!-- next-header -->
 ## Unreleased
 
+- Update `projection` module's and submodules' documentation
+- Remove `rh_ydown` projection module as it was very unlikely to be useful and caused confusion.
+
 ## 0.9.2
 
 - Add `num_traits::identities` support behind a `num-traits` feature flag

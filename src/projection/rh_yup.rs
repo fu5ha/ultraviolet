@@ -1,7 +1,18 @@
 //! Projection matrices that are intended to be used when the base coordinate
-//! system (i.e. the one used by the application code) is right-handed with the
-//! the x-axis pointing right, y-axis pointing *up*, and z-axis pointing *out of
-//! the screen*. This is reexported at the root of `projections` as it is the
+//! system (i.e. the one used by the application code) is assumes +X points right, +Y points up,
+//! and +Z points towards the viewer, similar to Godot, Maya, Houdini, Substance, etc.:
+//!
+//! ```ignore,log
+//!     +y
+//!     |
+//!     |
+//!     0----- +x
+//!    /
+//!   /
+//! +z
+//! ```
+//!
+//! This is reexported at the root of `projections` as it is the
 //! de-facto standard coordinate system for doing computer graphics programming.
 
 use crate::mat::*;

@@ -1,7 +1,14 @@
 //! Projection matrices that are intended to be used when the base coordinate
-//! system (i.e. the one used by the application code) is left-handed, with the
-//! x-axis pointing right, y-axis pointing *up*, and z-axis pointing *into the
-//! screen*.
+//! system (i.e. the one used by the application code) assumes that +X points right, +Y points up,
+//! and +Z points away from the viewer, similar to Unity, Cinema4d, or ZBrush:
+//!
+//! ```ignore,log
+//!     +y  +z
+//!     |  /
+//!     | /
+//!     0 ----- +x
+//! ```
+//!
 
 use crate::mat::*;
 use crate::vec::*;
@@ -80,7 +87,7 @@ pub fn orthographic_wgpu_dx(
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from -1.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
@@ -103,7 +110,7 @@ pub fn perspective_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
@@ -126,7 +133,7 @@ pub fn perspective_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Mat4 {
@@ -153,7 +160,7 @@ pub fn perspective_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32, z_far: 
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from -1.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_infinite_z_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
@@ -179,7 +186,7 @@ pub fn perspective_infinite_z_gl(vertical_fov: f32, aspect_ratio: f32, z_near: f
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
@@ -205,7 +212,7 @@ pub fn perspective_infinite_z_vk(vertical_fov: f32, aspect_ratio: f32, z_near: f
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_infinite_z_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_near: f32) -> Mat4 {
@@ -231,7 +238,7 @@ pub fn perspective_infinite_z_wgpu_dx(vertical_fov: f32, aspect_ratio: f32, z_ne
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 ///
 /// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
@@ -266,7 +273,7 @@ pub fn perspective_reversed_z_wgpu_dx_gl(
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_reversed_z_vk(
@@ -304,7 +311,7 @@ pub fn perspective_reversed_z_vk(
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// left-handed and y-up with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 ///
 /// **Note that in order for this to work properly with OpenGL, you'll need to use the `gl_arb_clip_control` extension
@@ -343,7 +350,7 @@ pub fn perspective_reversed_infinite_z_wgpu_dx_gl(
 /// * `aspect_ratio` should be the quotient `width / height`.
 ///
 /// This matrix is meant to be used when the source coordinate space is left-handed and y-up
-/// (the standard computer graphics coordinate space) and the destination coordinate space is
+/// and the destination coordinate space is
 /// right-handed and y-down with Z (depth) clip extending from 0.0 (close) to 1.0 (far).
 #[inline]
 pub fn perspective_reversed_infinite_z_vk(
@@ -362,3 +369,4 @@ pub fn perspective_reversed_infinite_z_vk(
         Vec4::new(0.0, 0.0, z_near, 0.0),
     )
 }
+
