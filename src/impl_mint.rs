@@ -68,7 +68,11 @@ macro_rules! from_vec4s {
 
 from_vec2s!(
     mint::Vector2<f32> => Vec2,
-    mint::Point2<f32> => Vec2
+    mint::Point2<f32> => Vec2,
+    mint::Vector2<i32> => IVec2,
+    mint::Point2<i32> => IVec2,
+    mint::Vector2<u32> => UVec2,
+    mint::Point2<u32> => UVec2
 );
 #[cfg(feature = "f64")]
 from_vec2s!(
@@ -78,7 +82,11 @@ from_vec2s!(
 
 from_vec3s!(
     mint::Vector3<f32> => Vec3,
-    mint::Point3<f32> => Vec3
+    mint::Point3<f32> => Vec3,
+    mint::Vector3<i32> => IVec3,
+    mint::Point3<i32> => IVec3,
+    mint::Vector3<u32> => UVec3,
+    mint::Point3<u32> => UVec3
 );
 #[cfg(feature = "f64")]
 from_vec3s!(
@@ -86,9 +94,15 @@ from_vec3s!(
     mint::Point3<f64> => DVec3
 );
 
-from_vec4s!(mint::Vector4<f32> => Vec4);
+from_vec4s!(
+    mint::Vector4<f32> => Vec4,
+    mint::Vector4<i32> => IVec4,
+    mint::Vector4<u32> => UVec4
+);
 #[cfg(feature = "f64")]
-from_vec4s!(mint::Vector4<f64> => DVec4);
+from_vec4s!(
+    mint::Vector4<f64> => DVec4
+);
 
 macro_rules! from_mat2s {
     ($($minttype:ty => $uvtype:ty),+) => {

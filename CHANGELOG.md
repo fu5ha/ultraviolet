@@ -5,6 +5,7 @@
 
 - Update `projection` module's and submodules' documentation
 - Remove `rh_ydown` projection module as it was very unlikely to be useful and caused confusion.
+- Add `mint` type conversions for integer vectors
 
 ## 0.9.2
 
