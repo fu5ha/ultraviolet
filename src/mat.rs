@@ -965,9 +965,9 @@ macro_rules! impl_mat3 {
                     s.copysign(self[2][1] - self[1][2])
                 };
 
-                let xz = {
+                let zx = {
                     let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
-                    s.copysign(self[2][0] - self[0][2])
+                    s.copysign(self[0][2] - self[2][0])
                 };
 
                 let xy = {
@@ -975,7 +975,7 @@ macro_rules! impl_mat3 {
                     s.copysign(self[1][0] - self[0][1])
                 };
 
-                $rt::new(w, $bt::new(xy, xz, yz))
+                $rt::new(w, $bt::new(xy, zx, yz))
             }
         })+
     }
@@ -1003,9 +1003,9 @@ macro_rules! impl_mat3_wide {
                     s.flip_signs(self[2][1] - self[1][2])
                 };
 
-                let xz = {
+                let zx = {
                     let s = ($t::splat(1.0) - self[0][0] + self[1][1] - self[2][2]).max($t::splat(0.0)).sqrt() * $t::splat(0.5);
-                    s.flip_signs(self[2][0] - self[0][2])
+                    s.flip_signs(self[0][2] - self[2][0])
                 };
 
                 let xy = {
@@ -1013,7 +1013,7 @@ macro_rules! impl_mat3_wide {
                     s.flip_signs(self[1][0] - self[0][1])
                 };
 
-                $rt::new(w, $bt::new(xy, xz, yz))
+                $rt::new(w, $bt::new(xy, zx, yz))
             }
         })+
     }
@@ -1878,8 +1878,80 @@ mod test {
         let iso = Isometry3::new(c, r_ab);
         let iso_mat4 = iso.into_homogeneous_matrix();
         let iso_ = iso_mat4.into_isometry();
+        println!("{:#?}, {:#?}", r_ab.into_matrix(), iso_mat4);
+        println!("{:#?}, {:#?}", r_ab, iso_.rotation);
         assert!(iso_.translation.eq_eps(c));
-        assert!(iso_.rotation.eq_eps(r_ab));
+        assert!(a.rotated_by(iso_.rotation).eq_eps(b));
+    }
+
+    #[test]
+    pub fn matrix_to_rotor_roundtrip() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let r_ab = Rotor3::from_rotation_between(a, b);
+        assert!(a.rotated_by(r_ab).eq_eps(b));
+        let mat_ab = r_ab.into_matrix();
+        assert!((mat_ab * a).eq_eps(b));
+
+        let r_ab_2 = mat_ab.into_rotor3();
+        assert!(a.rotated_by(r_ab_2).eq_eps(b));
+    }
+
+    #[test]
+    pub fn rotation_plane_xy() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_z(FRAC_PI_3);
+        let rotated = matrix * Vec3::unit_x();
+        let expected = Vec3::new(0.5, 3f32.sqrt() / 2., 0.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_zx() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_y(FRAC_PI_3);
+        let rotated = matrix * Vec3::unit_z();
+        let expected = Vec3::new(3f32.sqrt() / 2., 0., 0.5);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_yz() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_x(FRAC_PI_3);
+        let rotated = matrix * Vec3::unit_y();
+        let expected = Vec3::new(0., 0.5, 3f32.sqrt() / 2.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_xy_by_rotor() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_z(FRAC_PI_3);
+        let rotor = matrix.into_rotor3();
+        let rotated = Vec3::unit_x().rotated_by(rotor);
+        let expected = Vec3::new(0.5, 3f32.sqrt() / 2., 0.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_zx_by_rotor() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_y(FRAC_PI_3);
+        let rotor = matrix.into_rotor3();
+        let rotated = Vec3::unit_z().rotated_by(rotor);
+        let expected = Vec3::new(3f32.sqrt() / 2., 0., 0.5);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_yz_by_rotor() {
+        use std::f32::consts::*;
+        let matrix = Mat3::from_rotation_x(FRAC_PI_3);
+        let rotor = matrix.into_rotor3();
+        let rotated = Vec3::unit_y().rotated_by(rotor);
+        let expected = Vec3::new(0., 0.5, 3f32.sqrt() / 2.);
+        assert!(rotated.eq_eps(expected))
     }
 
     #[test]

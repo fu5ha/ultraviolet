@@ -307,21 +307,21 @@ macro_rules! bivec3s {
         #[repr(C)]
         pub struct $bn {
             pub xy: $t,
-            pub xz: $t,
+            pub zx: $t,
             pub yz: $t,
         }
 
         impl EqualsEps for $bn {
             fn eq_eps(self, other: Self) -> bool {
-                self.xy.eq_eps(other.xy) && self.xz.eq_eps(other.xz) && self.yz.eq_eps(other.yz)
+                self.xy.eq_eps(other.xy) && self.zx.eq_eps(other.zx) && self.yz.eq_eps(other.yz)
             }
         }
 
         impl $bn {
             #[inline]
-            pub const fn new(xy: $t, xz: $t, yz: $t) -> Self {
+            pub const fn new(xy: $t, zx: $t, yz: $t) -> Self {
                 Self {
-                    xy, xz, yz
+                    xy, zx, yz
                 }
             }
 
@@ -334,7 +334,7 @@ macro_rules! bivec3s {
             /// normalized 'axis vector'
             #[inline]
             pub fn from_normalized_axis(v: $vt) -> Self {
-                Self::new(v.z, -v.y, v.x)
+                Self::new(v.z, v.y, v.x)
             }
 
             #[inline]
@@ -343,7 +343,7 @@ macro_rules! bivec3s {
             }
 
             #[inline]
-            pub fn unit_xz() -> Self {
+            pub fn unit_zx() -> Self {
                 Self::new($t::splat(0.0), $t::splat(1.0), $t::splat(0.0))
             }
 
@@ -354,7 +354,7 @@ macro_rules! bivec3s {
 
             #[inline]
             pub fn mag_sq(&self) -> $t {
-                (self.xy * self.xy) + (self.xz * self.xz) + (self.yz * self.yz)
+                (self.xy * self.xy) + (self.zx * self.zx) + (self.yz * self.yz)
             }
 
             #[inline]
@@ -366,7 +366,7 @@ macro_rules! bivec3s {
             pub fn normalize(&mut self) {
                 let mag = self.mag();
                 self.xy /= mag;
-                self.xz /= mag;
+                self.zx /= mag;
                 self.yz /= mag;
             }
 
@@ -380,7 +380,7 @@ macro_rules! bivec3s {
 
             #[inline]
             pub fn dot(&self, rhs: Self) -> $t {
-                (self.xy * rhs.xy) + (self.xz * rhs.xz) + (self.yz * rhs.yz)
+                (self.xy * rhs.xy) + (self.zx * rhs.zx) + (self.yz * rhs.yz)
             }
 
             #[inline]
@@ -463,7 +463,7 @@ macro_rules! bivec3s {
             #[inline]
             fn add_assign(&mut self, rhs: $bn) {
                 self.xy += rhs.xy;
-                self.xz += rhs.xz;
+                self.zx += rhs.zx;
                 self.yz += rhs.yz;
             }
         }
@@ -481,7 +481,7 @@ macro_rules! bivec3s {
             #[inline]
             fn sub_assign(&mut self, rhs: $bn) {
                 self.xy -= rhs.xy;
-                self.xz -= rhs.xz;
+                self.zx -= rhs.zx;
                 self.yz -= rhs.yz;
             }
         }
@@ -517,7 +517,7 @@ macro_rules! bivec3s {
             #[inline]
             fn mul_assign(&mut self, rhs: Self) {
                 self.xy *= rhs.xy;
-                self.xz *= rhs.xz;
+                self.zx *= rhs.zx;
                 self.yz *= rhs.yz;
             }
         }
@@ -526,7 +526,7 @@ macro_rules! bivec3s {
             #[inline]
             fn mul_assign(&mut self, rhs: $t) {
                 self.xy *= rhs;
-                self.xz *= rhs;
+                self.zx *= rhs;
                 self.yz *= rhs;
             }
         }
@@ -553,7 +553,7 @@ macro_rules! bivec3s {
             #[inline]
             fn div_assign(&mut self, rhs: $bn) {
                 self.xy /= rhs.xy;
-                self.xz /= rhs.xz;
+                self.zx /= rhs.zx;
                 self.yz /= rhs.yz;
             }
         }
@@ -562,7 +562,7 @@ macro_rules! bivec3s {
             #[inline]
             fn div_assign(&mut self, rhs: $t) {
                 self.xy /= rhs;
-                self.xz /= rhs;
+                self.zx /= rhs;
                 self.yz /= rhs;
             }
         }
@@ -572,7 +572,7 @@ macro_rules! bivec3s {
             #[inline]
             fn neg(mut self) -> Self {
                 self.xy = -self.xy;
-                self.xz = -self.xz;
+                self.zx = -self.zx;
                 self.yz = -self.yz;
                 self
             }

@@ -435,11 +435,11 @@ macro_rules! rotor3s {
                 Self::from_angle_plane(angle, $bt::unit_xy())
             }
 
-            /// Create new Rotor from a rotation in the xz plane (also known as
+            /// Create new Rotor from a rotation in the zx plane (also known as
             /// "around the y axis").
             #[inline]
-            pub fn from_rotation_xz(angle: $t) -> Self {
-                Self::from_angle_plane(angle, $bt::unit_xz())
+            pub fn from_rotation_zx(angle: $t) -> Self {
+                Self::from_angle_plane(angle, $bt::unit_zx())
             }
 
             /// Create new Rotor from a rotation in the yz plane (also known as
@@ -453,10 +453,10 @@ macro_rules! rotor3s {
             ///
             /// - Roll is rotation inside the xy plane ("around the z axis")
             /// - Pitch is rotation inside the yz plane ("around the x axis")
-            /// - Yaw is rotation inside the xz plane ("around the y axis")
+            /// - Yaw is rotation inside the zx plane ("around the y axis")
             #[inline]
             pub fn from_euler_angles(roll: $t, pitch: $t, yaw: $t) -> Self {
-                Self::from_angle_plane(yaw, $bt::unit_xz())
+                Self::from_angle_plane(yaw, $bt::unit_zx())
                     * Self::from_angle_plane(pitch, $bt::unit_yz())
                     * Self::from_angle_plane(roll, $bt::unit_xy())
             }
@@ -476,7 +476,7 @@ macro_rules! rotor3s {
                 let mag = self.mag();
                 self.s /= mag;
                 self.bv.xy /= mag;
-                self.bv.xz /= mag;
+                self.bv.zx /= mag;
                 self.bv.yz /= mag;
             }
 
@@ -522,31 +522,31 @@ macro_rules! rotor3s {
                 let two = $t::splat(2.0);
                 let sa2 = a.s * a.s;
                 let baxy2 = a.bv.xy * a.bv.xy;
-                let baxz2 = a.bv.xz * a.bv.xz;
+                let bazx2 = a.bv.zx * a.bv.zx;
                 let bayz2 = a.bv.yz * a.bv.yz;
                 let sa_baxy = a.s * a.bv.xy;
-                let sa_baxz = a.s * a.bv.xz;
+                let sa_bazx = a.s * a.bv.zx;
                 let sa_bayz = a.s * a.bv.yz;
-                let baxy_baxz = a.bv.xy * a.bv.xz;
+                let baxy_bazx = a.bv.xy * a.bv.zx;
                 let baxy_bayz = a.bv.xy * a.bv.yz;
-                let baxz_bayz = a.bv.xz * a.bv.yz;
+                let bazx_bayz = a.bv.zx * a.bv.yz;
                 let two_bbxy = two * b.bv.xy;
-                let two_bbxz = two * b.bv.xz;
+                let two_bbzx = two * b.bv.zx;
                 let two_bbyz = two * b.bv.yz;
 
-                self.s = (sa2 + baxy2 + baxz2 + bayz2) * b.s;
+                self.s = (sa2 + baxy2 + bazx2 + bayz2) * b.s;
 
-                self.bv.xy = (sa2 + baxy2 - baxz2 - bayz2) * b.bv.xy
-                    + (baxy_baxz + sa_bayz) * two_bbxz
-                    + (baxy_bayz - sa_baxz) * two_bbyz;
+                self.bv.xy = (sa2 + baxy2 - bazx2 - bayz2) * b.bv.xy
+                    + (baxy_bazx + sa_bayz) * two_bbzx
+                    + (baxy_bayz - sa_bazx) * two_bbyz;
 
-                self.bv.xz = (sa2 - baxy2 + baxz2 - bayz2) * b.bv.xz
-                    + (baxy_baxz - sa_bayz) * two_bbxy
-                    + (baxz_bayz + sa_baxy) * two_bbyz;
+                self.bv.zx = (sa2 - baxy2 + bazx2 - bayz2) * b.bv.zx
+                    + (baxy_bazx - sa_bayz) * two_bbxy
+                    + (bazx_bayz + sa_baxy) * two_bbyz;
 
-                self.bv.yz = (sa2 - baxy2 - baxz2 + bayz2) * b.bv.yz
-                    + (baxy_bayz + sa_baxz) * two_bbxy
-                    + (baxz_bayz - sa_baxy) * two_bbxz;
+                self.bv.yz = (sa2 - baxy2 - bazx2 + bayz2) * b.bv.yz
+                    + (baxy_bayz + sa_bazx) * two_bbxy
+                    + (bazx_bayz - sa_baxy) * two_bbzx;
             }
 
             /// Rotates this rotor by another rotor and returns the result. Note that if you
@@ -570,15 +570,15 @@ macro_rules! rotor3s {
             pub fn rotate_vec(self, vec: &mut $vt) {
                 // see derivation/rotor3_rotate_vec_derivation for a derivation
                 // f = geometric product of (self)(vec)
-                let fx = self.s * vec.x + self.bv.xy * vec.y + self.bv.xz * vec.z;
+                let fx = self.s * vec.x + self.bv.xy * vec.y - self.bv.zx * vec.z;
                 let fy = self.s * vec.y - self.bv.xy * vec.x + self.bv.yz * vec.z;
-                let fz = self.s * vec.z - self.bv.xz * vec.x - self.bv.yz * vec.y;
-                let fw = self.bv.xy * vec.z - self.bv.xz * vec.y + self.bv.yz * vec.x;
+                let fz = self.s * vec.z + self.bv.zx * vec.x - self.bv.yz * vec.y;
+                let fw = self.bv.xy * vec.z + self.bv.zx * vec.y + self.bv.yz * vec.x;
 
                 // result = geometric product of (f)(self~)
-                vec.x = self.s * fx + self.bv.xy * fy + self.bv.xz * fz + self.bv.yz * fw;
-                vec.y = self.s * fy - self.bv.xy * fx - self.bv.xz * fw + self.bv.yz * fz;
-                vec.z = self.s * fz + self.bv.xy * fw - self.bv.xz * fx - self.bv.yz * fy;
+                vec.x = self.s * fx + self.bv.xy * fy - self.bv.zx * fz + self.bv.yz * fw;
+                vec.y = self.s * fy - self.bv.xy * fx + self.bv.zx * fw + self.bv.yz * fz;
+                vec.z = self.s * fz + self.bv.xy * fw + self.bv.zx * fx - self.bv.yz * fy;
             }
 
             /// Rotates multiple vectors by this rotor.
@@ -590,26 +590,26 @@ macro_rules! rotor3s {
             pub fn rotate_vecs(self, vecs: &mut [$vt]) {
                 let s2 = self.s * self.s;
                 let bxy2 = self.bv.xy * self.bv.xy;
-                let bxz2 = self.bv.xz * self.bv.xz;
+                let bzx2 = self.bv.zx * self.bv.zx;
                 let byz2 = self.bv.yz * self.bv.yz;
                 let s_bxy = self.s * self.bv.xy;
-                let s_bxz = self.s * self.bv.xz;
+                let s_bzx = self.s * self.bv.zx;
                 let s_byz = self.s * self.bv.yz;
-                let bxz_byz = self.bv.xz * self.bv.yz;
+                let bzx_byz = self.bv.zx * self.bv.yz;
                 let bxy_byz = self.bv.xy * self.bv.yz;
-                let bxy_bxz = self.bv.xy * self.bv.xz;
+                let bxy_bzx = self.bv.xy * self.bv.zx;
 
-                let xa = s2 - bxy2 - bxz2 + byz2;
-                let xb = s_bxy - bxz_byz;
-                let xc = s_bxz + bxy_byz;
+                let xa = s2 - bxy2 - bzx2 + byz2;
+                let xb = s_bxy + bzx_byz;
+                let xc = -s_bzx + bxy_byz;
 
-                let ya = -(bxz_byz + s_bxy);
-                let yb = s2 - bxy2 + bxz2 - byz2;
-                let yc = s_byz - bxy_bxz;
+                let ya = bzx_byz - s_bxy;
+                let yb = s2 - bxy2 + bzx2 - byz2;
+                let yc = s_byz + bxy_bzx;
 
-                let za = bxy_byz - s_bxz;
-                let zb = bxy_bxz + s_byz;
-                let zc = -(s2 + bxy2 - bxz2 - byz2);
+                let za = bxy_byz + s_bzx;
+                let zb = bxy_bzx - s_byz;
+                let zc = s2 + bxy2 - bzx2 - byz2;
 
                 for vec in vecs {
                     let two_vx = vec.x + vec.x;
@@ -618,7 +618,7 @@ macro_rules! rotor3s {
 
                     vec.x = vec.x * xa + two_vy * xb + two_vz * xc;
                     vec.y = two_vx * ya + vec.y * yb + two_vz * yc;
-                    vec.z = two_vx * za - two_vy * zb - vec.z * zc;
+                    vec.z = two_vx * za + two_vy * zb + vec.z * zc;
                 }
             }
 
@@ -626,31 +626,31 @@ macro_rules! rotor3s {
             pub fn into_matrix(self) -> $mt {
                 let s2 = self.s * self.s;
                 let bxy2 = self.bv.xy * self.bv.xy;
-                let bxz2 = self.bv.xz * self.bv.xz;
+                let bzx2 = self.bv.zx * self.bv.zx;
                 let byz2 = self.bv.yz * self.bv.yz;
                 let s_bxy = self.s * self.bv.xy;
-                let s_bxz = self.s * self.bv.xz;
+                let s_bzx = self.s * self.bv.zx;
                 let s_byz = self.s * self.bv.yz;
-                let bxz_byz = self.bv.xz * self.bv.yz;
+                let bzx_byz = self.bv.zx * self.bv.yz;
                 let bxy_byz = self.bv.xy * self.bv.yz;
-                let bxy_bxz = self.bv.xy * self.bv.xz;
+                let bxy_bzx = self.bv.xy * self.bv.zx;
 
                 let two = $t::splat(2.0);
 
                 $mt::new(
                     $vt::new(
-                        s2 - bxy2 - bxz2 + byz2,
-                        -two * (bxz_byz + s_bxy),
-                        two * (bxy_byz - s_bxz)),
+                        s2 - bxy2 - bzx2 + byz2,
+                        two * (bzx_byz - s_bxy),
+                        two * (bxy_byz + s_bzx)),
                     $vt::new(
-                        two * (s_bxy - bxz_byz),
-                        s2 - bxy2 + bxz2 - byz2,
-                        -two * (s_byz + bxy_bxz)
+                        two * (s_bxy + bzx_byz),
+                        s2 - bxy2 + bzx2 - byz2,
+                        two * (-s_byz + bxy_bzx)
                     ),
                     $vt::new(
-                        two * (s_bxz + bxy_byz),
-                        two * (s_byz - bxy_bxz),
-                        s2 + bxy2 - bxz2 - byz2
+                        two * (-s_bzx + bxy_byz),
+                        two * (s_byz  + bxy_bzx),
+                        s2 + bxy2 - bzx2 - byz2
                     )
                 )
             }
@@ -659,14 +659,14 @@ macro_rules! rotor3s {
             /// `[vector, scalar]`.
             #[inline]
             pub fn into_quaternion_array(self) -> [$t; 4] {
-                [-self.bv.yz, self.bv.xz, -self.bv.xy, self.s]
+                [-self.bv.yz, -self.bv.zx, -self.bv.xy, self.s]
             }
 
             /// Convert an array that represents a quaternion in the form `[vector, scalar]` into a
             /// rotor.
             #[inline]
             pub fn from_quaternion_array(array: [$t; 4]) -> Self {
-                Self::new(array[3], $bt::new(-array[2], array[1], -array[0]))
+                Self::new(array[3], $bt::new(-array[2], -array[1], -array[0]))
             }
 
             #[inline]
@@ -699,11 +699,11 @@ macro_rules! rotor3s {
             #[inline]
             fn mul(self, q: Self) -> Self {
                 Self {
-                    s: self.s * q.s - self.bv.xy * q.bv.xy - self.bv.xz * q.bv.xz - self.bv.yz * q.bv.yz,
+                    s: self.s * q.s - self.bv.xy * q.bv.xy - self.bv.zx * q.bv.zx - self.bv.yz * q.bv.yz,
                     bv: $bt {
-                        xy: self.bv.xy * q.s + self.s * q.bv.xy + self.bv.yz * q.bv.xz - self.bv.xz * q.bv.yz,
-                        xz: self.bv.xz * q.s + self.s * q.bv.xz - self.bv.yz * q.bv.xy + self.bv.xy * q.bv.yz,
-                        yz: self.bv.yz * q.s + self.s * q.bv.yz + self.bv.xz * q.bv.xy - self.bv.xy * q.bv.xz,
+                        xy: self.bv.xy * q.s + self.s * q.bv.xy - self.bv.yz * q.bv.zx + self.bv.zx * q.bv.yz,
+                        zx: self.bv.zx * q.s + self.s * q.bv.zx + self.bv.yz * q.bv.xy - self.bv.xy * q.bv.yz,
+                        yz: self.bv.yz * q.s + self.s * q.bv.yz - self.bv.zx * q.bv.xy + self.bv.xy * q.bv.zx,
                     }
                 }
             }
@@ -815,12 +815,135 @@ mod test {
     use super::*;
 
     #[test]
+    pub fn rotation_plane_xy() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_xy(FRAC_PI_3);
+        let rotated = Vec3::unit_x().rotated_by(rotation);
+        let expected = Vec3::new(0.5, 3f32.sqrt() / 2., 0.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_zx() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_zx(FRAC_PI_3);
+        let rotated = Vec3::unit_z().rotated_by(rotation);
+        let expected = Vec3::new(3f32.sqrt() / 2., 0., 0.5);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_yz() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_yz(FRAC_PI_3);
+        let rotated = Vec3::unit_y().rotated_by(rotation);
+        let expected = Vec3::new(0., 0.5, 3f32.sqrt() / 2.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_xy_by_matrix() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_xy(FRAC_PI_3);
+        let rotated = rotation.into_matrix() * Vec3::unit_x();
+        let expected = Vec3::new(0.5, 3f32.sqrt() / 2., 0.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_zx_by_matrix() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_zx(FRAC_PI_3);
+        let rotated = rotation.into_matrix() * Vec3::unit_z();
+        let expected = Vec3::new(3f32.sqrt() / 2., 0., 0.5);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotation_plane_yz_by_matrix() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_yz(FRAC_PI_3);
+        let rotated = rotation.into_matrix() * Vec3::unit_y();
+        let expected = Vec3::new(0., 0.5, 3f32.sqrt() / 2.);
+        assert!(rotated.eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotate_vecs_plane_xy() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_xy(FRAC_PI_3);
+        let mut vecs = vec![Vec3::new(1., 0., 12.)];
+        rotation.rotate_vecs(&mut vecs);
+        let expected = Vec3::new(0.5, 3f32.sqrt() / 2., 12.);
+        assert!(vecs[0].eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotate_vecs_plane_zx() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_zx(FRAC_PI_3);
+        let mut vecs = vec![Vec3::new(0., 12., 1.)];
+        rotation.rotate_vecs(&mut vecs);
+        let expected = Vec3::new(3f32.sqrt() / 2., 12., 0.5);
+        assert!(vecs[0].eq_eps(expected))
+    }
+
+    #[test]
+    pub fn rotate_vecs_plane_yz() {
+        use std::f32::consts::*;
+        let rotation = Rotor3::from_rotation_yz(FRAC_PI_3);
+        let mut vecs = vec![Vec3::new(12., 1., 0.)];
+        rotation.rotate_vecs(&mut vecs);
+        let expected = Vec3::new(12., 0.5, 3f32.sqrt() / 2.);
+        assert!(vecs[0].eq_eps(expected))
+    }
+
+    #[test]
     pub fn rotate_vector_roundtrip() {
         let a = Vec3::new(1.0, 2.0, -5.0).normalized();
         let b = Vec3::new(1.0, 1.0, 1.0).normalized();
         let c = Vec3::new(2.0, 3.0, -3.0).normalized();
         let rotor_ab = Rotor3::from_rotation_between(a, b);
         let rotor_bc = Rotor3::from_rotation_between(b, c);
+        let rot_ab = rotor_ab * a;
+        let rot_bc = rotor_bc * b;
+        let rot_abc = rotor_bc * (rotor_ab * a);
+        println!("{:?} = {:?}", rot_ab, b);
+        println!("{:?} = {:?}", rot_bc, c);
+        println!("{:?} = {:?}", rot_abc, c);
+        assert!(rot_ab.eq_eps(b));
+        assert!(rot_bc.eq_eps(c));
+        assert!(rot_abc.eq_eps(c));
+    }
+
+    #[test]
+    pub fn rotate_vector_roundtrip_with_rotate_vecs() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let rotor_ab = Rotor3::from_rotation_between(a, b);
+        let rotor_bc = Rotor3::from_rotation_between(b, c);
+        let mut arg_ab = vec![a.clone()];
+        rotor_ab.rotate_vecs(&mut arg_ab);
+        let mut arg_bc = vec![b.clone()];
+        rotor_bc.rotate_vecs(&mut arg_bc);
+        let mut arg_abc = vec![rotor_ab * a];
+        rotor_bc.rotate_vecs(&mut arg_abc);
+        println!("{:?} = {:?}", arg_ab[0], b);
+        println!("{:?} = {:?}", arg_bc[0], c);
+        println!("{:?} = {:?}", arg_abc[0], c);
+        assert!(arg_ab[0].eq_eps(b));
+        assert!(arg_bc[0].eq_eps(c));
+        assert!(arg_abc[0].eq_eps(c));
+    }
+
+    #[test]
+    pub fn rotate_vector_roundtrip_with_matrices() {
+        let a = Vec3::new(1.0, 2.0, -5.0).normalized();
+        let b = Vec3::new(1.0, 1.0, 1.0).normalized();
+        let c = Vec3::new(2.0, 3.0, -3.0).normalized();
+        let rotor_ab = Rotor3::from_rotation_between(a, b).into_matrix();
+        let rotor_bc = Rotor3::from_rotation_between(b, c).into_matrix();
         let rot_ab = rotor_ab * a;
         let rot_bc = rotor_bc * b;
         let rot_abc = rotor_bc * (rotor_ab * a);
@@ -851,9 +974,10 @@ mod test {
         let c = Vec3::new(-3.0, 0.0, -1.0).normalized();
         let rotor_ab = Rotor3::from_rotation_between(a, b);
         let rotor_bc = Rotor3::from_rotation_between(b, c);
+        let rotor_ac = Rotor3::from_rotation_between(a, c);
         let rotor_abbc = rotor_bc * rotor_ab;
         let res = rotor_abbc * a;
-        println!("{:#?} {:#?}", rotor_abbc, res);
+        println!("{:#?} {:#?} {:#?}", rotor_abbc, rotor_ac, res);
         assert!(c.eq_eps(res));
     }
 
