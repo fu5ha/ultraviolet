@@ -1141,7 +1141,10 @@ macro_rules! impl_serde_bivec2 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1180,7 +1183,7 @@ macro_rules! impl_serde_bivec2 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 macro_rules! impl_serde_bivec3 {
@@ -1248,7 +1251,10 @@ macro_rules! impl_serde_bivec3 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1309,7 +1315,7 @@ macro_rules! impl_serde_bivec3 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 impl_serde_bivec2!(Bivec2);
@@ -1428,7 +1434,10 @@ macro_rules! impl_serde_rotor2 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1478,7 +1487,7 @@ macro_rules! impl_serde_rotor2 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 macro_rules! impl_serde_rotor3 {
@@ -1543,7 +1552,10 @@ macro_rules! impl_serde_rotor3 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1593,7 +1605,7 @@ macro_rules! impl_serde_rotor3 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 impl_serde_rotor2!(Rotor2);
@@ -1729,7 +1741,10 @@ macro_rules! impl_serde_isometry2 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1756,7 +1771,9 @@ macro_rules! impl_serde_isometry2 {
                             match key {
                                 Field::Translation => {
                                     if translation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("translation"));
+                                        return Err(serde::de::Error::duplicate_field(
+                                            "translation",
+                                        ));
                                     }
                                     translation = Some(map.next_value()?);
                                 }
@@ -1768,8 +1785,8 @@ macro_rules! impl_serde_isometry2 {
                                 }
                             }
                         }
-                        let translation =
-                            translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
+                        let translation = translation
+                            .ok_or_else(|| serde::de::Error::missing_field("translation"))?;
                         let rotation =
                             rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
                         Ok(Self::Value::new(translation, rotation))
@@ -1781,7 +1798,7 @@ macro_rules! impl_serde_isometry2 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 macro_rules! impl_serde_isometry3 {
@@ -1846,7 +1863,10 @@ macro_rules! impl_serde_isometry3 {
                 impl<'de> Visitor<'de> for TVisitor {
                     type Value = $name;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(
+                        &self,
+                        formatter: &mut std::fmt::Formatter<'_>,
+                    ) -> std::fmt::Result {
                         formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
@@ -1873,7 +1893,9 @@ macro_rules! impl_serde_isometry3 {
                             match key {
                                 Field::Translation => {
                                     if translation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("translation"));
+                                        return Err(serde::de::Error::duplicate_field(
+                                            "translation",
+                                        ));
                                     }
                                     translation = Some(map.next_value()?);
                                 }
@@ -1885,8 +1907,8 @@ macro_rules! impl_serde_isometry3 {
                                 }
                             }
                         }
-                        let translation =
-                            translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
+                        let translation = translation
+                            .ok_or_else(|| serde::de::Error::missing_field("translation"))?;
                         let rotation =
                             rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
                         Ok(Self::Value::new(translation, rotation))
@@ -1898,7 +1920,7 @@ macro_rules! impl_serde_isometry3 {
                 deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
-    }
+    };
 }
 
 impl_serde_isometry2!(Isometry2);
@@ -1911,9 +1933,9 @@ impl_serde_isometry3!(DIsometry3);
 
 #[cfg(test)]
 mod isometry_serde_tests {
-    use crate::{Vec2, Vec3};
-    use crate::transform::{Isometry2, Isometry3};
     use crate::rotor::{Rotor2, Rotor3};
+    use crate::transform::{Isometry2, Isometry3};
+    use crate::{Vec2, Vec3};
     use serde_test::{assert_tokens, Token};
 
     #[test]
