@@ -1908,3 +1908,101 @@ impl_serde_isometry2!(DIsometry2, "DIsometry2");
 impl_serde_isometry3!(Isometry3, "Isometry3");
 #[cfg(feature = "f64")]
 impl_serde_isometry3!(DIsometry3, "DIsometry3");
+
+#[cfg(test)]
+mod isometry_serde_tests {
+    use crate::{Vec2, Vec3};
+    use crate::transform::{Isometry2, Isometry3};
+    use crate::rotor::{Rotor2, Rotor3};
+    use serde_test::{assert_tokens, Token};
+
+    #[test]
+    fn isometry2() {
+        let isometry2 = Isometry2::new(Vec2::new(1., 2.), Rotor2::from_angle(0.));
+
+        assert_tokens(
+            &isometry2,
+            &[
+                Token::Struct {
+                    name: "Isometry2",
+                    len: 2,
+                },
+                Token::Str("translation"),
+                Token::Struct {
+                    name: "Vec2",
+                    len: 2,
+                },
+                Token::Str("x"),
+                Token::F32(1.),
+                Token::Str("y"),
+                Token::F32(2.),
+                Token::StructEnd,
+                Token::Str("rotation"),
+                Token::Struct {
+                    name: "Rotor2",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec2",
+                    len: 1,
+                },
+                Token::Str("xy"),
+                Token::F32(0.),
+                Token::StructEnd,
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn isometry3() {
+        let isometry3 = Isometry3::new(Vec3::new(1., 2., 3.), Rotor3::from_rotation_xy(0.));
+
+        assert_tokens(
+            &isometry3,
+            &[
+                Token::Struct {
+                    name: "Isometry3",
+                    len: 2,
+                },
+                Token::Str("translation"),
+                Token::Struct {
+                    name: "Vec3",
+                    len: 3,
+                },
+                Token::Str("x"),
+                Token::F32(1.),
+                Token::Str("y"),
+                Token::F32(2.),
+                Token::Str("z"),
+                Token::F32(3.),
+                Token::StructEnd,
+                Token::Str("rotation"),
+                Token::Struct {
+                    name: "Rotor3",
+                    len: 2,
+                },
+                Token::Str("s"),
+                Token::F32(1.),
+                Token::Str("bv"),
+                Token::Struct {
+                    name: "Bivec3",
+                    len: 3,
+                },
+                Token::Str("xy"),
+                Token::F32(0.),
+                Token::Str("xz"),
+                Token::F32(0.),
+                Token::Str("yz"),
+                Token::F32(0.),
+                Token::StructEnd,
+                Token::StructEnd,
+                Token::StructEnd,
+            ],
+        );
+    }
+}
