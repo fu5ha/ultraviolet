@@ -1011,12 +1011,12 @@ mod mat_serde_tests {
         assert_tokens(
             &mat2,
             &[
-                Token::Seq { len: Some(4) },
+                Token::Tuple { len: 4 },
                 Token::F32(1.0),
                 Token::F32(2.0),
                 Token::F32(3.0),
                 Token::F32(4.0),
-                Token::SeqEnd,
+                Token::TupleEnd,
             ],
         );
     }
@@ -1032,7 +1032,7 @@ mod mat_serde_tests {
         assert_tokens(
             &mat3,
             &[
-                Token::Seq { len: Some(9) },
+                Token::Tuple { len: 9 },
                 Token::F32(1.0),
                 Token::F32(2.0),
                 Token::F32(3.0),
@@ -1042,7 +1042,7 @@ mod mat_serde_tests {
                 Token::F32(7.0),
                 Token::F32(8.0),
                 Token::F32(9.0),
-                Token::SeqEnd,
+                Token::TupleEnd,
             ],
         );
     }
@@ -1059,7 +1059,7 @@ mod mat_serde_tests {
         assert_tokens(
             &mat4,
             &[
-                Token::Seq { len: Some(16) },
+                Token::Tuple { len: 16 },
                 Token::F32(1.0),
                 Token::F32(2.0),
                 Token::F32(3.0),
@@ -1076,7 +1076,7 @@ mod mat_serde_tests {
                 Token::F32(14.0),
                 Token::F32(15.0),
                 Token::F32(16.0),
-                Token::SeqEnd,
+                Token::TupleEnd,
             ],
         );
     }
