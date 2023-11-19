@@ -7,20 +7,20 @@ use serde::{
 };
 
 macro_rules! impl_serde_vec2 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 2)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
                 state.serialize_field("x", &self.x)?;
                 state.serialize_field("y", &self.y)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -66,16 +66,16 @@ macro_rules! impl_serde_vec2 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(
                         &self,
                         formatter: &mut std::fmt::Formatter<'_>,
                     ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($type)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -85,10 +85,10 @@ macro_rules! impl_serde_vec2 {
                         let y = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok($t::new(x, y))
+                        Ok(Self::Value::new(x, y))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -112,25 +112,25 @@ macro_rules! impl_serde_vec2 {
                         }
                         let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
                         let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
-                        Ok($t::new(x, y))
+                        Ok(Self::Value::new(x, y))
                     }
                 }
 
                 const FIELDS: &'static [&'static str] = &["x", "y"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     };
 }
 macro_rules! impl_serde_vec3 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 3)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 3)?;
                 state.serialize_field("x", &self.x)?;
                 state.serialize_field("y", &self.y)?;
                 state.serialize_field("z", &self.z)?;
@@ -138,7 +138,7 @@ macro_rules! impl_serde_vec3 {
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -186,16 +186,16 @@ macro_rules! impl_serde_vec3 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(
                         &self,
                         formatter: &mut std::fmt::Formatter<'_>,
                     ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -208,10 +208,10 @@ macro_rules! impl_serde_vec3 {
                         let z = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                        Ok($t::new(x, y, z))
+                        Ok(Self::Value::new(x, y, z))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -243,25 +243,25 @@ macro_rules! impl_serde_vec3 {
                         let x = x.ok_or_else(|| serde::de::Error::missing_field("x"))?;
                         let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
                         let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
-                        Ok($t::new(x, y, z))
+                        Ok(Self::Value::new(x, y, z))
                     }
                 }
 
                 const FIELDS: &'static [&'static str] = &["x", "y", "z"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     };
 }
 macro_rules! impl_serde_vec4 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 4)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 4)?;
                 state.serialize_field("x", &self.x)?;
                 state.serialize_field("y", &self.y)?;
                 state.serialize_field("z", &self.z)?;
@@ -270,7 +270,7 @@ macro_rules! impl_serde_vec4 {
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -320,16 +320,16 @@ macro_rules! impl_serde_vec4 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(
                         &self,
                         formatter: &mut std::fmt::Formatter<'_>,
                     ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -345,10 +345,10 @@ macro_rules! impl_serde_vec4 {
                         let w = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(3, &self))?;
-                        Ok($t::new(x, y, z, w))
+                        Ok(Self::Value::new(x, y, z, w))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -388,41 +388,41 @@ macro_rules! impl_serde_vec4 {
                         let y = y.ok_or_else(|| serde::de::Error::missing_field("y"))?;
                         let z = z.ok_or_else(|| serde::de::Error::missing_field("z"))?;
                         let w = w.ok_or_else(|| serde::de::Error::missing_field("w"))?;
-                        Ok($t::new(x, y, z, w))
+                        Ok(Self::Value::new(x, y, z, w))
                     }
                 }
 
                 const FIELDS: &'static [&'static str] = &["x", "y", "z", "w"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     };
 }
 
-impl_serde_vec2!(Vec2, "Vec2");
+impl_serde_vec2!(Vec2);
 #[cfg(feature = "int")]
-impl_serde_vec2!(UVec2, "UVec2");
+impl_serde_vec2!(UVec2);
 #[cfg(feature = "int")]
-impl_serde_vec2!(IVec2, "IVec2");
+impl_serde_vec2!(IVec2);
 #[cfg(feature = "f64")]
-impl_serde_vec2!(DVec2, "DVec2");
+impl_serde_vec2!(DVec2);
 
-impl_serde_vec3!(Vec3, "Vec3");
+impl_serde_vec3!(Vec3);
 #[cfg(feature = "int")]
-impl_serde_vec3!(UVec3, "UVec3");
+impl_serde_vec3!(UVec3);
 #[cfg(feature = "int")]
-impl_serde_vec3!(IVec3, "IVec3");
+impl_serde_vec3!(IVec3);
 #[cfg(feature = "f64")]
-impl_serde_vec3!(DVec3, "DVec3");
+impl_serde_vec3!(DVec3);
 
-impl_serde_vec4!(Vec4, "Vec4");
+impl_serde_vec4!(Vec4);
 #[cfg(feature = "int")]
-impl_serde_vec4!(UVec4, "UVec4");
+impl_serde_vec4!(UVec4);
 #[cfg(feature = "int")]
-impl_serde_vec4!(IVec4, "IVec4");
+impl_serde_vec4!(IVec4);
 #[cfg(feature = "f64")]
-impl_serde_vec4!(DVec4, "DVec4");
+impl_serde_vec4!(DVec4);
 
 #[cfg(test)]
 mod vec_serde_tests {
@@ -1083,19 +1083,19 @@ mod mat_serde_tests {
 }
 
 macro_rules! impl_serde_bivec2 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 1)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 1)?;
                 state.serialize_field("xy", &self.xy)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1139,23 +1139,23 @@ macro_rules! impl_serde_bivec2 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
                         let xy = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                        Ok($t::new(xy))
+                        Ok(Self::Value::new(xy))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1171,26 +1171,26 @@ macro_rules! impl_serde_bivec2 {
                             }
                         }
                         let xy = xy.ok_or_else(|| serde::de::Error::missing_field("xy"))?;
-                        Ok($t::new(xy))
+                        Ok(Self::Value::new(xy))
                     }
                 }
 
                 const FIELDS: &[&str] = &["xy"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
 macro_rules! impl_serde_bivec3 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 3)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 3)?;
                 state.serialize_field("xy", &self.xy)?;
                 state.serialize_field("xz", &self.xz)?;
                 state.serialize_field("yz", &self.yz)?;
@@ -1198,7 +1198,7 @@ macro_rules! impl_serde_bivec3 {
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1246,13 +1246,13 @@ macro_rules! impl_serde_bivec3 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -1265,10 +1265,10 @@ macro_rules! impl_serde_bivec3 {
                         let yz = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                        Ok($t::new(xy, xz, yz))
+                        Ok(Self::Value::new(xy, xz, yz))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1300,25 +1300,25 @@ macro_rules! impl_serde_bivec3 {
                         let xy = xy.ok_or_else(|| serde::de::Error::missing_field("xy"))?;
                         let xz = xz.ok_or_else(|| serde::de::Error::missing_field("xz"))?;
                         let yz = yz.ok_or_else(|| serde::de::Error::missing_field("yz"))?;
-                        Ok($t::new(xy, xz, yz))
+                        Ok(Self::Value::new(xy, xz, yz))
                     }
                 }
 
                 const FIELDS: &[&str] = &["xy", "xz", "yz"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
-impl_serde_bivec2!(Bivec2, "Bivec2");
+impl_serde_bivec2!(Bivec2);
 #[cfg(feature = "f64")]
-impl_serde_bivec2!(DBivec2, "DBivec2");
+impl_serde_bivec2!(DBivec2);
 
-impl_serde_bivec3!(Bivec3, "Bivec3");
+impl_serde_bivec3!(Bivec3);
 #[cfg(feature = "f64")]
-impl_serde_bivec3!(DBivec3, "DBivec3");
+impl_serde_bivec3!(DBivec3);
 
 #[cfg(test)]
 mod bivec_serde_tests {
@@ -1367,20 +1367,20 @@ mod bivec_serde_tests {
 }
 
 macro_rules! impl_serde_rotor2 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 2)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
                 state.serialize_field("s", &self.s)?;
                 state.serialize_field("bv", &self.bv)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1426,13 +1426,13 @@ macro_rules! impl_serde_rotor2 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -1442,10 +1442,10 @@ macro_rules! impl_serde_rotor2 {
                         let bv = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok($t::new(s, bv))
+                        Ok(Self::Value::new(s, bv))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1469,33 +1469,33 @@ macro_rules! impl_serde_rotor2 {
                         }
                         let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
                         let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
-                        Ok($t::new(s, bv))
+                        Ok(Self::Value::new(s, bv))
                     }
                 }
 
                 const FIELDS: &[&str] = &["s", "bv"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
 macro_rules! impl_serde_rotor3 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct("Rotor3", 2)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
                 state.serialize_field("s", &self.s)?;
                 state.serialize_field("bv", &self.bv)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1541,13 +1541,13 @@ macro_rules! impl_serde_rotor3 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -1557,10 +1557,10 @@ macro_rules! impl_serde_rotor3 {
                         let bv = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok($t::new(s, bv))
+                        Ok(Self::Value::new(s, bv))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1584,25 +1584,25 @@ macro_rules! impl_serde_rotor3 {
                         }
                         let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
                         let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
-                        Ok($t::new(s, bv))
+                        Ok(Self::Value::new(s, bv))
                     }
                 }
 
                 const FIELDS: &[&str] = &["s", "bv"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
-impl_serde_rotor2!(Rotor2, "Rotor2");
+impl_serde_rotor2!(Rotor2);
 #[cfg(feature = "f64")]
-impl_serde_rotor2!(DRotor2, "DRotor2");
+impl_serde_rotor2!(DRotor2);
 
-impl_serde_rotor3!(Rotor3, "Rotor3");
+impl_serde_rotor3!(Rotor3);
 #[cfg(feature = "f64")]
-impl_serde_rotor3!(DRotor3, "DRotor3");
+impl_serde_rotor3!(DRotor3);
 
 #[cfg(test)]
 mod rotor_serde_tests {
@@ -1668,20 +1668,20 @@ mod rotor_serde_tests {
 }
 
 macro_rules! impl_serde_isometry2 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 2)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
                 state.serialize_field("translation", &self.translation)?;
                 state.serialize_field("rotation", &self.rotation)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1727,13 +1727,13 @@ macro_rules! impl_serde_isometry2 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -1743,10 +1743,10 @@ macro_rules! impl_serde_isometry2 {
                         let rotation = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok($t::new(translation, rotation))
+                        Ok(Self::Value::new(translation, rotation))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1772,33 +1772,33 @@ macro_rules! impl_serde_isometry2 {
                             translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
                         let rotation =
                             rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
-                        Ok($t::new(translation, rotation))
+                        Ok(Self::Value::new(translation, rotation))
                     }
                 }
 
                 const FIELDS: &[&str] = &["rotation", "translation"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
 macro_rules! impl_serde_isometry3 {
-    ($t:ident, $n:expr) => {
-        impl Serialize for $t {
+    ($name:ident) => {
+        impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
             where
                 T: Serializer,
             {
-                let mut state = serializer.serialize_struct($n, 2)?;
+                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
                 state.serialize_field("translation", &self.translation)?;
                 state.serialize_field("rotation", &self.rotation)?;
                 state.end()
             }
         }
 
-        impl<'de> Deserialize<'de> for $t {
+        impl<'de> Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
@@ -1844,13 +1844,13 @@ macro_rules! impl_serde_isometry3 {
                 struct TVisitor;
 
                 impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $t;
+                    type Value = $name;
 
                     fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", $n].concat())
+                        formatter.write_str(&["struct ", stringify!($name)].concat())
                     }
 
-                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
                     where
                         V: SeqAccess<'de>,
                     {
@@ -1860,10 +1860,10 @@ macro_rules! impl_serde_isometry3 {
                         let rotation = seq
                             .next_element()?
                             .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok($t::new(translation, rotation))
+                        Ok(Self::Value::new(translation, rotation))
                     }
 
-                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
                     where
                         V: MapAccess<'de>,
                     {
@@ -1889,25 +1889,25 @@ macro_rules! impl_serde_isometry3 {
                             translation.ok_or_else(|| serde::de::Error::missing_field("translation"))?;
                         let rotation =
                             rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
-                        Ok($t::new(translation, rotation))
+                        Ok(Self::Value::new(translation, rotation))
                     }
                 }
 
                 const FIELDS: &[&str] = &["rotation", "translation"];
 
-                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
             }
         }
     }
 }
 
-impl_serde_isometry2!(Isometry2, "Isometry2");
+impl_serde_isometry2!(Isometry2);
 #[cfg(feature = "f64")]
-impl_serde_isometry2!(DIsometry2, "DIsometry2");
+impl_serde_isometry2!(DIsometry2);
 
-impl_serde_isometry3!(Isometry3, "Isometry3");
+impl_serde_isometry3!(Isometry3);
 #[cfg(feature = "f64")]
-impl_serde_isometry3!(DIsometry3, "DIsometry3");
+impl_serde_isometry3!(DIsometry3);
 
 #[cfg(test)]
 mod isometry_serde_tests {
