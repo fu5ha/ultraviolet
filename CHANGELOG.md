@@ -6,6 +6,8 @@
 - Update `projection` module's and submodules' documentation
 - Remove `rh_ydown` projection module as it was very unlikely to be useful and caused confusion.
 - Add `mint` type conversions for integer vectors
+- Implement Serialize and Deserialize for all `DBivec`, `DRotor` and `DIsometry` types
+  (under `serde` and `f64` feature flags)
 
 ## 0.9.2
 
