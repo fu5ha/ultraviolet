@@ -1366,227 +1366,243 @@ mod bivec_serde_tests {
     }
 }
 
-impl Serialize for Rotor2 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Rotor2", 2)?;
-        state.serialize_field("s", &self.s)?;
-        state.serialize_field("bv", &self.bv)?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Rotor2 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            S,
-            Bv,
+macro_rules! impl_serde_rotor2 {
+    ($t:ident, $n:expr) => {
+        impl Serialize for $t {
+            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+            where
+                T: Serializer,
+            {
+                let mut state = serializer.serialize_struct($n, 2)?;
+                state.serialize_field("s", &self.s)?;
+                state.serialize_field("bv", &self.bv)?;
+                state.end()
+            }
         }
 
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+        impl<'de> Deserialize<'de> for $t {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct FieldVisitor;
+                enum Field {
+                    S,
+                    Bv,
+                }
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
-
-                    fn expecting(
-                        &self,
-                        formatter: &mut std::fmt::Formatter<'_>,
-                    ) -> std::fmt::Result {
-                        formatter.write_str("`s` or `bv`")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                impl<'de> Deserialize<'de> for Field {
+                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
                     where
-                        E: serde::de::Error,
+                        D: Deserializer<'de>,
                     {
-                        match value {
-                            "s" => Ok(Field::S),
-                            "bv" => Ok(Field::Bv),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        struct FieldVisitor;
+
+                        impl<'de> Visitor<'de> for FieldVisitor {
+                            type Value = Field;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut std::fmt::Formatter<'_>,
+                            ) -> std::fmt::Result {
+                                formatter.write_str("`s` or `bv`")
+                            }
+
+                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                            where
+                                E: serde::de::Error,
+                            {
+                                match value {
+                                    "s" => Ok(Field::S),
+                                    "bv" => Ok(Field::Bv),
+                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                                }
+                            }
                         }
+
+                        deserializer.deserialize_identifier(FieldVisitor)
                     }
                 }
 
-                deserializer.deserialize_identifier(FieldVisitor)
-            }
-        }
+                struct TVisitor;
 
-        struct Rotor2Visitor;
+                impl<'de> Visitor<'de> for TVisitor {
+                    type Value = $t;
 
-        impl<'de> Visitor<'de> for Rotor2Visitor {
-            type Value = Rotor2;
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        formatter.write_str(&["struct ", $n].concat())
+                    }
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("struct Rotor2")
-            }
+                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    where
+                        V: SeqAccess<'de>,
+                    {
+                        let s = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        let bv = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                        Ok($t::new(s, bv))
+                    }
 
-            fn visit_seq<V>(self, mut seq: V) -> Result<Rotor2, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let s = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let bv = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                Ok(Rotor2::new(s, bv))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Rotor2, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut s = None;
-                let mut bv = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::S => {
-                            if s.is_some() {
-                                return Err(serde::de::Error::duplicate_field("s"));
+                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    where
+                        V: MapAccess<'de>,
+                    {
+                        let mut s = None;
+                        let mut bv = None;
+                        while let Some(key) = map.next_key()? {
+                            match key {
+                                Field::S => {
+                                    if s.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("s"));
+                                    }
+                                    s = Some(map.next_value()?);
+                                }
+                                Field::Bv => {
+                                    if bv.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("bv"));
+                                    }
+                                    bv = Some(map.next_value()?);
+                                }
                             }
-                            s = Some(map.next_value()?);
                         }
-                        Field::Bv => {
-                            if bv.is_some() {
-                                return Err(serde::de::Error::duplicate_field("bv"));
-                            }
-                            bv = Some(map.next_value()?);
-                        }
+                        let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
+                        let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
+                        Ok($t::new(s, bv))
                     }
                 }
-                let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
-                let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
-                Ok(Rotor2::new(s, bv))
+
+                const FIELDS: &[&str] = &["s", "bv"];
+
+                deserializer.deserialize_struct($n, FIELDS, TVisitor)
+            }
+        }
+    }
+}
+
+macro_rules! impl_serde_rotor3 {
+    ($t:ident, $n:expr) => {
+        impl Serialize for $t {
+            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
+            where
+                T: Serializer,
+            {
+                let mut state = serializer.serialize_struct("Rotor3", 2)?;
+                state.serialize_field("s", &self.s)?;
+                state.serialize_field("bv", &self.bv)?;
+                state.end()
             }
         }
 
-        const FIELDS: &[&str] = &["s", "bv"];
-
-        deserializer.deserialize_struct("Rotor2", FIELDS, Rotor2Visitor)
-    }
-}
-
-impl Serialize for Rotor3 {
-    fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-    where
-        T: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Rotor3", 2)?;
-        state.serialize_field("s", &self.s)?;
-        state.serialize_field("bv", &self.bv)?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Rotor3 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        enum Field {
-            S,
-            Bv,
-        }
-
-        impl<'de> Deserialize<'de> for Field {
-            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+        impl<'de> Deserialize<'de> for $t {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct FieldVisitor;
+                enum Field {
+                    S,
+                    Bv,
+                }
 
-                impl<'de> Visitor<'de> for FieldVisitor {
-                    type Value = Field;
-
-                    fn expecting(
-                        &self,
-                        formatter: &mut std::fmt::Formatter<'_>,
-                    ) -> std::fmt::Result {
-                        formatter.write_str("`s` or `bv`")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                impl<'de> Deserialize<'de> for Field {
+                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
                     where
-                        E: serde::de::Error,
+                        D: Deserializer<'de>,
                     {
-                        match value {
-                            "s" => Ok(Field::S),
-                            "bv" => Ok(Field::Bv),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        struct FieldVisitor;
+
+                        impl<'de> Visitor<'de> for FieldVisitor {
+                            type Value = Field;
+
+                            fn expecting(
+                                &self,
+                                formatter: &mut std::fmt::Formatter<'_>,
+                            ) -> std::fmt::Result {
+                                formatter.write_str("`s` or `bv`")
+                            }
+
+                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                            where
+                                E: serde::de::Error,
+                            {
+                                match value {
+                                    "s" => Ok(Field::S),
+                                    "bv" => Ok(Field::Bv),
+                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                                }
+                            }
                         }
+
+                        deserializer.deserialize_identifier(FieldVisitor)
                     }
                 }
 
-                deserializer.deserialize_identifier(FieldVisitor)
-            }
-        }
+                struct TVisitor;
 
-        struct Rotor3Visitor;
+                impl<'de> Visitor<'de> for TVisitor {
+                    type Value = $t;
 
-        impl<'de> Visitor<'de> for Rotor3Visitor {
-            type Value = Rotor3;
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        formatter.write_str(&["struct ", $n].concat())
+                    }
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("struct Rotor3")
-            }
+                    fn visit_seq<V>(self, mut seq: V) -> Result<$t, V::Error>
+                    where
+                        V: SeqAccess<'de>,
+                    {
+                        let s = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        let bv = seq
+                            .next_element()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
+                        Ok($t::new(s, bv))
+                    }
 
-            fn visit_seq<V>(self, mut seq: V) -> Result<Rotor3, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let s = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                let bv = seq
-                    .next_element()?
-                    .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                Ok(Rotor3::new(s, bv))
-            }
-
-            fn visit_map<V>(self, mut map: V) -> Result<Rotor3, V::Error>
-            where
-                V: MapAccess<'de>,
-            {
-                let mut s = None;
-                let mut bv = None;
-                while let Some(key) = map.next_key()? {
-                    match key {
-                        Field::S => {
-                            if s.is_some() {
-                                return Err(serde::de::Error::duplicate_field("s"));
+                    fn visit_map<V>(self, mut map: V) -> Result<$t, V::Error>
+                    where
+                        V: MapAccess<'de>,
+                    {
+                        let mut s = None;
+                        let mut bv = None;
+                        while let Some(key) = map.next_key()? {
+                            match key {
+                                Field::S => {
+                                    if s.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("s"));
+                                    }
+                                    s = Some(map.next_value()?);
+                                }
+                                Field::Bv => {
+                                    if bv.is_some() {
+                                        return Err(serde::de::Error::duplicate_field("bv"));
+                                    }
+                                    bv = Some(map.next_value()?);
+                                }
                             }
-                            s = Some(map.next_value()?);
                         }
-                        Field::Bv => {
-                            if bv.is_some() {
-                                return Err(serde::de::Error::duplicate_field("bv"));
-                            }
-                            bv = Some(map.next_value()?);
-                        }
+                        let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
+                        let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
+                        Ok($t::new(s, bv))
                     }
                 }
-                let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
-                let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
-                Ok(Rotor3::new(s, bv))
+
+                const FIELDS: &[&str] = &["s", "bv"];
+
+                deserializer.deserialize_struct($n, FIELDS, TVisitor)
             }
         }
-
-        const FIELDS: &[&str] = &["s", "bv"];
-
-        deserializer.deserialize_struct("Rotor3", FIELDS, Rotor3Visitor)
     }
 }
+
+impl_serde_rotor2!(Rotor2, "Rotor2");
+#[cfg(feature = "f64")]
+impl_serde_rotor2!(DRotor2, "DRotor2");
+
+impl_serde_rotor3!(Rotor3, "Rotor3");
+#[cfg(feature = "f64")]
+impl_serde_rotor3!(DRotor3, "DRotor3");
 
 #[cfg(test)]
 mod rotor_serde_tests {
