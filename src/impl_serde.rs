@@ -1372,7 +1372,7 @@ mod bivec_serde_tests {
     }
 }
 
-macro_rules! impl_serde_rotor2 {
+macro_rules! impl_serde_rotor {
     ($name:ident) => {
         impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
@@ -1490,131 +1490,13 @@ macro_rules! impl_serde_rotor2 {
     };
 }
 
-macro_rules! impl_serde_rotor3 {
-    ($name:ident) => {
-        impl Serialize for $name {
-            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-            where
-                T: Serializer,
-            {
-                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
-                state.serialize_field("s", &self.s)?;
-                state.serialize_field("bv", &self.bv)?;
-                state.end()
-            }
-        }
-
-        impl<'de> Deserialize<'de> for $name {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                enum Field {
-                    S,
-                    Bv,
-                }
-
-                impl<'de> Deserialize<'de> for Field {
-                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-                    where
-                        D: Deserializer<'de>,
-                    {
-                        struct FieldVisitor;
-
-                        impl<'de> Visitor<'de> for FieldVisitor {
-                            type Value = Field;
-
-                            fn expecting(
-                                &self,
-                                formatter: &mut std::fmt::Formatter<'_>,
-                            ) -> std::fmt::Result {
-                                formatter.write_str("`s` or `bv`")
-                            }
-
-                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                            where
-                                E: serde::de::Error,
-                            {
-                                match value {
-                                    "s" => Ok(Field::S),
-                                    "bv" => Ok(Field::Bv),
-                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                                }
-                            }
-                        }
-
-                        deserializer.deserialize_identifier(FieldVisitor)
-                    }
-                }
-
-                struct TVisitor;
-
-                impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $name;
-
-                    fn expecting(
-                        &self,
-                        formatter: &mut std::fmt::Formatter<'_>,
-                    ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", stringify!($name)].concat())
-                    }
-
-                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: SeqAccess<'de>,
-                    {
-                        let s = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                        let bv = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok(Self::Value::new(s, bv))
-                    }
-
-                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: MapAccess<'de>,
-                    {
-                        let mut s = None;
-                        let mut bv = None;
-                        while let Some(key) = map.next_key()? {
-                            match key {
-                                Field::S => {
-                                    if s.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("s"));
-                                    }
-                                    s = Some(map.next_value()?);
-                                }
-                                Field::Bv => {
-                                    if bv.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("bv"));
-                                    }
-                                    bv = Some(map.next_value()?);
-                                }
-                            }
-                        }
-                        let s = s.ok_or_else(|| serde::de::Error::missing_field("s"))?;
-                        let bv = bv.ok_or_else(|| serde::de::Error::missing_field("bv"))?;
-                        Ok(Self::Value::new(s, bv))
-                    }
-                }
-
-                const FIELDS: &[&str] = &["s", "bv"];
-
-                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
-            }
-        }
-    };
-}
-
-impl_serde_rotor2!(Rotor2);
+impl_serde_rotor!(Rotor2);
 #[cfg(feature = "f64")]
-impl_serde_rotor2!(DRotor2);
+impl_serde_rotor!(DRotor2);
 
-impl_serde_rotor3!(Rotor3);
+impl_serde_rotor!(Rotor3);
 #[cfg(feature = "f64")]
-impl_serde_rotor3!(DRotor3);
+impl_serde_rotor!(DRotor3);
 
 #[cfg(test)]
 mod rotor_serde_tests {
@@ -1679,7 +1561,7 @@ mod rotor_serde_tests {
     }
 }
 
-macro_rules! impl_serde_isometry2 {
+macro_rules! impl_serde_isometry {
     ($name:ident) => {
         impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
@@ -1801,135 +1683,13 @@ macro_rules! impl_serde_isometry2 {
     };
 }
 
-macro_rules! impl_serde_isometry3 {
-    ($name:ident) => {
-        impl Serialize for $name {
-            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-            where
-                T: Serializer,
-            {
-                let mut state = serializer.serialize_struct(stringify!($name), 2)?;
-                state.serialize_field("translation", &self.translation)?;
-                state.serialize_field("rotation", &self.rotation)?;
-                state.end()
-            }
-        }
-
-        impl<'de> Deserialize<'de> for $name {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                enum Field {
-                    Translation,
-                    Rotation,
-                }
-
-                impl<'de> Deserialize<'de> for Field {
-                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-                    where
-                        D: Deserializer<'de>,
-                    {
-                        struct FieldVisitor;
-
-                        impl<'de> Visitor<'de> for FieldVisitor {
-                            type Value = Field;
-
-                            fn expecting(
-                                &self,
-                                formatter: &mut std::fmt::Formatter<'_>,
-                            ) -> std::fmt::Result {
-                                formatter.write_str("`translation` or `rotation`")
-                            }
-
-                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                            where
-                                E: serde::de::Error,
-                            {
-                                match value {
-                                    "translation" => Ok(Field::Translation),
-                                    "rotation" => Ok(Field::Rotation),
-                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                                }
-                            }
-                        }
-
-                        deserializer.deserialize_identifier(FieldVisitor)
-                    }
-                }
-
-                struct TVisitor;
-
-                impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $name;
-
-                    fn expecting(
-                        &self,
-                        formatter: &mut std::fmt::Formatter<'_>,
-                    ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", stringify!($name)].concat())
-                    }
-
-                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: SeqAccess<'de>,
-                    {
-                        let translation = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                        let rotation = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        Ok(Self::Value::new(translation, rotation))
-                    }
-
-                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: MapAccess<'de>,
-                    {
-                        let mut translation = None;
-                        let mut rotation = None;
-                        while let Some(key) = map.next_key()? {
-                            match key {
-                                Field::Translation => {
-                                    if translation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field(
-                                            "translation",
-                                        ));
-                                    }
-                                    translation = Some(map.next_value()?);
-                                }
-                                Field::Rotation => {
-                                    if rotation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("rotation"));
-                                    }
-                                    rotation = Some(map.next_value()?);
-                                }
-                            }
-                        }
-                        let translation = translation
-                            .ok_or_else(|| serde::de::Error::missing_field("translation"))?;
-                        let rotation =
-                            rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
-                        Ok(Self::Value::new(translation, rotation))
-                    }
-                }
-
-                const FIELDS: &[&str] = &["rotation", "translation"];
-
-                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
-            }
-        }
-    };
-}
-
-impl_serde_isometry2!(Isometry2);
+impl_serde_isometry!(Isometry2);
 #[cfg(feature = "f64")]
-impl_serde_isometry2!(DIsometry2);
+impl_serde_isometry!(DIsometry2);
 
-impl_serde_isometry3!(Isometry3);
+impl_serde_isometry!(Isometry3);
 #[cfg(feature = "f64")]
-impl_serde_isometry3!(DIsometry3);
+impl_serde_isometry!(DIsometry3);
 
 #[cfg(test)]
 mod isometry_serde_tests {
@@ -2029,7 +1789,7 @@ mod isometry_serde_tests {
     }
 }
 
-macro_rules! impl_serde_similarity2 {
+macro_rules! impl_serde_similarity {
     ($name:ident) => {
         impl Serialize for $name {
             fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
@@ -2166,150 +1926,13 @@ macro_rules! impl_serde_similarity2 {
     };
 }
 
-macro_rules! impl_serde_similarity3 {
-    ($name:ident) => {
-        impl Serialize for $name {
-            fn serialize<T>(&self, serializer: T) -> Result<T::Ok, T::Error>
-            where
-                T: Serializer,
-            {
-                let mut state = serializer.serialize_struct(stringify!($name), 3)?;
-                state.serialize_field("translation", &self.translation)?;
-                state.serialize_field("rotation", &self.rotation)?;
-                state.serialize_field("scale", &self.scale)?;
-                state.end()
-            }
-        }
-
-        impl<'de> Deserialize<'de> for $name {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                enum Field {
-                    Translation,
-                    Rotation,
-                    Scale,
-                }
-
-                impl<'de> Deserialize<'de> for Field {
-                    fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
-                    where
-                        D: Deserializer<'de>,
-                    {
-                        struct FieldVisitor;
-
-                        impl<'de> Visitor<'de> for FieldVisitor {
-                            type Value = Field;
-
-                            fn expecting(
-                                &self,
-                                formatter: &mut std::fmt::Formatter<'_>,
-                            ) -> std::fmt::Result {
-                                formatter.write_str("`translation`, `rotation` or `scale`")
-                            }
-
-                            fn visit_str<E>(self, value: &str) -> Result<Field, E>
-                            where
-                                E: serde::de::Error,
-                            {
-                                match value {
-                                    "translation" => Ok(Field::Translation),
-                                    "rotation" => Ok(Field::Rotation),
-                                    "scale" => Ok(Field::Scale),
-                                    _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                                }
-                            }
-                        }
-
-                        deserializer.deserialize_identifier(FieldVisitor)
-                    }
-                }
-
-                struct TVisitor;
-
-                impl<'de> Visitor<'de> for TVisitor {
-                    type Value = $name;
-
-                    fn expecting(
-                        &self,
-                        formatter: &mut std::fmt::Formatter<'_>,
-                    ) -> std::fmt::Result {
-                        formatter.write_str(&["struct ", stringify!($name)].concat())
-                    }
-
-                    fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: SeqAccess<'de>,
-                    {
-                        let translation = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
-                        let rotation = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(1, &self))?;
-                        let scale = seq
-                            .next_element()?
-                            .ok_or_else(|| serde::de::Error::invalid_length(2, &self))?;
-                        Ok(Self::Value::new(translation, rotation, scale))
-                    }
-
-                    fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
-                    where
-                        V: MapAccess<'de>,
-                    {
-                        let mut translation = None;
-                        let mut rotation = None;
-                        let mut scale = None;
-                        while let Some(key) = map.next_key()? {
-                            match key {
-                                Field::Translation => {
-                                    if translation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field(
-                                            "translation",
-                                        ));
-                                    }
-                                    translation = Some(map.next_value()?);
-                                }
-                                Field::Rotation => {
-                                    if rotation.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("rotation"));
-                                    }
-                                    rotation = Some(map.next_value()?);
-                                }
-                                Field::Scale => {
-                                    if scale.is_some() {
-                                        return Err(serde::de::Error::duplicate_field("scale"));
-                                    }
-                                    scale = Some(map.next_value()?);
-                                }
-                            }
-                        }
-                        let translation = translation
-                            .ok_or_else(|| serde::de::Error::missing_field("translation"))?;
-                        let rotation =
-                            rotation.ok_or_else(|| serde::de::Error::missing_field("rotation"))?;
-                        let scale =
-                            scale.ok_or_else(|| serde::de::Error::missing_field("scale"))?;
-                        Ok(Self::Value::new(translation, rotation, scale))
-                    }
-                }
-
-                const FIELDS: &[&str] = &["rotation", "translation", "scale"];
-
-                deserializer.deserialize_struct(stringify!($name), FIELDS, TVisitor)
-            }
-        }
-    };
-}
-
-impl_serde_similarity2!(Similarity2);
+impl_serde_similarity!(Similarity2);
 #[cfg(feature = "f64")]
-impl_serde_similarity2!(DSimilarity2);
+impl_serde_similarity!(DSimilarity2);
 
-impl_serde_similarity3!(Similarity3);
+impl_serde_similarity!(Similarity3);
 #[cfg(feature = "f64")]
-impl_serde_similarity3!(DSimilarity3);
+impl_serde_similarity!(DSimilarity3);
 
 #[cfg(test)]
 mod similarity_serde_tests {
@@ -2411,6 +2034,4 @@ mod similarity_serde_tests {
             ],
         );
     }
-
-    fn round_trip
 }
