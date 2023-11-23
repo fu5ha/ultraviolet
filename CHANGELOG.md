@@ -6,6 +6,8 @@
 - Update `projection` module's and submodules' documentation
 - Remove `rh_ydown` projection module as it was very unlikely to be useful and caused confusion.
 - Add `mint` type conversions for integer vectors
+- Implement Serialize and Deserialize for `Similarity`
+- Implement Serialize and Deserialize for f64 types: `DBivec`, `DRotor`, `DIsometry`, `DSimilarity`
 
 ## 0.9.2
 
