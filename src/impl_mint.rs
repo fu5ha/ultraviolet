@@ -190,3 +190,33 @@ from_mat3s!(mint::ColumnMatrix3<f64> => DMat3);
 from_mat4s!(mint::ColumnMatrix4<f32> => Mat4);
 #[cfg(feature = "f64")]
 from_mat4s!(mint::ColumnMatrix4<f64> => DMat4);
+
+macro_rules! from_quat {
+    ($($minttype:ty => $uvtype:ty),+) => {
+        $(impl From<$minttype> for $uvtype {
+            #[inline]
+            fn from(q: $minttype) -> Self {
+                Self::from_quaternion_array([q.v.x, q.v.y, q.v.z, q.s])
+            }
+        }
+
+        impl From<$uvtype> for $minttype {
+            #[inline]
+            fn from(r: $uvtype) -> Self {
+                let arr = r.into_quaternion_array();
+                Self {
+                    v: mint::Vector3 {
+                        x: arr[0],
+                        y: arr[1],
+                        z: arr[2],
+                    },
+                    s: arr[3],
+                }
+            }
+        })+
+    }
+}
+
+from_quat!(mint::Quaternion<f32> => Rotor3);
+#[cfg(feature = "f64")]
+from_mat4s!(mint::Quaternion<f64> => DRotor3);

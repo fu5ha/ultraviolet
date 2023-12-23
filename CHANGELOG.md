@@ -8,6 +8,7 @@
 - Add `mint` type conversions for integer vectors
 - Implement Serialize and Deserialize for `Similarity`
 - Implement Serialize and Deserialize for f64 types: `DBivec`, `DRotor`, `DIsometry`, `DSimilarity`
+- Add type conversion between `mint` quaternion and `Rotor3`
 
 ## 0.9.2
 
