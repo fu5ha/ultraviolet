@@ -219,4 +219,4 @@ macro_rules! from_quat {
 
 from_quat!(mint::Quaternion<f32> => Rotor3);
 #[cfg(feature = "f64")]
-from_mat4s!(mint::Quaternion<f64> => DRotor3);
+from_quat!(mint::Quaternion<f64> => DRotor3);
