@@ -290,7 +290,7 @@ pub fn perspective_reversed_z_vk(
     Mat4::new(
         Vec4::new(sx, 0.0, 0.0, 0.0),
         Vec4::new(0.0, -sy, 0.0, 0.0),
-        Vec4::new(0.0, 0.0, z_far / nmf, 1.0),
+        Vec4::new(0.0, 0.0, z_near / nmf, 1.0),
         Vec4::new(0.0, 0.0, -z_near * z_far / nmf, 0.0),
     )
 }
