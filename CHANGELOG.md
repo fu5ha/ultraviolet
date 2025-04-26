@@ -3,7 +3,9 @@
 <!-- next-header -->
 ## Unreleased
 
-## 0.10.0
+- Upgrade to edition 2024
+- Minor implementation updates
+- Minor documentation fixes
 
 ## 0.10.0
 

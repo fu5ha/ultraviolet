@@ -1,8 +1,8 @@
 [package]
 name = "ultraviolet"
-version = "0.10.0"
+version = "0.11.0"
 authors = ["Gray Olson <gray@grayolson.com>"]
-edition = "2018"
+edition = "2024"
 description = "A crate to do linear algebra, fast."
 repository = "https://github.com/termhn/ultraviolet"
 readme = "README.md"
@@ -10,7 +10,7 @@ keywords = ["simd", "wide", "graphics", "math", "linear-algebra"]
 license = "MIT OR Apache-2.0 OR Zlib"
 
 [package.metadata.docs.rs]
-features = ["f64", "int", "serde", "mint", "bytemuck"]
+all-features = true
 
 [dependencies]
 # wide = { path = "../wide", optional = true }
@@ -21,9 +21,13 @@ bytemuck = { version = "1.22", optional = true }
 num-traits = { version = "0.2", optional = true }
 
 [features]
-default = []
+default = ["int"]
 f64 = []
 int = []
+serde = ["dep:serde"]
+mint = ["dep:mint"]
+bytemuck = ["dep:bytemuck"]
+num-traits = ["dep:num-traits"]
 
 [dev-dependencies]
 serde_test = "1.0"

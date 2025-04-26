@@ -25,7 +25,11 @@ macro_rules! impl_num_traits_vecs {
     };
 }
 
-impl_num_traits_vecs!(Vec2, Vec2x4, Vec2x8, Vec3, Vec3x4, Vec3x8, Vec4, Vec4x4, Vec4x8);
+impl_num_traits_vecs!(
+    Vec2, Vec2x4, Vec2x8, Vec3, Vec3x4, Vec3x8, Vec4, Vec4x4, Vec4x8
+);
 
 #[cfg(feature = "f64")]
-impl_num_traits_vecs!(DVec2, DVec2x2, DVec2x4, DVec3, DVec3x2, DVec3x4, DVec4, DVec4x2, DVec4x4);
+impl_num_traits_vecs!(
+    DVec2, DVec2x2, DVec2x4, DVec3, DVec3x2, DVec3x4, DVec4, DVec4x2, DVec4x4
+);

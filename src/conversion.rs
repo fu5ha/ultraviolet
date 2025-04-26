@@ -8,30 +8,10 @@ use core::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 
-/// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
-trait TryFromExt<Source>: Sized {
-    type Error;
-
-    fn try_from(source: Source) -> Result<Self, Self::Error>;
+trait FloatToInt<Target> {
+    fn try_into_int(self) -> Result<Target, FloatConversionError>;
 }
 
-/// A simple trait extension to simulate `TryInto` for types that are not from this crate.
-trait TryIntoExt<Target> {
-    type Error;
-
-    fn try_into(self) -> Result<Target, Self::Error>;
-}
-
-impl<Source, Target, E> TryIntoExt<Target> for Source
-where
-    Target: TryFromExt<Source, Error = E>,
-{
-    type Error = E;
-
-    fn try_into(self) -> Result<Target, Self::Error> {
-        Target::try_from(self)
-    }
-}
 /// The error type that may happen when converting a `f32` or `f64` to any other numerical
 /// representation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -57,9 +37,7 @@ impl Error for FloatConversionError {}
 
 macro_rules! impl_try_from_float {
     ($source:ty => $($target:ident),*) => {$(
-        impl TryFromExt<$source> for $target {
-            type Error = FloatConversionError;
-
+        impl FloatToInt<$target> for $source {
             /// Tries to convert the source to Self in a lossy way, flooring any float value.
             ///
             /// # Errors
@@ -68,25 +46,25 @@ macro_rules! impl_try_from_float {
             /// * `PosOverflow` - If the float value would be greater than the target max value.
             /// * `NegOverflow` - If the float value would be less than the target min value.
             #[inline]
-            fn try_from(source: $source) -> Result<Self, Self::Error> {
-                if source.is_nan() {
+            fn try_into_int(self: $source) -> Result<$target, FloatConversionError> {
+                if self.is_nan() {
                     return Err(FloatConversionError::NaN)
                 }
-                if source.is_infinite() {
+                if self.is_infinite() {
                     return Err(FloatConversionError::Infinite)
                 }
 
-                let min = Self::MIN as $source;
-                if source < min {
+                let min = $target::MIN as $source;
+                if self < min {
                     return Err(FloatConversionError::NegOverflow)
                 }
 
-                let max = Self::MAX as $source;
-                if source > max {
+                let max = $target::MAX as $source;
+                if self > max {
                     return Err(FloatConversionError::PosOverflow)
                 }
 
-                Ok(source as Self)
+                Ok(self as $target)
             }
         }
     )*}
@@ -110,7 +88,7 @@ macro_rules! impl_try_from_float_vec {
             /// * `NegOverflow` - If a float value would be less than the self.component min value.
             #[inline]
             fn try_from(v: $name) -> Result<Self, Self::Error> {
-                Ok(Self::new($(v.$var.try_into()?,)* ))
+                Ok(Self::new($(v.$var.try_into_int()?,)* ))
             }
         }
         )+

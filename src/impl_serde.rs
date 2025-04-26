@@ -1,9 +1,9 @@
 use crate::*;
 
 use serde::{
+    Deserialize, Deserializer, Serialize, Serializer,
     de::{MapAccess, SeqAccess, Visitor},
     ser::SerializeStruct,
-    Deserialize, Deserializer, Serialize, Serializer,
 };
 
 macro_rules! impl_serde_vec2 {
@@ -427,7 +427,7 @@ impl_serde_vec4!(DVec4);
 #[cfg(test)]
 mod vec_serde_tests {
     use crate::vec::{Vec2, Vec3, Vec4};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn vec2() {
@@ -500,7 +500,7 @@ mod vec_serde_tests {
 #[cfg(test)]
 mod int_vec_serde_tests {
     use crate::{IVec2, IVec3, IVec4, UVec2, UVec3, UVec4};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn uvec2() {
@@ -1002,7 +1002,7 @@ impl_serde_mat4!(DMat4, DVec4, f64, "tuple of 16 floats");
 mod mat_serde_tests {
     use crate::mat::{Mat2, Mat3, Mat4};
     use crate::vec::{Vec2, Vec3, Vec4};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn mat2() {
@@ -1329,7 +1329,7 @@ impl_serde_bivec3!(DBivec3);
 #[cfg(test)]
 mod bivec_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn bivec2() {
@@ -1502,7 +1502,7 @@ impl_serde_rotor!(DRotor3);
 mod rotor_serde_tests {
     use crate::bivec::{Bivec2, Bivec3};
     use crate::rotor::{Rotor2, Rotor3};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn rotor2() {
@@ -1696,7 +1696,7 @@ mod isometry_serde_tests {
     use crate::rotor::{Rotor2, Rotor3};
     use crate::transform::{Isometry2, Isometry3};
     use crate::{Vec2, Vec3};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn isometry2() {
@@ -1939,7 +1939,7 @@ mod similarity_serde_tests {
     use crate::rotor::{Rotor2, Rotor3};
     use crate::transform::{Similarity2, Similarity3};
     use crate::{Vec2, Vec3};
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{Token, assert_tokens};
 
     #[test]
     fn similarity2() {
