@@ -33,14 +33,9 @@
 //! ## Cargo Features
 //!
 //! To help further improve build times, `ultraviolet` puts various functionality under feature flags. For example, the 2d and 3d projective geometric algebras
-//! as well as f64 and integer types are disabled by default. In order to enable them, enable the corresponding crate feature flags in your `Cargo.toml`. For example:
+//! as well as f64 and integer types are disabled by default. In order to enable them, enable the corresponding crate feature flags in your `Cargo.toml`.
 //!
-//! ```toml
-//! [dependencies]
-//! ultraviolet = { version = "0.9", features = [ "f64", "int" ] }
-//! ```
-//!
-//! Will enable the `f64` and `int` features. Here's a list of the available features:
+//! Here's a list of the available features:
 //!
 //! * `f64` – Enable `f64` bit wide floating point support. Naming convention is `D[Type]`, such as `DVec3x4` would be a collection of 4 3d vectors with `f64` precision each.
 //! * `int` – Enable integer vector types.
