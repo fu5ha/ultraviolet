@@ -3,6 +3,8 @@
 <!-- next-header -->
 ## Unreleased
 
+## 0.10.0
+
 - Update `projection` module's and submodules' documentation
 - Remove `rh_ydown` projection module as it was very unlikely to be useful and caused confusion.
 - Add `mint` type conversions for integer vectors
