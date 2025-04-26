@@ -3,12 +3,36 @@
 //! To realize such conversions we make use of crate-private traits `TryFromExt` and `TryIntoExt` to
 //! simulate the behaviour of the official [From] and [Into].
 
-use crate::util::{TryFromExt, TryIntoExt};
 use crate::*;
 use core::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 
+
+/// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
+trait TryFromExt<Source>: Sized {
+    type Error;
+
+    fn try_from(source: Source) -> Result<Self, Self::Error>;
+}
+
+/// A simple trait extension to simulate `TryInto` for types that are not from this crate.
+trait TryIntoExt<Target> {
+    type Error;
+
+    fn try_into(self) -> Result<Target, Self::Error>;
+}
+
+impl<Source, Target, E> TryIntoExt<Target> for Source
+where
+    Target: TryFromExt<Source, Error = E>,
+{
+    type Error = E;
+
+    fn try_into(self) -> Result<Target, Self::Error> {
+        Target::try_from(self)
+    }
+}
 /// The error type that may happen when converting a `f32` or `f64` to any other numerical
 /// representation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

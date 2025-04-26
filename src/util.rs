@@ -78,28 +78,3 @@ macro_rules! derive_default_identity {
         }
     };
 }
-
-/// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
-pub trait TryFromExt<Source>: Sized {
-    type Error;
-
-    fn try_from(source: Source) -> Result<Self, Self::Error>;
-}
-
-/// A simple trait extension to simulate `TryInto` for types that are not from this crate.
-pub trait TryIntoExt<Target> {
-    type Error;
-
-    fn try_into(self) -> Result<Target, Self::Error>;
-}
-
-impl<Source, Target, E> TryIntoExt<Target> for Source
-where
-    Target: TryFromExt<Source, Error = E>,
-{
-    type Error = E;
-
-    fn try_into(self) -> Result<Target, Self::Error> {
-        Target::try_from(self)
-    }
-}
