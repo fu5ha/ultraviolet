@@ -8,7 +8,6 @@ use core::convert::TryFrom;
 use std::error::Error;
 use std::fmt;
 
-
 /// A simple trait extension to simulate `TryFrom` for types that are not from this crate.
 trait TryFromExt<Source>: Sized {
     type Error;
