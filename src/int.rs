@@ -424,21 +424,15 @@ macro_rules! ivec2s {
             type Output = $t;
 
             fn index(&self, index: usize) -> &Self::Output {
-                match index {
-                    0 => &self.x,
-                    1 => &self.y,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 2, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_slice().index(index)
             }
         }
 
         impl IndexMut<usize> for $n {
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-                match index {
-                    0 => &mut self.x,
-                    1 => &mut self.y,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 2, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_mut_slice().index_mut(index)
             }
         }
         )+
@@ -878,23 +872,15 @@ macro_rules! ivec3s {
             type Output = $t;
 
             fn index(&self, index: usize) -> &Self::Output {
-                match index {
-                    0 => &self.x,
-                    1 => &self.y,
-                    2 => &self.z,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 3, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_slice().index(index)
             }
         }
 
         impl IndexMut<usize> for $n {
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-                match index {
-                    0 => &mut self.x,
-                    1 => &mut self.y,
-                    2 => &mut self.z,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 3, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_mut_slice().index_mut(index)
             }
         }
         )+
@@ -1312,25 +1298,15 @@ macro_rules! ivec4s {
             type Output = $t;
 
             fn index(&self, index: usize) -> &Self::Output {
-                match index {
-                    0 => &self.x,
-                    1 => &self.y,
-                    2 => &self.z,
-                    3 => &self.w,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 4, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_slice().index(index)
             }
         }
 
         impl IndexMut<usize> for $n {
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-                match index {
-                    0 => &mut self.x,
-                    1 => &mut self.y,
-                    2 => &mut self.z,
-                    3 => &mut self.w,
-                    _ => panic!("Invalid for vector of type: {}", std::any::type_name::<$n>()),
-                }
+                assert!(index < 4, "Invalid for vector of type: {}", std::any::type_name::<$n>());
+                self.as_mut_slice().index_mut(index)
             }
         }
 
