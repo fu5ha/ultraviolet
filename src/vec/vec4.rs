@@ -502,6 +502,7 @@ macro_rules! vec4s {
                 self.as_mut_slice().index_mut(index)
             }
         }
+
         impl std::iter::Sum<$n> for $n {
             fn sum<I>(iter: I) -> Self where I: Iterator<Item = Self> {
                 // Kahan summation algorithm
