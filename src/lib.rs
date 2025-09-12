@@ -43,6 +43,7 @@
 //! * `mint` – Enable interoperation with other math crates through the `mint` interface.
 //! * `num-traits` – Enable [identity traits](https://docs.rs/num-traits/latest/num_traits/identities/index.html) for interoperation with other math crates.
 //! * `serde` – Enable `Serialize` and `Deserialize` implementations for many scalar types.
+//! * `encase` – Enable `encase` trait implementations for `ultraviolet` types.
 //!
 //! ## Crate Features
 //!
@@ -109,6 +110,9 @@ mod impl_mint;
 
 #[cfg(feature = "bytemuck")]
 mod impl_bytemuck;
+
+#[cfg(feature = "encase")]
+mod impl_encase;
 
 pub use bivec::*;
 #[cfg(feature = "int")]

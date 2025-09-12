@@ -19,6 +19,7 @@ serde = { version = "1.0", features = [], optional = true }
 mint = { version = "0.5", optional = true }
 bytemuck = { version = "1.22", optional = true }
 num-traits = { version = "0.2", optional = true }
+encase = { version = "0.12", optional = true }
 
 [features]
 default = ["int"]
@@ -28,6 +29,7 @@ serde = ["dep:serde"]
 mint = ["dep:mint"]
 bytemuck = ["dep:bytemuck"]
 num-traits = ["dep:num-traits"]
+encase = ["dep:encase"]
 
 [dev-dependencies]
 serde_test = "1.0"
