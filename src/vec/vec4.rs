@@ -585,18 +585,18 @@ macro_rules! impl_wide_vec4s {
                 }
             }
 
-            /// Blend two vectors together lanewise using `mask` as a mask.
+            /// Select between two vectors lanewise using `mask` as a mask.
             ///
-            /// This is essentially a bitwise blend operation, such that any point where
+            /// This is essentially a bitwise selection operation, such that any point where
             /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
             /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
             #[inline]
-            pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
+            pub fn select(mask: $maskt, tru: Self, fals: Self) -> Self {
                 Self {
-                    x: mask.blend(tru.x, fals.x),
-                    y: mask.blend(tru.y, fals.y),
-                    z: mask.blend(tru.z, fals.z),
-                    w: mask.blend(tru.w, fals.w),
+                    x: mask.select(tru.x, fals.x),
+                    y: mask.select(tru.y, fals.y),
+                    z: mask.select(tru.z, fals.z),
+                    w: mask.select(tru.w, fals.w),
                 }
             }
         }

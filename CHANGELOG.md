@@ -1,9 +1,12 @@
 # Changelog
 
 <!-- next-header -->
+
 ## Unreleased
 
 - Upgrade to edition 2024
+- Upgrade to wide 1.7
+  - Rename `blend` to `select` across all types
 - Minor implementation updates
 - Minor documentation fixes
 
