@@ -18,6 +18,7 @@ impl Splat<f64> for f64 {
     }
 }
 
+#[allow(dead_code)]
 pub trait EqualsEps {
     fn eq_eps(self, other: Self) -> bool;
 }
@@ -29,7 +30,7 @@ macro_rules! impl_eq_eps_wide {
                 let r = (self - other).abs();
                 let eps = $t::splat(0.01);
 
-                r.cmp_ge(eps).none()
+                r.simd_ge(eps).none()
             }
         })+
     };

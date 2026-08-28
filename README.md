@@ -250,7 +250,7 @@ Another approach is to calculate the results for both branches for all 8 lanes, 
 To create the mask for 8 lanes of `descrim` values with `0.0`:
 
 ```rust
-    let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
+    let desc_pos = descrim.simd_gt(uv::f32x8::splat(0.0));
 ```
 
 In the true case of the original scalar version, we then have more arithmetic operations that end up looking the exact same when we do them on the vectorized version:
@@ -264,7 +264,7 @@ In the true case of the original scalar version, we then have more arithmetic op
 And now in the scalar code we have another branch based on `t1 > 0.0`, so we apply the same technique, with a little bit extra:
 
 ```rust
-    let t1_valid = t1.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t1_valid = t1.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 ```
 
 The `& desc_pos` at the end does a bitwise and operation to combine the masks that say whether each of the lanes of `t1 > 0.0` are true or false, with those of whether each of the lanes of `descrim > 0.0` were true or false, and if both are true for a lane, then the mask value will be true for that lane in `t1_mask`, otherwise the value for the lane will be `false`. This is combining the nested logic.
@@ -273,7 +273,7 @@ The true case of the `t1 > 0.0` condition just returns `t1`, but the false case 
 
 ```rust
     let t2 = -b + desc_sqrt;
-    let t2_valid = t2.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t2_valid = t2.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 ```
 
 This may sound like it could be slower than scalar code because this algorithm being applied to wide data types is doing all the calculations for both branches regardless of which is true, and you would be right!
@@ -339,15 +339,15 @@ fn ray_sphere_intersect_x8(
     let c = oc.mag_sq() - sphere_r_sq;
     let descrim = b * b - c;
 
-    let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
+    let desc_pos = descrim.simd_gt(uv::f32x8::splat(0.0));
 
     let desc_sqrt = descrim.sqrt();
 
     let t1 = -b - desc_sqrt;
-    let t1_valid = t1.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t1_valid = t1.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 
     let t2 = -b + desc_sqrt;
-    let t2_valid = t2.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t2_valid = t2.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 
     let t = t2_valid.blend(t2, uv::f32x8::splat(std::f32::MAX));
     let t = t1_valid.blend(t1, t);

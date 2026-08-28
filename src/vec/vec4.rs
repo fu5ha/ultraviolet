@@ -593,10 +593,10 @@ macro_rules! impl_wide_vec4s {
             #[inline]
             pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
                 Self {
-                    x: mask.blend(tru.x, fals.x),
-                    y: mask.blend(tru.y, fals.y),
-                    z: mask.blend(tru.z, fals.z),
-                    w: mask.blend(tru.w, fals.w),
+                    x: mask.select(tru.x, fals.x),
+                    y: mask.select(tru.y, fals.y),
+                    z: mask.select(tru.z, fals.z),
+                    w: mask.select(tru.w, fals.w),
                 }
             }
         }

@@ -584,8 +584,8 @@ macro_rules! impl_wide_vec2s {
             #[inline]
             pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
                 Self {
-                    x: mask.blend(tru.x, fals.x),
-                    y: mask.blend(tru.y, fals.y),
+                    x: mask.select(tru.x, fals.x),
+                    y: mask.select(tru.y, fals.y),
                 }
             }
 
@@ -602,7 +602,7 @@ macro_rules! impl_wide_vec2s {
                 let ndi = n.dot(i);
 
                 let k = one - eta * eta * (one - ndi * ndi);
-                let mask = k.cmp_lt($t::splat(0.0));
+                let mask = k.simd_lt($t::splat(0.0));
 
                 let out = i * eta - (eta * ndi + k.sqrt()) * n;
 

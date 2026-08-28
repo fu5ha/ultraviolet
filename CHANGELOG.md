@@ -1,6 +1,12 @@
 # Changelog
 
 <!-- next-header -->
+## Monkey patching
+
+- change to wide 1.7
+- change using WideType.cmp_?? to WoideType.simd_??
+- change using WideType.blend to WideType.select
+
 ## Unreleased
 
 - Upgrade to edition 2024
