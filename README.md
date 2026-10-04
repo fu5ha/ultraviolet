@@ -250,7 +250,7 @@ Another approach is to calculate the results for both branches for all 8 lanes, 
 To create the mask for 8 lanes of `descrim` values with `0.0`:
 
 ```rust
-    let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
+    let desc_pos = descrim.simd_gt(uv::f32x8::splat(0.0));
 ```
 
 In the true case of the original scalar version, we then have more arithmetic operations that end up looking the exact same when we do them on the vectorized version:
@@ -264,7 +264,7 @@ In the true case of the original scalar version, we then have more arithmetic op
 And now in the scalar code we have another branch based on `t1 > 0.0`, so we apply the same technique, with a little bit extra:
 
 ```rust
-    let t1_valid = t1.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t1_valid = t1.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 ```
 
 The `& desc_pos` at the end does a bitwise and operation to combine the masks that say whether each of the lanes of `t1 > 0.0` are true or false, with those of whether each of the lanes of `descrim > 0.0` were true or false, and if both are true for a lane, then the mask value will be true for that lane in `t1_mask`, otherwise the value for the lane will be `false`. This is combining the nested logic.
@@ -273,7 +273,7 @@ The true case of the `t1 > 0.0` condition just returns `t1`, but the false case 
 
 ```rust
     let t2 = -b + desc_sqrt;
-    let t2_valid = t2.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t2_valid = t2.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 ```
 
 This may sound like it could be slower than scalar code because this algorithm being applied to wide data types is doing all the calculations for both branches regardless of which is true, and you would be right!
@@ -282,7 +282,7 @@ This approach is indeed a tradeoff and depends on the likelihood of branching on
 
 At this point, we have ported almost the entire algorithm. We have values for `t1` and `t2` for each of the 8 lanes. We have mask values in `t1_valid` that indicate whether both `descrim > 0.0 && t1 > 0.0` for each lane. And we have `t2_valid` with values indicating exactly `descrim > 0.0 && t2 > 0.0`. When the scalar code does not return `t1` or `t2`, it returns `f32::MAX`. How do we now select the correct return value for each of the lanes?
 
-`ultraviolet` has a `blend` function on the mask types that uses the true or false values for each of the lanes to select from the calculated values for the true and false cases. So if `a` were a wide vector of values that would be calculated in the true case of a branch, and `b` were for the false case, with a mask `m` we could select from `a` and `b` based on `m` by calling `m.blend(a, b)` and the result would be the desired output values!
+`ultraviolet` has a `select` function on the mask types that uses the true or false values for each of the lanes to select from the calculated values for the true and false cases. So if `a` were a wide vector of values that would be calculated in the true case of a branch, and `b` were for the false case, with a mask `m` we could select from `a` and `b` based on `m` by calling `m.select(a, b)` and the result would be the desired output values!
 
 Let's try to apply that to the scalar code by looking just at its logical control flow:
 
@@ -305,22 +305,22 @@ Let's try to apply that to the scalar code by looking just at its logical contro
 So if we take the outer-most if condition..
 
 ```rust
-   let t = t1_valid.blend(t1, ???);
+   let t = t1_valid.select(t1, ???);
 ```
 
-What is the value for false case of the `descrim > 0.0 && t1 > 0.0` test? There are two possibilities - either `descrim <= 0.0`, which is the false case of the `descrim > 0.0` condition, or `descrim > 0.0 && t1 <= 0.0` which is the else case where we handle `t2`. This looks complicated. Let's try looking at the `descrim > 0.0 && t2 > 0.0` case in the scalar code and try `blend`ing that:
+What is the value for false case of the `descrim > 0.0 && t1 > 0.0` test? There are two possibilities - either `descrim <= 0.0`, which is the false case of the `descrim > 0.0` condition, or `descrim > 0.0 && t1 <= 0.0` which is the else case where we handle `t2`. This looks complicated. Let's try looking at the `descrim > 0.0 && t2 > 0.0` case in the scalar code and try selecting based on that:
 
 ```rust
-    let t = t2_valid.blend(t2, uv::f32x8::splat(std::f32::MAX));
+    let t = t2_valid.select(t2, uv::f32x8::splat(std::f32::MAX));
 ```
 
-So `descrim > 0.0 && t2 > 0.0` has two false cases, either `descrim <= 0.0` and we want to return `f32::MAX`, or `descrim > 0.0 && t2 <= 0.0` and we want to return `f32::MAX`, so we can `blend` to select the correct values here to cover the false case of the scalar `descrim > 0.0` condition, and the false case of the `t1 > 0.0` condition, that leaves only the true case of the `t1 > 0.0` condition left to resolve...
+So `descrim > 0.0 && t2 > 0.0` has two false cases, either `descrim <= 0.0` and we want to return `f32::MAX`, or `descrim > 0.0 && t2 <= 0.0` and we want to return `f32::MAX`, so we can use `select` to select the correct values here to cover the false case of the scalar `descrim > 0.0` condition, and the false case of the `t1 > 0.0` condition, that leaves only the true case of the `t1 > 0.0` condition left to resolve...
 
-And that is exactly what `t1_valid.blend(t1, ???)` would select! So we can combine the two blends like this:
+And that is exactly what `t1_valid.select(t1, ???)` would select! So we can combine the two selections like this:
 
 ```rust
-    let t = t2_valid.blend(t2, uv::f32x8::splat(std::f32::MAX));
-    let t = t1_valid.blend(t1, t);
+    let t = t2_valid.select(t2, uv::f32x8::splat(std::f32::MAX));
+    let t = t1_valid.select(t1, t);
 ```
 
 `t` now contains `t1`, `t2` or `f32::MAX` as appropriate for each of the lanes! We have completed the port of the scalar algorithm code to leverage SIMD operations on 8-lane wide data types to calculate 8 ray-sphere intersections in parallel!
@@ -339,18 +339,18 @@ fn ray_sphere_intersect_x8(
     let c = oc.mag_sq() - sphere_r_sq;
     let descrim = b * b - c;
 
-    let desc_pos = descrim.cmp_gt(uv::f32x8::splat(0.0));
+    let desc_pos = descrim.simd_gt(uv::f32x8::splat(0.0));
 
     let desc_sqrt = descrim.sqrt();
 
     let t1 = -b - desc_sqrt;
-    let t1_valid = t1.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t1_valid = t1.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 
     let t2 = -b + desc_sqrt;
-    let t2_valid = t2.cmp_gt(uv::f32x8::splat(0.0)) & desc_pos;
+    let t2_valid = t2.simd_gt(uv::f32x8::splat(0.0)) & desc_pos;
 
-    let t = t2_valid.blend(t2, uv::f32x8::splat(std::f32::MAX));
-    let t = t1_valid.blend(t1, t);
+    let t = t2_valid.select(t2, uv::f32x8::splat(std::f32::MAX));
+    let t = t1_valid.select(t1, t);
 
     t
 }
