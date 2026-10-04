@@ -9,6 +9,7 @@
   - Rename `blend` to `select` across all types
 - Minor implementation updates
 - Minor documentation fixes
+- Added `encase` feature, providing `encase` trait implementations for `ultraviolet` types.
 
 ## 0.10.0
 
