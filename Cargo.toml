@@ -14,15 +14,15 @@ all-features = true
 
 [dependencies]
 # wide = { path = "../wide", optional = true }
-wide = { version = "0.7" }
 serde = { version = "1.0", features = [], optional = true }
 mint = { version = "0.5", optional = true }
 bytemuck = { version = "1.22", optional = true }
 num-traits = { version = "0.2", optional = true }
 encase = { version = "0.12", optional = true }
+wide = "1.7.0"
 
 [features]
-default = ["int"]
+default = ["int", "f64"]
 f64 = []
 int = []
 serde = ["dep:serde"]

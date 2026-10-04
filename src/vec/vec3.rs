@@ -651,17 +651,17 @@ macro_rules! impl_wide_vec3s {
                 }
             }
 
-            /// Blend two vectors together lanewise using `mask` as a mask.
+            /// Select between two vectors lanewise using `mask` as a mask.
             ///
-            /// This is essentially a bitwise blend operation, such that any point where
+            /// This is essentially a bitwise selection operation, such that any point where
             /// there is a 1 bit in `mask`, the output will put the bit from `tru`, while
             /// where there is a 0 bit in `mask`, the output will put the bit from `fals`
             #[inline]
-            pub fn blend(mask: $maskt, tru: Self, fals: Self) -> Self {
+            pub fn select(mask: $maskt, tru: Self, fals: Self) -> Self {
                 Self {
-                    x: mask.blend(tru.x, fals.x),
-                    y: mask.blend(tru.y, fals.y),
-                    z: mask.blend(tru.z, fals.z),
+                    x: mask.select(tru.x, fals.x),
+                    y: mask.select(tru.y, fals.y),
+                    z: mask.select(tru.z, fals.z),
                 }
             }
 
@@ -678,11 +678,11 @@ macro_rules! impl_wide_vec3s {
                 let ndi = n.dot(i);
 
                 let k = one - eta * eta * (one - ndi * ndi);
-                let mask = k.cmp_lt($t::splat(0.0));
+                let mask = k.simd_lt($t::splat(0.0));
 
                 let out = i.mul_add(Self::broadcast(eta), -(eta * ndi + k.sqrt()) * n);
 
-                Self::blend(mask, Self::zero(), out)
+                Self::select(mask, Self::zero(), out)
             }
         }
 
